@@ -11,7 +11,7 @@ const APP_VERSION = "1.6"; // <--- Update this to match your HTML
 // --- SETTINGS ---
 // Set to TRUE for testing offline/local only.
 // Set to FALSE for GitHub/Production to use the live database.
-const TEST_MODE = true;
+const TEST_MODE = false;
 
 const firebaseConfig = {
   apiKey: "AIzaSyBRMITHX8gm0jKpEXuC4iePGWoYON85BDU",
