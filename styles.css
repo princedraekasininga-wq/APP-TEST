@@ -653,32 +653,71 @@ tbody tr:hover {
     padding-bottom: 4px;
   }
 }
-/* --- SKETCH TABS (The Pill Buttons) --- */
+/* --- BRIGHTER GREY & WHITE TABS (Theme Adaptive) --- */
 .sketch-tabs {
+  background: transparent;
+  box-shadow: none;
+  border: none;
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 20px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 24px auto;
+  padding: 0 8px;
 }
 
 .sketch-btn {
-  background: transparent;
-  border: 1px solid var(--divider);
-  color: var(--text-muted);
-  padding: 12px 30px;
-  border-radius: 50px; /* Fully rounded pill shape */
-  font-weight: 600;
-  font-size: 0.95rem;
+  flex: 1;
+  padding: 18px 0;
+  font-size: 1.1rem;
+  font-weight: 700; /* Bolder text */
+  border-radius: 20px;
+  text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 130px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* DEFAULT (DARK MODE): White Glass look */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted); /* Uses theme variable */
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Active State - Matches your Grey Mobile Theme */
+/* LIGHT MODE OVERRIDE (For visibility on light backgrounds) */
+[data-theme="light"] .sketch-btn {
+  background: rgba(0, 0, 0, 0.05); /* Darker glass for contrast */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--text-muted);
+}
+
+/* --- ACTIVE STATE (The "Pop") --- */
 .sketch-btn.active {
-  background: #64748b; /* Slate Grey */
-  color: white;
-  border-color: #64748b;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transform: scale(1.05);
+  /* Solid Bright White for BOTH themes */
+  background: #ffffff;
+  border-color: #ffffff;
+
+  /* Text is always dark on the white button for max contrast */
+  color: #0f172a;
+
+  /* Strong pop-up shadow */
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3); /* White Glow */
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Light Mode Active Shadow (Darker shadow instead of glow) */
+[data-theme="light"] .sketch-btn.active {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Hover Effect */
+.sketch-btn:not(.active):hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+[data-theme="light"] .sketch-btn:not(.active):hover {
+  background: rgba(0, 0, 0, 0.1);
 }

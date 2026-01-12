@@ -215,69 +215,14 @@ function showWelcomeScreen() {
   const errorMsg = el("authError");
   const loader = el("loadingOverlay");
 
-  // --- 1. CHECK FOR SESSIONS (Real or Test) ---
-  const lastActive = localStorage.getItem("stallz_last_active");
-  const testSession = localStorage.getItem("stallz_test_session"); // <--- NEW: Checks for test login
-  const now = Date.now();
-  const THIRTY_MINUTES = 30 * 60 * 1000;
-
-  // Session Timeout Logic
-  if (lastActive && (now - lastActive > THIRTY_MINUTES)) {
-    console.log("Session expired. Logging out.");
-    if (typeof firebase !== "undefined" && firebase.auth) firebase.auth().signOut();
-    localStorage.removeItem("stallz_last_active");
-    localStorage.removeItem("stallz_test_session"); // Clear test session too
-
-    if (loader) loader.style.display = "none";
-    screen.style.display = "flex";
-    return;
-  }
-
-  // --- 2. AUTO-LOGIN LOGIC ---
-  if (TEST_MODE) {
-    // If we are in Test Mode AND have a saved test session...
-    if (testSession === "true") {
-       console.log("TEST MODE: Auto-logging in from saved session...");
-       state.user = { email: "test@admin.com", uid: "test-user-123" };
-       state.isLoggedIn = true;
-       updateSessionActivity();
-
-       // Hide login immediately, show loader while data loads
-       screen.style.display = "none";
-       if (loader) loader.style.display = "flex";
-
-       loadFromFirebase();
-    } else {
-       // No saved session? Show login screen
-       if (loader) loader.style.display = "none";
-       screen.style.display = "flex";
-    }
-  }
-  // Real Firebase Logic (Unchanged)
-  else if (typeof firebase !== "undefined" && firebase.auth) {
-      firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-          updateSessionActivity();
-          state.user = user;
-          state.isLoggedIn = true;
-          screen.style.display = "none";
-          // Keep loader visible until data loads (handled inside loadFromFirebase)
-          if (loader) { loader.style.display = "flex"; loader.style.opacity = "1"; }
-          loadFromFirebase();
-        } else {
-          if (loader) loader.style.display = "none";
-          screen.style.display = "flex";
-        }
-      });
-  } else {
-      // Fallback if firebase is missing
-      if (loader) loader.style.display = "none";
-      screen.style.display = "flex";
-  }
-
-  // --- 3. LOGIN BUTTON LOGIC ---
+  // --- 1. SETUP LOGIN BUTTON LISTENER (MOVED TO TOP) ---
+  // We do this first so the button ALWAYS works, even if session expires below.
   if (loginBtn) {
-    loginBtn.onclick = async () => {
+    // Remove old listeners to prevent duplicates (cloning trick)
+    const newBtn = loginBtn.cloneNode(true);
+    loginBtn.parentNode.replaceChild(newBtn, loginBtn);
+
+    newBtn.onclick = async () => {
       const email = el("loginEmail").value.trim();
       const password = el("loginPassword").value.trim();
 
@@ -311,6 +256,61 @@ function showWelcomeScreen() {
         errorMsg.textContent = "Login failed: " + error.message;
       }
     };
+  }
+
+  // --- 2. CHECK FOR SESSIONS (Real or Test) ---
+  const lastActive = localStorage.getItem("stallz_last_active");
+  const testSession = localStorage.getItem("stallz_test_session");
+  const now = Date.now();
+  const THIRTY_MINUTES = 30 * 60 * 1000;
+
+  // Session Timeout Logic
+  if (lastActive && (now - lastActive > THIRTY_MINUTES)) {
+    console.log("Session expired. Logging out.");
+    if (typeof firebase !== "undefined" && firebase.auth) firebase.auth().signOut();
+    localStorage.removeItem("stallz_last_active");
+    localStorage.removeItem("stallz_test_session");
+
+    if (loader) loader.style.display = "none";
+    screen.style.display = "flex";
+    return; // <--- This used to kill the button listener! Now it's safe.
+  }
+
+  // --- 3. AUTO-LOGIN LOGIC ---
+  if (TEST_MODE) {
+    if (testSession === "true") {
+       console.log("TEST MODE: Auto-logging in from saved session...");
+       state.user = { email: "test@admin.com", uid: "test-user-123" };
+       state.isLoggedIn = true;
+       updateSessionActivity();
+
+       screen.style.display = "none";
+       if (loader) loader.style.display = "flex";
+
+       loadFromFirebase();
+    } else {
+       if (loader) loader.style.display = "none";
+       screen.style.display = "flex";
+    }
+  }
+  // Real Firebase Logic
+  else if (typeof firebase !== "undefined" && firebase.auth) {
+      firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+          updateSessionActivity();
+          state.user = user;
+          state.isLoggedIn = true;
+          screen.style.display = "none";
+          if (loader) { loader.style.display = "flex"; loader.style.opacity = "1"; }
+          loadFromFirebase();
+        } else {
+          if (loader) loader.style.display = "none";
+          screen.style.display = "flex";
+        }
+      });
+  } else {
+      if (loader) loader.style.display = "none";
+      screen.style.display = "flex";
   }
 }
 
@@ -1247,27 +1247,33 @@ function init() {
     }, { passive: true });
   }
 
-  // --- NEW: Toggle between Dashboard and Loans tabs ---
-function switchOverviewTab(tabName, btnElement) {
-  // 1. Haptic Feedback
+// --- UPDATED: Switcher with Animation & Fix ---
+// This function is now explicitly attached to window to ensure clickability
+window.switchOverviewTab = function(tabName, btnElement) {
+  // 1. Haptic Feedback (Mobile feel)
   if (typeof vibrate === "function") vibrate([15]);
 
-  // 2. Hide both sections
+  // 2. Get Sections
   const dash = document.getElementById("tab-dashboard");
   const loans = document.getElementById("tab-loans");
 
-  if (dash) dash.style.display = "none";
-  if (loans) loans.style.display = "none";
+  // 3. Reset Classes (to allow re-animation)
+  if(dash) { dash.style.display = "none"; dash.classList.remove("animate-in"); }
+  if(loans) { loans.style.display = "none"; loans.classList.remove("animate-in"); }
 
-  // 3. Show the selected one
+  // 4. Show & Animate Target
   const target = document.getElementById("tab-" + tabName);
-  if (target) target.style.display = "block";
+  if (target) {
+    target.style.display = "block";
+    // Small delay to trigger animation
+    setTimeout(() => target.classList.add("animate-in"), 10);
+  }
 
-  // 4. Update Button Styles
+  // 5. Update Buttons (Visual Pop)
   const buttons = document.querySelectorAll(".sketch-btn");
   buttons.forEach(b => b.classList.remove("active"));
   if (btnElement) btnElement.classList.add("active");
-}
+};
 
   // 9. Filters
   ["searchInput", "statusFilter", "planFilter"].forEach(id => el(id)?.addEventListener("input", renderLoansTable));
