@@ -238,10 +238,22 @@ header {
   }
 
   .nav-btn-active { color: var(--text-main); border-bottom: none; }
+
+  /* --- FIXED: Grey Background, Blue Icon --- */
   .nav-btn-active .icon {
-    background: var(--primary); color: white;
+    /* Background remains subtle grey/glass */
+    background: rgba(125, 125, 125, 0.15);
+
+    /* Icon turns blue to show selection */
+    color: var(--primary);
+
+    /* Pop-up animation */
     transform: translateY(-15px) scale(1.1);
-    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+
+    /* Shadow is now neutral, not blue */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+    /* Border cutout effect */
     border: 4px solid var(--bg-color);
   }
 }
@@ -634,3 +646,4 @@ tbody tr:hover {
     justify-content: center;
     padding-bottom: 4px;
   }
+}
