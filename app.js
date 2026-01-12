@@ -1,7 +1,7 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.6"; // <--- Update this to match your HTML
+const APP_VERSION = "1.61"; // <--- Update this to match your HTML
 
 
 // ==========================================
