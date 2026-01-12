@@ -238,29 +238,14 @@ header {
   }
 
   .nav-btn-active { color: var(--text-main); border-bottom: none; }
-
-  /* --- FIXED: Grey Background, WHITE Icon (No Blue) --- */
+  
+  /* --- CHANGED: REMOVED BLUE, NOW GREY --- */
   .nav-btn-active .icon {
-    /* Background remains subtle grey/glass */
-    background: rgba(125, 125, 125, 0.15);
-
-    /* Icon stays WHITE (instead of blue) */
-    color: #ffffff;
-
-    /* Pop-up animation */
+    background: #64748b; /* Solid Grey */
+    color: white; /* White Icon */
     transform: translateY(-15px) scale(1.1);
-
-    /* Shadow is neutral */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-
-    /* Border cutout effect */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Neutral Shadow */
     border: 4px solid var(--bg-color);
-  }
-
-  /* Hiding Logic (for scrolling) */
-  .nav-hidden {
-    transform: translate(-50%, 150%) !important;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
