@@ -38,6 +38,7 @@
   <datalist id="clientList"></datalist>
 
   <div class="app-shell">
+
     <header>
       <div class="header-brand">
         <h1>
@@ -48,6 +49,9 @@
             ⬇ Install App
         </button>
       </div>
+
+      <div id="welcomeDesktop" class="welcome-text-pc"></div>
+
       <div class="hud-rates">
         <div class="hud-badge">20% <span>1Wk</span></div>
         <div class="hud-badge">30% <span>2Wks</span></div>
@@ -79,7 +83,10 @@
     </div>
 
     <main>
+
       <div id="view-main" style="display:block; max-width: 800px; margin: 0 auto;">
+
+        <div id="welcomeMobile" class="welcome-text-mobile"></div>
 
         <div class="sketch-tabs">
             <button class="sketch-btn active" onclick="switchOverviewTab('dashboard', this)">Dashboard</button>
@@ -188,6 +195,12 @@
                 <span class="icon" style="font-size:2rem;">🧾</span>
                 <div>No loans yet.</div>
               </div>
+            </div>
+
+            <div class="btn-group" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" id="exportBtn" class="btn-secondary btn-sm" style="background: #107c41; border-color: #107c41; color: white;">
+                Export Excel
+              </button>
             </div>
 
             <div class="section-title" style="margin-top:20px;">Repayments History</div>

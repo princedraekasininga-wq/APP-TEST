@@ -216,7 +216,7 @@ function showWelcomeScreen() {
   const loader = el("loadingOverlay");
 
   // --- 1. SETUP LOGIN BUTTON LISTENER (MOVED TO TOP) ---
-  // We do this first so the button ALWAYS works, even if session expires below.
+  // We do this first so the button ALWAYS works, even if session checks fail later.
   if (loginBtn) {
     // Remove old listeners to prevent duplicates (cloning trick)
     const newBtn = loginBtn.cloneNode(true);
@@ -228,43 +228,67 @@ function showWelcomeScreen() {
 
       if (!email || !password) {
         errorMsg.textContent = "Please enter both email and password.";
+        if (typeof vibrate === "function") vibrate([50, 50]);
         return;
       }
       if (loader) { loader.style.display = "flex"; loader.style.opacity = "1"; }
 
+      // Helper to set welcome message on both PC and Mobile
+      const setWelcomeMsg = (userEmail) => {
+         const name = userEmail.split('@')[0];
+         // Capitalize first letter (e.g. "stallz" -> "Stallz")
+         const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+         const msg = `Welcome back, ${formattedName}`;
+
+         const pc = document.getElementById("welcomeDesktop");
+         const mob = document.getElementById("welcomeMobile");
+
+         if(pc) pc.textContent = msg;
+         if(mob) mob.textContent = msg + " 👋";
+      };
+
+      // --- A. TEST MODE LOGIN ---
       if (TEST_MODE) {
         setTimeout(() => {
-          // SAVE THE FAKE SESSION SO IT REMEMBERS YOU ON REFRESH
           localStorage.setItem("stallz_test_session", "true");
-
           state.user = { email: email || "test@admin.com", uid: "test-user-123" };
           state.isLoggedIn = true;
           updateSessionActivity();
+
           screen.style.display = "none";
           loadFromFirebase();
+
+          // Trigger Welcome Effects
+          setWelcomeMsg(email);
+          showToast("Login Successful", "success");
+
         }, 500);
         return;
       }
 
-      // Real Auth
+      // --- B. REAL FIREBASE LOGIN ---
       try {
         if (typeof firebase === "undefined") throw new Error("Firebase not loaded");
         await firebase.auth().signInWithEmailAndPassword(email, password);
         updateSessionActivity();
+
+        // Trigger Welcome Effects
+        setWelcomeMsg(email);
+        showToast("Login Successful", "success");
+
       } catch (error) {
         if (loader) loader.style.display = "none";
         errorMsg.textContent = "Login failed: " + error.message;
+        if (typeof vibrate === "function") vibrate([50, 50, 50]);
       }
     };
   }
 
-  // --- 2. CHECK FOR SESSIONS (Real or Test) ---
+  // --- 2. CHECK FOR SESSION TIMEOUT ---
   const lastActive = localStorage.getItem("stallz_last_active");
-  const testSession = localStorage.getItem("stallz_test_session");
   const now = Date.now();
   const THIRTY_MINUTES = 30 * 60 * 1000;
 
-  // Session Timeout Logic
   if (lastActive && (now - lastActive > THIRTY_MINUTES)) {
     console.log("Session expired. Logging out.");
     if (typeof firebase !== "undefined" && firebase.auth) firebase.auth().signOut();
@@ -273,13 +297,15 @@ function showWelcomeScreen() {
 
     if (loader) loader.style.display = "none";
     screen.style.display = "flex";
-    return; // <--- This used to kill the button listener! Now it's safe.
+    return; // Stop here so we don't auto-login
   }
 
   // --- 3. AUTO-LOGIN LOGIC ---
+  const testSession = localStorage.getItem("stallz_test_session");
+
   if (TEST_MODE) {
     if (testSession === "true") {
-       console.log("TEST MODE: Auto-logging in from saved session...");
+       console.log("TEST MODE: Auto-logging in...");
        state.user = { email: "test@admin.com", uid: "test-user-123" };
        state.isLoggedIn = true;
        updateSessionActivity();
@@ -289,11 +315,11 @@ function showWelcomeScreen() {
 
        loadFromFirebase();
     } else {
+       // No session, show login
        if (loader) loader.style.display = "none";
        screen.style.display = "flex";
     }
   }
-  // Real Firebase Logic
   else if (typeof firebase !== "undefined" && firebase.auth) {
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
@@ -301,6 +327,7 @@ function showWelcomeScreen() {
           state.user = user;
           state.isLoggedIn = true;
           screen.style.display = "none";
+          // Keep loader visible until data loads
           if (loader) { loader.style.display = "flex"; loader.style.opacity = "1"; }
           loadFromFirebase();
         } else {
@@ -1114,14 +1141,14 @@ function init() {
   // 1. Navigation Listeners
   document.querySelectorAll(".nav-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      vibrate([10]); // Tiny click feedback
+      if (typeof vibrate === "function") vibrate([10]); // Tiny click feedback
       setActiveView(btn.dataset.view);
     });
   });
 
   // 2. Wizard Modal Listeners (New Loan)
   el("openLoanModalBtn")?.addEventListener("click", () => {
-    vibrate([10]);
+    if (typeof vibrate === "function") vibrate([10]);
     wizardStep=0;
     wizardDraft={};
     updateWizard();
@@ -1129,8 +1156,14 @@ function init() {
   });
 
   el("modalCloseBtn")?.addEventListener("click", () => el("loanModal").classList.add("modal-hidden"));
-  el("modalNextBtn")?.addEventListener("click", () => { vibrate([10]); handleWizardNext(); });
-  el("modalBackBtn")?.addEventListener("click", () => { vibrate([10]); handleWizardBack(); });
+  el("modalNextBtn")?.addEventListener("click", () => {
+      if (typeof vibrate === "function") vibrate([10]);
+      handleWizardNext();
+  });
+  el("modalBackBtn")?.addEventListener("click", () => {
+      if (typeof vibrate === "function") vibrate([10]);
+      handleWizardBack();
+  });
 
   // 3. Action Modal Listeners
   el("actionModalCloseBtn")?.addEventListener("click", () => el("actionModal").classList.add("modal-hidden"));
@@ -1138,7 +1171,7 @@ function init() {
 
   // 4. CONFIRM ACTION LISTENER (Handles Pay, Note, Write-Off)
   el("actionModalConfirmBtn")?.addEventListener("click", () => {
-     vibrate([20]); // Haptic feedback on confirm
+     if (typeof vibrate === "function") vibrate([20]); // Haptic feedback on confirm
      const loan = state.loans.find(l => l.id === currentLoanId);
 
      if (currentAction === "PAY" && loan) {
@@ -1180,7 +1213,7 @@ function init() {
   // 5. Capital Tabs Logic
   document.querySelectorAll('.mini-tab').forEach(b => {
       b.addEventListener('click', () => {
-          vibrate([10]);
+          if (typeof vibrate === "function") vibrate([10]);
           document.querySelectorAll('.mini-tab').forEach(t => t.classList.remove('active'));
           document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
           b.classList.add('active');
@@ -1209,7 +1242,7 @@ function init() {
 
   // 7. Export Excel
   el("exportBtn")?.addEventListener("click", () => {
-     vibrate([20]);
+     if (typeof vibrate === "function") vibrate([20]);
      try {
        const loansData = state.loans.map(l => ({
            ID: l.id,
@@ -1247,34 +1280,6 @@ function init() {
     }, { passive: true });
   }
 
-// --- UPDATED: Switcher with Animation & Fix ---
-// This function is now explicitly attached to window to ensure clickability
-window.switchOverviewTab = function(tabName, btnElement) {
-  // 1. Haptic Feedback (Mobile feel)
-  if (typeof vibrate === "function") vibrate([15]);
-
-  // 2. Get Sections
-  const dash = document.getElementById("tab-dashboard");
-  const loans = document.getElementById("tab-loans");
-
-  // 3. Reset Classes (to allow re-animation)
-  if(dash) { dash.style.display = "none"; dash.classList.remove("animate-in"); }
-  if(loans) { loans.style.display = "none"; loans.classList.remove("animate-in"); }
-
-  // 4. Show & Animate Target
-  const target = document.getElementById("tab-" + tabName);
-  if (target) {
-    target.style.display = "block";
-    // Small delay to trigger animation
-    setTimeout(() => target.classList.add("animate-in"), 10);
-  }
-
-  // 5. Update Buttons (Visual Pop)
-  const buttons = document.querySelectorAll(".sketch-btn");
-  buttons.forEach(b => b.classList.remove("active"));
-  if (btnElement) btnElement.classList.add("active");
-};
-
   // 9. Filters
   ["searchInput", "statusFilter", "planFilter"].forEach(id => el(id)?.addEventListener("input", renderLoansTable));
 
@@ -1285,10 +1290,7 @@ window.switchOverviewTab = function(tabName, btnElement) {
   setActiveView("main");
   showWelcomeScreen();
 
-// --- NEW: VERSION CHECK ---
-  checkAppVersion(); // <--- ADD THIS LINE
-  // --- ACTIVATE MOBILE FEATURES ---
-  // This turns on the Install Button, Vibrations, and Long Press actions
+  checkAppVersion();
   setupMobileUX();
 }
 

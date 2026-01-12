@@ -806,7 +806,7 @@ tbody tr:hover {
 
 /* The class added by app.js when you switch tabs */
 .animate-in {
-  animation: slideUpFade 1.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: slideUpFade 1.9s cubic-bezier(0.3, 0.8, 0.2, 1) forwards;
 }
 
 /* The Animation Keyframes */
@@ -820,3 +820,49 @@ tbody tr:hover {
     transform: translateY(0) scale(1);       /* End in normal position */
   }
 }
+
+/* =========================================
+   WELCOME MESSAGE STYLING (PC vs MOBILE)
+   ========================================= */
+
+/* 1. DESKTOP STYLE (In Header) */
+.welcome-text-pc {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary); /* Blue text */
+  background: rgba(59, 130, 246, 0.1);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  display: block; /* Visible by default on PC */
+}
+
+/* 2. MOBILE STYLE (Under Header) */
+.welcome-text-mobile {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+  margin-bottom: 16px; /* Space before the Tabs */
+  display: none; /* Hidden by default on PC */
+  animation: fadeIn 0.8s ease;
+}
+
+/* --- MEDIA QUERY SWITCH --- */
+@media (max-width: 768px) {
+  /* Hide PC version */
+  .welcome-text-pc {
+    display: none;
+  }
+
+  /* Show Mobile version */
+  .welcome-text-mobile {
+    display: block;
+  }
+
+  /* Adjust header layout to ignore the hidden element */
+  header {
+    justify-content: space-between;
+  }
+}
+
