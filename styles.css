@@ -482,12 +482,68 @@ tbody tr:hover {
 .stat-green .stat-value { background: linear-gradient(to right, #4ade80, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .text-danger-glow { color: #ef4444 !important; text-shadow: 0 0 10px rgba(239, 68, 68, 0.6) !important; background: none !important; -webkit-text-fill-color: #ef4444 !important; }
 
-/* MINI TABS */
-.mini-tabs { display: flex; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--divider); }
-.mini-tab { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 10px; font-size: 0.85rem; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-.mini-tab.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
-.tab-content { display: none; animation: fadeIn 0.3s ease; }
-.tab-content.active { display: block; }
+/* =========================================
+   MINI TABS (Updated to match Big Sketch Design)
+   ========================================= */
+.mini-tabs {
+  display: flex;
+  background: transparent; /* Removed old container background */
+  padding: 0;
+  border: none;
+  gap: 12px; /* Space between buttons */
+  margin-bottom: 24px;
+}
+
+.mini-tab {
+  flex: 1;
+  /* Frost Glass Base */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+
+  padding: 14px 0;         /* Good touch size */
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 16px;     /* Smooth corners */
+  cursor: pointer;
+  text-align: center;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Light Mode Override for Inactive Tabs */
+[data-theme="light"] .mini-tab {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* ACTIVE STATE (The "Pop") */
+.mini-tab.active {
+  background: #ffffff;     /* Bright White */
+  border-color: #ffffff;
+  color: #0f172a;          /* Dark Text for Contrast */
+
+  /* White Glow Shadow */
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px) scale(1.02); /* Pop Up Animation */
+}
+
+/* Light Mode Active Shadow (Darker shadow instead of glow) */
+[data-theme="light"] .mini-tab.active {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Hover Effect */
+.mini-tab:not(.active):hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+[data-theme="light"] .mini-tab:not(.active):hover {
+  background: rgba(0, 0, 0, 0.1);
+}
 
 /* =========================================
    9. MISC UI & ANIMATIONS
