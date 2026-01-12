@@ -239,22 +239,28 @@ header {
 
   .nav-btn-active { color: var(--text-main); border-bottom: none; }
 
-  /* --- FIXED: Grey Background, Blue Icon --- */
+  /* --- FIXED: Grey Background, WHITE Icon (No Blue) --- */
   .nav-btn-active .icon {
     /* Background remains subtle grey/glass */
     background: rgba(125, 125, 125, 0.15);
 
-    /* Icon turns blue to show selection */
-    color: var(--primary);
+    /* Icon stays WHITE (instead of blue) */
+    color: #ffffff;
 
     /* Pop-up animation */
     transform: translateY(-15px) scale(1.1);
 
-    /* Shadow is now neutral, not blue */
+    /* Shadow is neutral */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 
     /* Border cutout effect */
     border: 4px solid var(--bg-color);
+  }
+
+  /* Hiding Logic (for scrolling) */
+  .nav-hidden {
+    transform: translate(-50%, 150%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
