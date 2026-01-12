@@ -653,3 +653,32 @@ tbody tr:hover {
     padding-bottom: 4px;
   }
 }
+/* --- SKETCH TABS (The Pill Buttons) --- */
+.sketch-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.sketch-btn {
+  background: transparent;
+  border: 1px solid var(--divider);
+  color: var(--text-muted);
+  padding: 12px 30px;
+  border-radius: 50px; /* Fully rounded pill shape */
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 130px;
+}
+
+/* Active State - Matches your Grey Mobile Theme */
+.sketch-btn.active {
+  background: #64748b; /* Slate Grey */
+  color: white;
+  border-color: #64748b;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transform: scale(1.05);
+}

@@ -171,8 +171,8 @@ const state = {
   isLoggedIn: false
 };
 
-// --- FILTER STATE ---
-let activeFilters = { status: 'All', plan: 'All' };
+// NEW: Set status to 'ACTIVE' by default
+let activeFilters = { status: 'ACTIVE', plan: 'All' };
 
 function setFilter(type, value, btnElement) {
   activeFilters[type] = value;
@@ -1246,6 +1246,28 @@ function init() {
       lastScroll = currentScroll;
     }, { passive: true });
   }
+
+  // --- NEW: Toggle between Dashboard and Loans tabs ---
+function switchOverviewTab(tabName, btnElement) {
+  // 1. Haptic Feedback
+  if (typeof vibrate === "function") vibrate([15]);
+
+  // 2. Hide both sections
+  const dash = document.getElementById("tab-dashboard");
+  const loans = document.getElementById("tab-loans");
+
+  if (dash) dash.style.display = "none";
+  if (loans) loans.style.display = "none";
+
+  // 3. Show the selected one
+  const target = document.getElementById("tab-" + tabName);
+  if (target) target.style.display = "block";
+
+  // 4. Update Button Styles
+  const buttons = document.querySelectorAll(".sketch-btn");
+  buttons.forEach(b => b.classList.remove("active"));
+  if (btnElement) btnElement.classList.add("active");
+}
 
   // 9. Filters
   ["searchInput", "statusFilter", "planFilter"].forEach(id => el(id)?.addEventListener("input", renderLoansTable));
