@@ -274,14 +274,36 @@ header {
 
 .view-hidden { display: none; }
 
+/* =========================================
+   UPDATED CARD STYLE ("The Pop")
+   ========================================= */
 .card {
   background: var(--card-bg);
-  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--card-border);
-  border-radius: var(--radius); padding: 24px;
-  box-shadow: var(--card-glow);
-  position: relative; overflow: hidden;
+
+  /* 1. Stronger Glass Blur */
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+
+  /* 2. Brighter Border for edge definition */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.2); /* Top light highlight */
+
+  border-radius: var(--radius);
+  padding: 24px;
+
+  /* 3. THE POP EFFECT (Deep Shadow + Subtle Glow) */
+  box-shadow:
+    0 20px 40px -5px rgba(0, 0, 0, 0.4),  /* Lifts the card up */
+    0 8px 10px -6px rgba(0, 0, 0, 0.2),   /* Sharper shadow near base */
+    0 0 15px rgba(59, 130, 246, 0.15);    /* Ambient Cyber Blue Glow */
+
+  position: relative;
+  overflow: hidden;
+
+  /* Smooth entrance animation */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 @media (max-width: 600px) { .card { padding: 16px; } }
 
 .card h2 {
@@ -776,4 +798,25 @@ tbody tr:hover {
 }
 [data-theme="light"] .sketch-btn:not(.active):hover {
   background: rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================
+   11. VIEW SWITCHING ANIMATIONS
+   ========================================= */
+
+/* The class added by app.js when you switch tabs */
+.animate-in {
+  animation: slideUpFade 1.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* The Animation Keyframes */
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98); /* Start slightly lower and smaller */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);       /* End in normal position */
+  }
 }
