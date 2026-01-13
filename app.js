@@ -527,19 +527,24 @@ function renderDashboard() {
   if (!container) return;
 
   const loans = state.loans || [];
+
+  // --- 1. Calculate Stats ---
   const totalLoaned = loans.reduce((s, l) => s + (l.amount || 0), 0);
   const totalOutstanding = loans.reduce((s, l) => {
+      // Exclude defaulted/bad debt from outstanding expectation
       if (l.status === "DEFAULTED") return s;
       return s + Math.max(0, l.balance || 0);
   }, 0);
   const totalProfit = loans.reduce((s, l) => s + (l.profitCollected || 0), 0);
   const activeCount = loans.filter(l => l.status === "ACTIVE" || l.status === "OVERDUE").length;
 
+  // --- 2. Calculate Cash on Hand ---
   const starting = state.startingCapital || 0;
   const added = (state.capitalTxns || []).reduce((s, t) => s + (t.amount || 0), 0);
   const paidIn = loans.reduce((s, l) => s + (l.paid || 0), 0);
   const cashOnHand = starting + added + paidIn - totalLoaned;
 
+  // --- 3. Update "Cash on Hand" Card ---
   const cashEl = el("cashOnHandValue");
   if(cashEl) {
     cashEl.textContent = formatMoney(cashOnHand);
@@ -547,12 +552,12 @@ function renderDashboard() {
     else cashEl.classList.remove("text-danger-glow");
   }
 
+  // --- 4. Update Capital Setup Section ---
   if (state.startingCapital > 0) {
       if(el("startingCapitalSetupRow")) el("startingCapitalSetupRow").style.display = "none";
       if(el("startingCapitalInfoRow")) {
           el("startingCapitalInfoRow").style.display = "block";
-          el("startingCapitalInfoValue").textContent = formatMoney(state.startingCapital);
-          el("startingCapitalInfoDate").textContent = formatDate(state.startingCapitalSetDate || new Date().toISOString());
+          if(el("startingCapitalInfoValue")) el("startingCapitalInfoValue").textContent = formatMoney(state.startingCapital);
       }
       if(el("startingCapitalValue")) el("startingCapitalValue").textContent = formatMoney(state.startingCapital);
   } else {
@@ -561,6 +566,7 @@ function renderDashboard() {
       if(el("startingCapitalValue")) el("startingCapitalValue").textContent = "Not set";
   }
 
+  // --- 5. Update Capital Ledger Table ---
   const capBody = el("capitalTableBody");
   if(capBody) {
      capBody.innerHTML = (state.capitalTxns || []).map(t => `
@@ -568,6 +574,7 @@ function renderDashboard() {
      `).join("");
   }
 
+  // --- 6. Render the 4 Overview Stats Cards ---
   container.innerHTML = `
     <div class="stat-card" style="border-color: var(--primary);">
       <div class="stat-label">Active Deals</div>
@@ -591,19 +598,11 @@ function renderDashboard() {
     </div>
   `;
 
+  // --- 7. Trigger Animations ---
   animateValue(el("statLoaned"), 0, totalLoaned, 1500);
   animateValue(el("statOutstanding"), 0, totalOutstanding, 2000);
   animateValue(el("statProfit"), 0, totalProfit, 2500);
 }
-
-// --- NEW: PROFESSIONAL SVG ICONS ---
-const ICONS = {
-  receipt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
-  whatsapp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`,
-  pay: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
-  writeoff: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>`,
-  note: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`
-};
 
 function renderLoansTable() {
   const overdueCount = (state.loans || []).filter(l => l.status === "OVERDUE").length;
