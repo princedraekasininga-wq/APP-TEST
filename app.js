@@ -1,14 +1,14 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.6.5"; // Bumped version
+const APP_VERSION = "1.6.6"; // Force Refresh for New UI
 
 
 // ==========================================
 // 1. FIREBASE CONFIGURATION & SETUP
 // ==========================================
 
-const TEST_MODE = true; // FIXED: Set to FALSE for live database
+const TEST_MODE = true; // ENABLED AS REQUESTED
 
 // SAFETY FLAG: Prevents overwriting DB if app loads in "Offline/Timeout" mode
 let isSafeToSave = true;
@@ -49,7 +49,6 @@ try {
 
 function el(id) { return document.getElementById(id); }
 
-// --- EXPOSED TO WINDOW FOR HTML BUTTONS ---
 window.forceHideLoader = function() {
     const loader = el("loadingOverlay");
     if (loader) loader.style.display = "none";
@@ -81,35 +80,26 @@ function formatWhatsApp(phone) {
   return p;
 }
 
-// --- Helper to Update Welcome Message ---
 function updateWelcomeUI() {
   if (!state.user || !state.user.email) return;
-
   const name = state.user.email.split('@')[0];
   const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
   const msg = `Welcome back, ${formattedName}`;
-
   const pc = document.getElementById("welcomeDesktop");
   const mob = document.getElementById("welcomeMobile");
-
   if(pc) pc.textContent = msg;
   if(mob) mob.textContent = msg + " 👋";
 }
 
-// --- TOAST NOTIFICATION ---
 function showToast(message, type = "success") {
   const container = el("toast-container");
   if (!container) return;
-
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
   toast.textContent = message;
-
   container.appendChild(toast);
-
   if (type === "success" && typeof vibrate === "function") vibrate([20]);
   if (type === "error" && typeof vibrate === "function") vibrate([30, 30]);
-
   setTimeout(() => {
     toast.style.animation = "toastFadeOut 0.4s forwards";
     setTimeout(() => toast.remove(), 400);
@@ -129,10 +119,9 @@ function checkAppVersion() {
   if (subtitle) {
       subtitle.textContent = `Secure Admin Login (v${APP_VERSION})`;
   }
-  // Auto-clear cache on version bump
   if (storedVersion !== APP_VERSION) {
     console.log("New version detected. Clearing old session.");
-    localStorage.removeItem("stallz_test_session"); // Force re-login on update
+    localStorage.removeItem("stallz_test_session");
     localStorage.setItem("stallz_app_version", APP_VERSION);
     setTimeout(() => {
         showToast(`App Updated to v${APP_VERSION}`, "success");
@@ -179,7 +168,6 @@ const state = {
 
 let activeFilters = { status: 'ACTIVE', plan: 'All' };
 
-// FIXED: Attached to window for onclick in HTML
 window.setFilter = function(type, value, btnElement) {
   activeFilters[type] = value;
   const parent = btnElement.parentElement;
@@ -222,7 +210,6 @@ function showWelcomeScreen() {
   const errorMsg = el("authError");
   const loader = el("loadingOverlay");
 
-  // --- 1. SETUP LOGIN BUTTON ---
   if (loginBtn) {
     const newBtn = loginBtn.cloneNode(true);
     loginBtn.parentNode.replaceChild(newBtn, loginBtn);
@@ -238,24 +225,20 @@ function showWelcomeScreen() {
       }
       if (loader) { loader.style.display = "flex"; loader.style.opacity = "1"; }
 
-      // A. TEST MODE
       if (TEST_MODE) {
         setTimeout(() => {
           localStorage.setItem("stallz_test_session", "true");
           state.user = { email: email || "test@admin.com", uid: "test-user-123" };
           state.isLoggedIn = true;
           updateSessionActivity();
-
           screen.style.display = "none";
           loadFromFirebase();
-
           updateWelcomeUI();
           showToast(`Welcome back!`, "success");
         }, 500);
         return;
       }
 
-      // B. REAL FIREBASE
       try {
         if (typeof firebase === "undefined") throw new Error("Firebase not loaded");
         await firebase.auth().signInWithEmailAndPassword(email, password);
@@ -270,7 +253,6 @@ function showWelcomeScreen() {
     };
   }
 
-  // --- 2. CHECK SESSION TIMEOUT ---
   const lastActive = localStorage.getItem("stallz_last_active");
   const now = Date.now();
   const THIRTY_MINUTES = 30 * 60 * 1000;
@@ -280,13 +262,11 @@ function showWelcomeScreen() {
     if (typeof firebase !== "undefined" && firebase.auth) firebase.auth().signOut();
     localStorage.removeItem("stallz_last_active");
     localStorage.removeItem("stallz_test_session");
-
     if (loader) loader.style.display = "none";
     screen.style.display = "flex";
     return;
   }
 
-  // --- 3. AUTO-LOGIN ---
   const testSession = localStorage.getItem("stallz_test_session");
 
   if (TEST_MODE) {
@@ -294,7 +274,6 @@ function showWelcomeScreen() {
        state.user = { email: "test@admin.com", uid: "test-user-123" };
        state.isLoggedIn = true;
        updateSessionActivity();
-
        screen.style.display = "none";
        if (loader) loader.style.display = "flex";
        loadFromFirebase();
@@ -323,25 +302,20 @@ function showWelcomeScreen() {
   }
 }
 
-// --- UPDATED: ROBUST LOADER WITH EMERGENCY EXIT ---
 function loadFromFirebase() {
-  // SAFETY VALVE: If app takes > 3s, assume connection issue.
   setTimeout(() => {
       const loader = el("loadingOverlay");
       if (loader && loader.style.display !== "none") {
           console.warn("Loader timeout! Forcing UI open.");
-          loader.style.display = "none"; // FORCE HIDE
-
-          // FIXED: If we have to force load, DO NOT allow saving back to DB
-          // This prevents overwriting your real DB with empty data.
+          loader.style.display = "none";
           if (!state.dataLoaded) {
               console.log("Initializing defaults (READ ONLY MODE)...");
-              isSafeToSave = false; // <--- LOCK THE DB
+              isSafeToSave = false;
               showToast("Connection slow. Loaded in READ-ONLY mode.", "error");
               applyData({ loans: [], nextId: 1, admins: [] });
           }
       }
-  }, 3500); // 3.5s timeout
+  }, 3500);
 
   if (TEST_MODE) {
     setTimeout(() => {
@@ -364,21 +338,17 @@ function loadFromFirebase() {
       return;
   }
 
-  // Real DB Connection
   dataRef.on("value", (snapshot) => {
-    isSafeToSave = true; // Connection successful, safe to save
+    isSafeToSave = true;
     applyData(snapshot.val() || {});
   });
 }
 
 function applyData(parsed) {
-  // 1. Hide Loader IMMEDIATELY
   const loader = el("loadingOverlay");
   if (loader) {
      loader.style.display = "none";
   }
-
-  // 2. Load Data
   state.dataLoaded = true;
   state.loans = parsed.loans || [];
   state.nextId = parsed.nextId || 1;
@@ -391,7 +361,6 @@ function applyData(parsed) {
   state.admins = parsed.admins || [];
   state.nextAdminId = parsed.nextAdminId || 1;
 
-  // 3. Render
   try {
       refreshUI();
       updateWelcomeUI();
@@ -403,7 +372,6 @@ function applyData(parsed) {
 function saveState() {
   if (!state.dataLoaded) return;
 
-  // FIXED: The Critical Safety Check
   if (!isSafeToSave && !TEST_MODE) {
       console.warn("SAVE BLOCKED: App is in read-only/offline mode to prevent data loss.");
       showToast("Cannot save: Offline/Read-Only Mode", "error");
@@ -502,7 +470,6 @@ function generateLoanId() { return state.nextId++; }
 function generateRepaymentId() { return state.nextRepaymentId++; }
 function generateCapitalTxnId() { return state.nextCapitalTxnId++; }
 
-// FIXED: Attached to window
 window.openReceipt = function(loanId) {
   const loan = state.loans.find(l => l.id == loanId);
   if (!loan) return;
@@ -629,6 +596,15 @@ function renderDashboard() {
   animateValue(el("statProfit"), 0, totalProfit, 2500);
 }
 
+// --- NEW: PROFESSIONAL SVG ICONS ---
+const ICONS = {
+  receipt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+  whatsapp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`,
+  pay: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
+  writeoff: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>`,
+  note: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`
+};
+
 function renderLoansTable() {
   const overdueCount = (state.loans || []).filter(l => l.status === "OVERDUE").length;
   const badge = el("clientBadge");
@@ -676,7 +652,7 @@ function renderLoansTable() {
 
     const isClosed = l.status === "PAID" || l.status === "DEFAULTED";
 
-    // FIXED: Added onclicks that point to the window-exposed functions
+    // UPDATED: Using ICONS object for buttons
     return `
     <tr class="row-${(l.status || 'active').toLowerCase()}">
       <td data-label="ID"><span style="opacity:0.5; font-size:0.8rem;">#${l.id}</span></td>
@@ -706,11 +682,11 @@ function renderLoansTable() {
       <td data-label="Balance" ${balanceStyle}>${formatMoney(l.balance)}</td>
       <td data-label="Status"><span class="status-pill status-${(l.status||'active').toLowerCase()}">${l.status}</span></td>
       <td data-label="Actions" style="text-align:right; white-space:nowrap;">
-        <button class="btn-icon" onclick="openReceipt(${l.id})" title="Print Receipt">🧾</button>
-        <a href="${waLink}" target="_blank" class="btn-icon" style="${waStyle}; text-decoration:none; display:inline-block;" title="Send WhatsApp Reminder">💬</a>
-        <button class="btn-icon" onclick="openActionModal('PAY', ${l.id})" title="Pay" style="color:#38bdf8;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>💵</button>
-        <button class="btn-icon" onclick="openActionModal('WRITEOFF', ${l.id})" title="Write Off (Bad Debt)" style="color:#f87171;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>🚫</button>
-        <button class="btn-icon" onclick="openActionModal('NOTE', ${l.id})" title="Edit Note">✏️</button>
+        <button class="btn-icon" onclick="openReceipt(${l.id})" title="Print Receipt">${ICONS.receipt}</button>
+        <a href="${waLink}" target="_blank" class="btn-icon" style="${waStyle}; text-decoration:none; display:inline-flex;" title="Send WhatsApp Reminder">${ICONS.whatsapp}</a>
+        <button class="btn-icon" onclick="openActionModal('PAY', ${l.id})" title="Pay" style="color:#38bdf8;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>${ICONS.pay}</button>
+        <button class="btn-icon" onclick="openActionModal('WRITEOFF', ${l.id})" title="Write Off (Bad Debt)" style="color:#f87171;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>${ICONS.writeoff}</button>
+        <button class="btn-icon" onclick="openActionModal('NOTE', ${l.id})" title="Edit Note">${ICONS.note}</button>
       </td>
     </tr>
   `}).join("");
@@ -831,9 +807,6 @@ function renderAdminsTable() {
   </tr>`).join("");
 }
 
-// ==========================================
-// 8. MOBILE UX
-// ==========================================
 function vibrate(pattern = [15]) {
   if (typeof navigator !== "undefined" && navigator.vibrate) {
     navigator.vibrate(pattern);
@@ -897,48 +870,33 @@ function setupMobileUX() {
   checkIosInstall();
 }
 
-// --- NEW: Toggle between Dashboard and Loans tabs ---
-// This function is now explicitly attached to window to ensure clickability
 window.switchOverviewTab = function(tabName, btnElement) {
-  // 1. Haptic Feedback (Mobile feel)
   if (typeof vibrate === "function") vibrate([15]);
-
-  // 2. Get Sections
   const dash = document.getElementById("tab-dashboard");
   const loans = document.getElementById("tab-loans");
-
-  // 3. Reset Classes (to allow re-animation)
   if(dash) { dash.style.display = "none"; dash.classList.remove("animate-in"); }
   if(loans) { loans.style.display = "none"; loans.classList.remove("animate-in"); }
-
-  // 4. Show & Animate Target
   const target = document.getElementById("tab-" + tabName);
   if (target) {
     target.style.display = "block";
-    // Small delay to trigger animation
     setTimeout(() => target.classList.add("animate-in"), 10);
   }
-
-  // 5. Update Buttons (Visual Pop)
   const buttons = document.querySelectorAll(".sketch-btn");
   buttons.forEach(b => b.classList.remove("active"));
   if (btnElement) btnElement.classList.add("active");
 };
 
-// ... [Keep everything above the INIT function unchanged] ...
-
 // --- MODAL CONTROLS ---
 
 // Used by the bottom nav buttons to open sections as popups
 window.openPopup = function(id) {
-    // 1. Close other popups first (optional, but cleaner)
+    // 1. Close other popups first
     window.closeAllModals();
 
     // 2. Open the requested one
     const modal = document.getElementById(id);
     if(modal) {
         modal.classList.remove("modal-hidden");
-        // Haptic feedback
         if (typeof vibrate === "function") vibrate([15]);
     }
 }
@@ -954,7 +912,6 @@ window.closeAllModals = function() {
         const m = document.getElementById(id);
         if(m) m.classList.add("modal-hidden");
     });
-    // Haptic for "Overview" button
     if (typeof vibrate === "function") vibrate([10]);
 }
 
@@ -962,8 +919,6 @@ window.closeAllModals = function() {
 // 9. INIT
 // ==========================================
 function init() {
-
-  // NOTE: Bottom Nav click listeners are now inline in HTML (onclick="...")
 
   el("openLoanModalBtn")?.addEventListener("click", () => {
     if (typeof vibrate === "function") vibrate([10]);
@@ -1049,8 +1004,6 @@ function init() {
       showToast("Capital added successfully!", "success");
   });
 
-  // FAB ADD LISTENER REMOVED
-
   el("exportBtn")?.addEventListener("click", () => {
      if (typeof vibrate === "function") vibrate([20]);
      try {
@@ -1085,4 +1038,170 @@ function init() {
   setupMobileUX();
 }
 
+// 10. Start the App
 document.addEventListener("DOMContentLoaded", init);
+
+function setActiveView(view) {
+  // Not used in new navigation but kept for compatibility
+  document.querySelectorAll("[id^='view-']").forEach(v => v.classList.add("view-hidden"));
+  const target = el(`view-${view}`);
+  if (target) target.classList.remove("view-hidden");
+}
+
+function updateWizard(direction = "next") {
+  const step = LOAN_STEPS[wizardStep];
+  const wrapper = el("wizardWrapper");
+
+  wrapper.classList.remove("slide-in-right", "slide-out-left", "slide-in-left");
+  wrapper.classList.add(direction === "next" ? "slide-in-right" : "slide-in-left");
+
+  el("modalStepLabel").textContent = `Step ${wizardStep + 1} of ${LOAN_STEPS.length}`;
+  el("modalFieldLabel").textContent = step.label;
+  el("modalHelper").textContent = step.helper;
+
+  el("modalStepDots").innerHTML = LOAN_STEPS.map((_, i) =>
+    `<div class="step-dot ${i === wizardStep ? 'active' : ''}"></div>`
+  ).join("");
+
+  const container = el("modalFieldContainer");
+  container.innerHTML = "";
+
+  let input;
+  if (step.type === "select") {
+    input = document.createElement("select");
+    step.options.forEach(opt => {
+      const o = document.createElement("option");
+      o.value = opt;
+      o.textContent = opt;
+      input.appendChild(o);
+    });
+  } else if (step.type === "textarea") {
+    input = document.createElement("textarea");
+    input.rows = 3;
+  } else {
+    input = document.createElement("input");
+    input.type = step.type;
+    if(step.placeholder) input.placeholder = step.placeholder;
+    input.setAttribute("autocomplete", "off");
+
+    if (step.key === "clientName") {
+       input.setAttribute("list", "clientList");
+       const uniqueClients = [...new Set(state.loans.map(l => l.clientName))].sort();
+       const dataList = document.getElementById("clientList");
+       if(dataList) dataList.innerHTML = uniqueClients.map(name => `<option value="${name}">`).join("");
+    }
+  }
+
+  if (wizardDraft[step.key]) input.value = wizardDraft[step.key];
+  input.id = "wizardInput";
+  container.appendChild(input);
+
+  if (step.type === "date") {
+    const chipContainer = document.createElement("div");
+    chipContainer.style.cssText = "display:flex; gap:10px; margin-top:12px;";
+
+    const createChip = (text, dateVal) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn-secondary btn-sm";
+      btn.style.cssText = "padding:6px 12px; font-size:0.75rem; border-radius:20px; border:1px solid var(--primary); color:var(--primary); background:rgba(59, 130, 246, 0.1);";
+      btn.textContent = text;
+      btn.onclick = () => {
+        el("wizardInput").value = dateVal;
+        vibrate([20]);
+      };
+      return btn;
+    };
+
+    chipContainer.appendChild(createChip("Today", getLocalDateVal()));
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    const yesterdayStr = y.toISOString().split('T')[0];
+    chipContainer.appendChild(createChip("Yesterday", yesterdayStr));
+
+    container.appendChild(chipContainer);
+  }
+
+  setTimeout(() => input.focus(), 100);
+
+  el("modalBackBtn").style.visibility = wizardStep === 0 ? "hidden" : "visible";
+  el("modalNextBtn").textContent = wizardStep === LOAN_STEPS.length - 1 ? "Finish & Save" : "Next →";
+}
+
+function handleWizardNext() {
+  const step = LOAN_STEPS[wizardStep];
+  const input = el("wizardInput");
+  const val = input.value.trim();
+
+  if (step.required && !val) {
+    input.style.border = "1px solid #ef4444";
+    setTimeout(() => input.style.border = "", 2000);
+    return;
+  }
+  wizardDraft[step.key] = val;
+
+  if (wizardStep < LOAN_STEPS.length - 1) {
+    wizardStep++;
+    updateWizard("next");
+  } else {
+    saveNewLoan();
+  }
+}
+
+function handleWizardBack() {
+  if (wizardStep > 0) {
+    wizardStep--;
+    updateWizard("back");
+  }
+}
+
+function saveNewLoan() {
+  const newLoan = {
+    id: generateLoanId(),
+    ...wizardDraft,
+    amount: Number(wizardDraft.amount),
+    collateralValue: Number(wizardDraft.collateralValue || 0),
+    customInterest: wizardDraft.customInterest ? Number(wizardDraft.customInterest) : null,
+    paid: 0, saleAmount: 0, isDefaulted: false,
+    createdBy: "Admin", createdAt: new Date().toISOString(),
+    history: []
+  };
+
+  state.loans.unshift(newLoan);
+  saveState();
+  el("loanModal").classList.add("modal-hidden");
+  wizardStep = 0; wizardDraft = {};
+  refreshUI();
+  showToast("Loan created successfully!", "success");
+}
+
+window.openActionModal = function(action, loanId) {
+  currentAction = action;
+  currentLoanId = loanId;
+  const loan = state.loans.find(l => l.id === loanId);
+  if(!loan) return;
+
+  el("actionModal").classList.remove("modal-hidden");
+  const body = el("actionModalBody");
+  const title = el("actionModalTitle");
+
+  if (action === "PAY") {
+    title.textContent = "Record Payment";
+    body.innerHTML = `
+      <div class="field"><label>Amount</label><input type="number" id="actAmount" value="${Math.ceil(loan.balance)}"></div>
+      <div class="field"><label>Date</label><input type="date" id="actDate" value="${getLocalDateVal()}"></div>
+    `;
+  } else if (action === "NOTE") {
+    title.textContent = "Edit Note";
+    body.innerHTML = `<div class="field"><label>Note</label><textarea id="actNote">${loan.notes||''}</textarea></div>`;
+  } else if (action === "WRITEOFF") {
+    title.textContent = "Write Off Loan";
+    body.innerHTML = `
+      <div style="background:rgba(239, 68, 68, 0.1); border:1px solid #ef4444; padding:12px; border-radius:8px; color:#fca5a5;">
+        <strong>⚠️ Warning:</strong> You are about to mark this loan as <strong>Bad Debt</strong>.
+        <br><br>
+        This will stop the timer and remove the balance from your "Outstanding" assets. This action is final.
+      </div>
+      <div class="field" style="margin-top:16px;"><label>Reason (Optional)</label><textarea id="actNote" placeholder="e.g. Client relocated, uncontactable..."></textarea></div>
+    `;
+  }
+}
