@@ -8,7 +8,7 @@ const APP_VERSION = "1.6.5"; // Bumped version
 // 1. FIREBASE CONFIGURATION & SETUP
 // ==========================================
 
-const TEST_MODE = false; // FIXED: Set to FALSE for live database
+const TEST_MODE = true; // FIXED: Set to FALSE for live database
 
 // SAFETY FLAG: Prevents overwriting DB if app loads in "Offline/Timeout" mode
 let isSafeToSave = true;
@@ -925,8 +925,9 @@ window.switchOverviewTab = function(tabName, btnElement) {
   if (btnElement) btnElement.classList.add("active");
 };
 
+// ... [Keep everything above the INIT function unchanged] ...
 
-// --- NEW MODAL CONTROLS ---
+// --- MODAL CONTROLS ---
 
 // Used by the bottom nav buttons to open sections as popups
 window.openPopup = function(id) {
@@ -963,7 +964,6 @@ window.closeAllModals = function() {
 function init() {
 
   // NOTE: Bottom Nav click listeners are now inline in HTML (onclick="...")
-  // This simplifies the logic significantly.
 
   el("openLoanModalBtn")?.addEventListener("click", () => {
     if (typeof vibrate === "function") vibrate([10]);
@@ -1049,13 +1049,7 @@ function init() {
       showToast("Capital added successfully!", "success");
   });
 
-  el("fabAddBtn")?.addEventListener("click", () => {
-    if (typeof vibrate === "function") vibrate([20]);
-    wizardStep=0;
-    wizardDraft={};
-    updateWizard();
-    el("loanModal").classList.remove("modal-hidden");
-  });
+  // FAB ADD LISTENER REMOVED
 
   el("exportBtn")?.addEventListener("click", () => {
      if (typeof vibrate === "function") vibrate([20]);
@@ -1092,6 +1086,3 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
-// NOTE: setActiveView function removed as it is no longer used.
-// updateWizard(), handleWizardNext(), etc. remain the same.
