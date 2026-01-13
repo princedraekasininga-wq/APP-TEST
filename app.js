@@ -1,7 +1,7 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.6.9"; // Force Refresh for New UI
+const APP_VERSION = "1.7.0"; // Force Refresh for New UI
 
 
 // ==========================================
@@ -885,34 +885,60 @@ window.switchOverviewTab = function(tabName, btnElement) {
   if (btnElement) btnElement.classList.add("active");
 };
 
-// --- MODAL CONTROLS ---
+// --- MODAL CONTROLS & NAV ANIMATION ---
 
-// Used by the bottom nav buttons to open sections as popups
-window.openPopup = function(id) {
-    // 1. Close other popups first
-    window.closeAllModals();
+// Helper to switch the active button highlight
+function updateNavHighlight(activeBtnId) {
+    // 1. Remove 'active' class from ALL nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('nav-btn-active');
+    });
 
-    // 2. Open the requested one
-    const modal = document.getElementById(id);
+    // 2. Add 'active' class to the specific button we clicked
+    const targetBtn = document.getElementById(activeBtnId);
+    if (targetBtn) {
+        targetBtn.classList.add('nav-btn-active');
+    }
+}
+
+window.openPopup = function(modalId) {
+    // 1. Close other modals first
+    window.closeAllModals(false); // false = don't reset nav yet
+
+    // 2. Open the requested modal
+    const modal = document.getElementById(modalId);
     if(modal) {
         modal.classList.remove("modal-hidden");
         if (typeof vibrate === "function") vibrate([15]);
     }
+
+    // 3. Update the Nav Bar Animation based on which modal opened
+    if (modalId === 'monthlyModal') updateNavHighlight('navMonthlyBtn');
+    if (modalId === 'clientsModal') updateNavHighlight('navClientsBtn');
+    if (modalId === 'adminsModal')  updateNavHighlight('navAdminsBtn');
 }
 
 window.closePopup = function(id) {
     const modal = document.getElementById(id);
     if(modal) modal.classList.add("modal-hidden");
+    // When closing a specific popup, we assume we go back to Overview
+    updateNavHighlight('navMainBtn');
 }
 
-window.closeAllModals = function() {
+window.closeAllModals = function(resetNav = true) {
     // Closes Monthly, Clients, Admins
     ['monthlyModal', 'clientsModal', 'adminsModal'].forEach(id => {
         const m = document.getElementById(id);
         if(m) m.classList.add("modal-hidden");
     });
-    if (typeof vibrate === "function") vibrate([10]);
+
+    if (resetNav) {
+        // If we are fully closing everything, highlight "Overview"
+        updateNavHighlight('navMainBtn');
+        if (typeof vibrate === "function") vibrate([10]);
+    }
 }
+
 
 // ==========================================
 // 9. INIT
