@@ -157,7 +157,6 @@ header {
     transform: translateX(-50%);
     z-index: 2200;
 
-    /* Increased height for better spacing */
     width: 95%;
     max-width: 400px;
     height: 75px;
@@ -172,13 +171,10 @@ header {
     margin: 0;
     padding: 0 10px;
 
-    /* Flexbox for perfect spacing */
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: none;
-
-    /* CRITICAL: Allows the active icon to "pop" outside the box */
     overflow: visible;
   }
 
@@ -187,11 +183,11 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end; /* Pushes content to bottom */
+    justify-content: flex-end;
 
     background: transparent;
     border: none;
-    padding: 0 0 14px 0; /* Padding from bottom edge */
+    padding: 0 0 14px 0;
     height: 100%;
 
     font-size: 0.65rem;
@@ -200,13 +196,12 @@ header {
     border-radius: 0;
   }
 
-  /* The Icon Style */
+  /* --- BIGGER ICONS --- */
   .nav-btn .nav-icon {
-    width: 24px;
-    height: 24px;
-    margin-bottom: 6px; /* Space between icon and text */
+    width: 30px;  /* Increased size */
+    height: 30px; /* Increased size */
+    margin-bottom: 5px;
 
-    /* The Spring Animation Definition */
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
                 stroke 0.3s ease,
                 background 0.3s ease,
@@ -218,17 +213,35 @@ header {
     z-index: 10;
   }
 
-  /* --- ACTIVE STATE: Icon Pops Up --- */
+  /* --- NEW: ALERT BADGE (Red Dot) --- */
+  .nav-alert-badge {
+    position: absolute;
+    top: 15px;      /* Position relative to button top */
+    right: 35%;     /* Position relative to button width */
+    width: 10px;
+    height: 10px;
+    background-color: #ef4444; /* Red */
+    border-radius: 50%;
+    border: 2px solid var(--glass-bg); /* Cutout effect */
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+
+    display: none; /* Hidden by default */
+    z-index: 25;
+    pointer-events: none;
+    animation: pulseRed 2s infinite;
+  }
+
+  .nav-alert-badge.show {
+    display: block;
+  }
+
+  /* --- ACTIVE STATE --- */
   .nav-btn-active .nav-icon {
-    /* Moves the icon UP (-40px) and scales it larger */
-    transform: translateY(-40px) scale(1.4);
+    /* Adjusted pop-up height for bigger icon */
+    transform: translateY(-42px) scale(1.25);
 
     stroke: var(--primary);
-
-    /* Background matches body to hide the glass bar line behind it */
     background: var(--bg-color);
-
-    /* Neon Glow Effect */
     box-shadow: 0 -5px 20px rgba(59, 130, 246, 0.6);
     padding: 5px;
   }
@@ -238,50 +251,13 @@ header {
     border-bottom: none;
   }
 
-  /* Make active text bold and colored */
   .nav-btn-active div {
     font-weight: 700;
     color: var(--primary);
-    transform: translateY(-2px); /* Slight nudge up */
+    transform: translateY(-2px);
     transition: transform 0.3s ease;
   }
 
-  /* Utility: Hides nav if scrolled down (optional JS hook) */
-  .nav-hidden {
-    transform: translate(-50%, 150%) !important;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
-  /* --- ACTIVE STATE: Icon Pops Up --- */
-  .nav-btn-active .nav-icon {
-    /* Moves the icon UP (-38px) and scales it larger */
-    transform: translateY(-38px) scale(1.3);
-
-    stroke: var(--primary);
-
-    /* Background matches body to hide the glass bar line behind it */
-    background: var(--bg-color);
-
-    /* Neon Glow Effect */
-    box-shadow: 0 -5px 15px rgba(59, 130, 246, 0.5);
-    padding: 4px;
-  }
-
-  .nav-btn-active {
-    color: var(--text-main);
-    border-bottom: none;
-  }
-
-  /* Make active text bold and colored */
-  .nav-btn-active div {
-    font-weight: 700;
-    color: var(--primary);
-    transform: translateY(-2px); /* Slight nudge up */
-    transition: transform 0.3s ease;
-  }
-
-  /* Utility: Hides nav if scrolled down (optional JS hook) */
   .nav-hidden {
     transform: translate(-50%, 150%) !important;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);

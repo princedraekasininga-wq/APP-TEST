@@ -1,7 +1,7 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.7.0"; // Force Refresh for New UI
+const APP_VERSION = "1.7.2"; // Force Refresh for New UI
 
 
 // ==========================================
@@ -513,7 +513,18 @@ window.openReceipt = function(loanId) {
 // ==========================================
 
 function refreshUI() {
+  // --- 1. Re-calculate all math (Interest, Totals, Status) ---
   try { recomputeAllLoans(); } catch(e) { console.error("Error computing loans:", e); }
+
+  // --- 2. Check for Attention Items (Overdue) & Toggle Badge ---
+  const attentionCount = (state.loans || []).filter(l => l.status === "OVERDUE").length;
+  const navBadge = document.getElementById("overviewAlertBadge");
+  if (navBadge) {
+      if (attentionCount > 0) navBadge.classList.add("show");
+      else navBadge.classList.remove("show");
+  }
+
+  // --- 3. Re-render all sections ---
   try { renderDashboard(); } catch(e) { console.error("Dash Error:", e); }
   try { renderLoansTable(); } catch(e) { console.error("Loans Table Error:", e); }
   try { renderRepaymentsTable(); } catch(e) { console.error("Repay Table Error:", e); }
