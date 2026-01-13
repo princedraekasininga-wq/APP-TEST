@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>STALLZ LOANS — Loan Manager</title>
   <link rel="icon" type="image/png" href="myfavicon.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
@@ -42,7 +42,7 @@
     <header>
       <div class="header-brand">
         <h1>
-            <img src="my-logo.png" class="logo-img">
+            <img src="my-logo.png" class="logo-img" alt="Stallz Logo">
             STALLZ LOANS
         </h1>
         <button id="installAppBtn" class="btn-secondary btn-sm" style="display:none; margin-left:12px; border-color:#22c55e; color:#22c55e;">
@@ -61,7 +61,7 @@
     </header>
 
     <div class="top-nav">
-      <button class="nav-btn nav-btn-active" data-view="main" id="navMainBtn">
+      <button class="nav-btn nav-btn-active" id="navMainBtn" onclick="closeAllModals()">
         <span class="icon">
           📊
           <div id="clientBadge" class="nav-badge"></div>
@@ -69,16 +69,16 @@
         Overview
       </button>
 
-      <button class="nav-btn" data-view="monthly" id="navMonthlyBtn">
-        <span class="icon">📆</span> Monthly Cash Flow
+      <button class="nav-btn" id="navMonthlyBtn" onclick="openPopup('monthlyModal')">
+        <span class="icon">📆</span> Monthly
       </button>
 
-      <button class="nav-btn" data-view="clients" id="navClientsBtn">
+      <button class="nav-btn" id="navClientsBtn" onclick="openPopup('clientsModal')">
         <span class="icon">👤</span> Clients
       </button>
 
-      <button class="nav-btn" data-view="admins" id="navAdminsBtn">
-        <span class="icon">👥</span> Admin Profiles
+      <button class="nav-btn" id="navAdminsBtn" onclick="openPopup('adminsModal')">
+        <span class="icon">👥</span> Admins
       </button>
     </div>
 
@@ -141,16 +141,16 @@
                   <button type="button" id="addCapitalBtn" class="btn btn-sm">Add</button>
                 </div>
               </div>
-            </div>
 
-            <div class="section-title">Capital Ledger</div>
-            <div class="table-wrapper" style="max-height:180px;">
-              <table>
-                <thead>
-                  <tr><th>Date</th><th>Amt</th><th>Note</th></tr>
-                </thead>
-                <tbody id="capitalTableBody"></tbody>
-              </table>
+              <div class="section-title">Capital Ledger</div>
+              <div class="table-wrapper" style="max-height:180px;">
+                <table>
+                  <thead>
+                    <tr><th>Date</th><th>Amt</th><th>Note</th></tr>
+                  </thead>
+                  <tbody id="capitalTableBody"></tbody>
+                </table>
+              </div>
             </div>
 
             <div class="section-title">Overview Stats</div>
@@ -214,91 +214,90 @@
         </section>
 
       </div>
-
-      <div id="view-monthly" class="view-hidden">
-        <section class="card">
-          <div class="card-inner">
-            <h2>
-              <span>Monthly Cash Flow</span>
-              <span class="label">Loans out vs money in</span>
-            </h2>
-            <div class="table-wrapper" style="max-height:520px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Month</th>
-                    <th>Loans Out</th>
-                    <th>Repayments In</th>
-                    <th>Sales In</th>
-                    <th>Net Flow</th>
-                  </tr>
-                </thead>
-                <tbody id="monthlyTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <div id="view-clients" class="view-hidden">
-        <section class="card">
-          <div class="card-inner">
-            <h2>
-              <span>Clients</span>
-              <span class="label" id="clientsCountLabel">0 clients</span>
-            </h2>
-            <div class="table-wrapper" style="max-height:520px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Client</th>
-                    <th>Phone</th>
-                    <th># Loans</th>
-                    <th>Borrowed</th>
-                    <th>Paid In</th>
-                    <th>Sales</th>
-                    <th>Balance</th>
-                    <th>Active / Overdue</th>
-                  </tr>
-                </thead>
-                <tbody id="clientsTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <div id="view-admins" class="view-hidden">
-        <section class="card">
-          <div class="card-inner">
-            <h2>
-              <span>Admin Profiles</span>
-              <span class="label" id="adminsCountLabel">0 admins</span>
-            </h2>
-            <p class="subtle" style="color:#94a3b8; margin-bottom:16px;">
-              Record who has access to this loan book (local only, not real online logins).
-            </p>
-            <div class="section-title">Admin List</div>
-            <div class="table-wrapper" style="max-height:400px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Role</th>
-                    <th>Phone</th>
-                  </tr>
-                </thead>
-                <tbody id="adminsTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </div>
     </main>
   </div>
 
   <button class="btn fab-add" id="fabAddBtn" type="button">＋</button>
+
+  <div id="monthlyModal" class="modal-overlay modal-hidden">
+    <div class="modal" style="width:95%; max-width:800px; max-height:85vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div class="modal-title">Monthly Cash Flow</div>
+        <button type="button" class="modal-close" onclick="closePopup('monthlyModal')">-</button>
+      </div>
+      <div style="overflow-y:auto; flex:1;">
+        <div class="table-wrapper">
+            <table>
+            <thead>
+                <tr>
+                <th>Month</th>
+                <th>Loans Out</th>
+                <th>Repayments In</th>
+                <th>Sales In</th>
+                <th>Net Flow</th>
+                </tr>
+            </thead>
+            <tbody id="monthlyTableBody"></tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="clientsModal" class="modal-overlay modal-hidden">
+    <div class="modal" style="width:95%; max-width:800px; max-height:85vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div class="modal-title">Clients</div>
+        <button type="button" class="modal-close" onclick="closePopup('clientsModal')">-</button>
+      </div>
+      <div style="overflow-y:auto; flex:1;">
+        <div class="table-wrapper">
+            <table>
+            <thead>
+                <tr>
+                <th>Client</th>
+                <th>Phone</th>
+                <th># Loans</th>
+                <th>Borrowed</th>
+                <th>Paid In</th>
+                <th>Sales</th>
+                <th>Balance</th>
+                <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="clientsTableBody"></tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminsModal" class="modal-overlay modal-hidden">
+    <div class="modal" style="width:95%; max-width:500px; max-height:80vh; display:flex; flex-direction:column;">
+      <div class="modal-header">
+        <div class="modal-title">Admin Profiles</div>
+        <button type="button" class="modal-close" onclick="closePopup('adminsModal')">-</button>
+      </div>
+      <div style="overflow-y:auto; flex:1;">
+        <p class="subtle" style="color:#94a3b8; margin-bottom:16px;">
+            Record who has access to this loan book (local only).
+        </p>
+        <div class="table-wrapper">
+            <table>
+            <thead>
+                <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody id="adminsTableBody"></tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div id="loanModal" class="modal-overlay modal-hidden">
     <div class="modal">
@@ -353,17 +352,6 @@
       <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:20px;">
         To install this app on your iPhone, tap the <strong>Share</strong> button below and select <strong>"Add to Home Screen"</strong>.
       </p>
-      <div style="display:flex; justify-content:center; gap:20px; align-items:center; color:white; font-size:0.9rem; margin-bottom:20px;">
-          <span style="display:flex; flex-direction:column; align-items:center;">
-              <span style="font-size:1.5rem; background:rgba(255,255,255,0.1); width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px;">1</span>
-              Tap Share <br> (Square with arrow)
-          </span>
-          <span style="font-size:1.5rem;">→</span>
-          <span style="display:flex; flex-direction:column; align-items:center;">
-               <span style="font-size:1.5rem; background:rgba(255,255,255,0.1); width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px;">2</span>
-              Scroll down & <br> 'Add to Home Screen'
-          </span>
-      </div>
       <button id="closeIosModalBtn" class="btn-secondary btn-sm">Got it</button>
     </div>
   </div>
@@ -373,7 +361,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" defer></script>
-  <script src="app.js?v=1.6.4" defer></script>
+  <script src="app.js?v=1.6.5" defer></script>
 
 </body>
 </html>

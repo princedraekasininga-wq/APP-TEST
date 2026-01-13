@@ -481,7 +481,37 @@ tbody tr:hover {
   cursor: pointer; border-radius: 50%; transition: all 0.2s; opacity: 0.7;
 }
 .btn-icon:hover { background: rgba(255,255,255,0.1); transform: scale(1.2); opacity: 1; }
-.fab-add { display: none !important; }
+
+/* FIXED: Mobile Floating Action Button (FAB) */
+.fab-add {
+  display: flex !important;
+  position: fixed;
+  bottom: 85px; /* Above the mobile nav */
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  font-size: 1.8rem;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.fab-add:active {
+  transform: scale(0.95);
+}
+
+/* Hide FAB on desktop */
+@media (min-width: 769px) {
+  .fab-add { display: none !important; }
+}
 
 /* DASHBOARD STATS */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
@@ -865,4 +895,3 @@ tbody tr:hover {
     justify-content: space-between;
   }
 }
-
