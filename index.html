@@ -66,8 +66,7 @@
           <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
           <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
         </svg>
-        <div id="clientBadge" class="nav-badge"></div>
-        Overview
+        <div>Overview</div>
       </button>
 
       <button class="nav-btn" id="navMonthlyBtn" onclick="openPopup('monthlyModal')">
@@ -76,7 +75,7 @@
           <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
           <line x1="3" y1="10" x2="21" y2="10"></line>
         </svg>
-        Monthly
+        <div style="white-space: nowrap; transform: scale(0.9);">Monthly Cash Flow</div>
       </button>
 
       <button class="nav-btn" id="navClientsBtn" onclick="openPopup('clientsModal')">
@@ -86,14 +85,14 @@
           <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
           <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
         </svg>
-        Clients
+        <div>Clients</div>
       </button>
 
       <button class="nav-btn" id="navAdminsBtn" onclick="openPopup('adminsModal')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
         </svg>
-        Admins
+        <div>Admins</div>
       </button>
     </div>
 
@@ -374,7 +373,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" defer></script>
-  <script src="app.js?v=1.6.5" defer></script>
+  <script src="app.js?v=1.6.6" defer></script>
 
 </body>
 </html>
