@@ -1,17 +1,14 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.61"; // <--- Update this to match your HTML
+const APP_VERSION = "1.6.4"; // BUMPED TO FORCE RESET
 
 
 // ==========================================
 // 1. FIREBASE CONFIGURATION & SETUP
 // ==========================================
 
-// --- SETTINGS ---
-// Set to TRUE for testing offline/local only.
-// Set to FALSE for GitHub/Production to use the live database.
-const TEST_MODE = true;
+const TEST_MODE = true; // Set to FALSE for live database
 
 const firebaseConfig = {
   apiKey: "AIzaSyBRMITHX8gm0jKpEXuC4iePGWoYON85BDU",
@@ -26,24 +23,19 @@ const firebaseConfig = {
 
 let db, dataRef;
 
-// Initialize Firebase safely with Persistence
 try {
   if (typeof firebase !== "undefined") {
     firebase.initializeApp(firebaseConfig);
-
-    // OPTIMIZATION: Keep user logged in across refreshes
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
       .catch((error) => console.error("Auth Persistence Error:", error));
-
     db = firebase.database();
     dataRef = db.ref("loanManagerData_v5");
-
-    console.log("Firebase initialized. Mode: " + (TEST_MODE ? "Test/Offline" : "Live/Online"));
+    console.log("Firebase initialized.");
   } else {
     console.warn("Firebase SDK not loaded. Running in Offline/Test Mode.");
   }
 } catch (e) {
-  console.error("Firebase Init Error (Ignore if offline):", e);
+  console.error("Firebase Init Error:", e);
 }
 
 // ==========================================
@@ -52,7 +44,12 @@ try {
 
 function el(id) { return document.getElementById(id); }
 
-// Get local date string YYYY-MM-DD for input fields
+// --- SAFETY: Force Hide Loader ---
+function forceHideLoader() {
+    const loader = el("loadingOverlay");
+    if (loader) loader.style.display = "none";
+}
+
 function getLocalDateVal() {
   const d = new Date();
   const year = d.getFullYear();
@@ -61,12 +58,9 @@ function getLocalDateVal() {
   return `${year}-${month}-${day}`;
 }
 
-// --- AUTO THEME ENGINE ---
 function checkTimeBasedTheme() {
   const hour = new Date().getHours();
-  // Rule: Light Mode between 6 AM (06:00) and 6 PM (18:00)
   const isDayTime = hour >= 6 && hour < 18;
-
   if (isDayTime) {
     document.documentElement.setAttribute("data-theme", "light");
   } else {
@@ -74,16 +68,30 @@ function checkTimeBasedTheme() {
   }
 }
 
-// Helper: Format Phone for WhatsApp (Zambia)
 function formatWhatsApp(phone) {
   if (!phone) return "";
-  let p = phone.replace(/\D/g, ''); // Remove non-digits
-  if (p.startsWith('0')) p = '260' + p.substring(1); // 097 -> 26097
-  if (p.length === 9) p = '260' + p; // 97... -> 26097...
+  let p = phone.replace(/\D/g, '');
+  if (p.startsWith('0')) p = '260' + p.substring(1);
+  if (p.length === 9) p = '260' + p;
   return p;
 }
 
-// --- TOAST NOTIFICATION (Minimal) ---
+// --- Helper to Update Welcome Message ---
+function updateWelcomeUI() {
+  if (!state.user || !state.user.email) return;
+
+  const name = state.user.email.split('@')[0];
+  const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+  const msg = `Welcome back, ${formattedName}`;
+
+  const pc = document.getElementById("welcomeDesktop");
+  const mob = document.getElementById("welcomeMobile");
+
+  if(pc) pc.textContent = msg;
+  if(mob) mob.textContent = msg + " 👋";
+}
+
+// --- TOAST NOTIFICATION ---
 function showToast(message, type = "success") {
   const container = el("toast-container");
   if (!container) return;
@@ -94,17 +102,15 @@ function showToast(message, type = "success") {
 
   container.appendChild(toast);
 
-  // Vibration logic
-  if (type === "success") vibrate([20]);
-  if (type === "error") vibrate([30, 30]);
+  if (type === "success" && typeof vibrate === "function") vibrate([20]);
+  if (type === "error" && typeof vibrate === "function") vibrate([30, 30]);
 
-  // Remove faster (2.5 seconds) for a snappy feel
   setTimeout(() => {
     toast.style.animation = "toastFadeOut 0.4s forwards";
     setTimeout(() => toast.remove(), 400);
   }, 2500);
 }
-// --- SESSION MANAGEMENT ---
+
 function updateSessionActivity() {
   localStorage.setItem("stallz_last_active", Date.now());
 }
@@ -114,27 +120,22 @@ document.addEventListener("touchstart", updateSessionActivity);
 
 function checkAppVersion() {
   const storedVersion = localStorage.getItem("stallz_app_version");
-
-  // Display Version in the UI (e.g., on the Welcome Screen)
   const subtitle = document.querySelector(".welcome-subtitle");
   if (subtitle) {
       subtitle.textContent = `Secure Admin Login (v${APP_VERSION})`;
   }
-
-  // Check for Update
+  // Auto-clear cache on version bump
   if (storedVersion !== APP_VERSION) {
-    // New version detected!
+    console.log("New version detected. Clearing old session.");
+    localStorage.removeItem("stallz_test_session"); // Force re-login on update
     localStorage.setItem("stallz_app_version", APP_VERSION);
-
-    // Show a special update toast
     setTimeout(() => {
         showToast(`App Updated to v${APP_VERSION}`, "success");
-        vibrate([50, 50, 50]); // Distinct vibration pattern
-    }, 1500); // Wait for the "Connecting" screen to finish
+        if(typeof vibrate === "function") vibrate([50, 50, 50]);
+    }, 1500);
   }
 }
 
-// --- ROLLING COUNTER ANIMATION ---
 function animateValue(obj, start, end, duration) {
   if (!obj) return;
   let startTimestamp = null;
@@ -171,7 +172,6 @@ const state = {
   isLoggedIn: false
 };
 
-// NEW: Set status to 'ACTIVE' by default
 let activeFilters = { status: 'ACTIVE', plan: 'All' };
 
 function setFilter(type, value, btnElement) {
@@ -183,6 +183,7 @@ function setFilter(type, value, btnElement) {
 }
 
 function getInitials(name) {
+  if(!name) return "??";
   return name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
 }
 
@@ -215,10 +216,8 @@ function showWelcomeScreen() {
   const errorMsg = el("authError");
   const loader = el("loadingOverlay");
 
-  // --- 1. SETUP LOGIN BUTTON LISTENER (MOVED TO TOP) ---
-  // We do this first so the button ALWAYS works, even if session checks fail later.
+  // --- 1. SETUP LOGIN BUTTON ---
   if (loginBtn) {
-    // Remove old listeners to prevent duplicates (cloning trick)
     const newBtn = loginBtn.cloneNode(true);
     loginBtn.parentNode.replaceChild(newBtn, loginBtn);
 
@@ -233,21 +232,7 @@ function showWelcomeScreen() {
       }
       if (loader) { loader.style.display = "flex"; loader.style.opacity = "1"; }
 
-      // Helper to set welcome message on both PC and Mobile
-      const setWelcomeMsg = (userEmail) => {
-         const name = userEmail.split('@')[0];
-         // Capitalize first letter (e.g. "stallz" -> "Stallz")
-         const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-         const msg = `Welcome back, ${formattedName}`;
-
-         const pc = document.getElementById("welcomeDesktop");
-         const mob = document.getElementById("welcomeMobile");
-
-         if(pc) pc.textContent = msg;
-         if(mob) mob.textContent = msg + " 👋";
-      };
-
-      // --- A. TEST MODE LOGIN ---
+      // A. TEST MODE
       if (TEST_MODE) {
         setTimeout(() => {
           localStorage.setItem("stallz_test_session", "true");
@@ -258,24 +243,19 @@ function showWelcomeScreen() {
           screen.style.display = "none";
           loadFromFirebase();
 
-          // Trigger Welcome Effects
-          setWelcomeMsg(email);
-          showToast("Login Successful", "success");
-
+          updateWelcomeUI();
+          showToast(`Welcome back!`, "success");
         }, 500);
         return;
       }
 
-      // --- B. REAL FIREBASE LOGIN ---
+      // B. REAL FIREBASE
       try {
         if (typeof firebase === "undefined") throw new Error("Firebase not loaded");
         await firebase.auth().signInWithEmailAndPassword(email, password);
         updateSessionActivity();
-
-        // Trigger Welcome Effects
-        setWelcomeMsg(email);
-        showToast("Login Successful", "success");
-
+        updateWelcomeUI();
+        showToast(`Login Successful`, "success");
       } catch (error) {
         if (loader) loader.style.display = "none";
         errorMsg.textContent = "Login failed: " + error.message;
@@ -284,7 +264,7 @@ function showWelcomeScreen() {
     };
   }
 
-  // --- 2. CHECK FOR SESSION TIMEOUT ---
+  // --- 2. CHECK SESSION TIMEOUT ---
   const lastActive = localStorage.getItem("stallz_last_active");
   const now = Date.now();
   const THIRTY_MINUTES = 30 * 60 * 1000;
@@ -297,25 +277,22 @@ function showWelcomeScreen() {
 
     if (loader) loader.style.display = "none";
     screen.style.display = "flex";
-    return; // Stop here so we don't auto-login
+    return;
   }
 
-  // --- 3. AUTO-LOGIN LOGIC ---
+  // --- 3. AUTO-LOGIN ---
   const testSession = localStorage.getItem("stallz_test_session");
 
   if (TEST_MODE) {
     if (testSession === "true") {
-       console.log("TEST MODE: Auto-logging in...");
        state.user = { email: "test@admin.com", uid: "test-user-123" };
        state.isLoggedIn = true;
        updateSessionActivity();
 
        screen.style.display = "none";
        if (loader) loader.style.display = "flex";
-
        loadFromFirebase();
     } else {
-       // No session, show login
        if (loader) loader.style.display = "none";
        screen.style.display = "flex";
     }
@@ -327,7 +304,6 @@ function showWelcomeScreen() {
           state.user = user;
           state.isLoggedIn = true;
           screen.style.display = "none";
-          // Keep loader visible until data loads
           if (loader) { loader.style.display = "flex"; loader.style.opacity = "1"; }
           loadFromFirebase();
         } else {
@@ -341,7 +317,23 @@ function showWelcomeScreen() {
   }
 }
 
+// --- UPDATED: ROBUST LOADER WITH EMERGENCY EXIT ---
 function loadFromFirebase() {
+  // SAFETY VALVE: If app takes > 3s, force reset.
+  setTimeout(() => {
+      const loader = el("loadingOverlay");
+      if (loader && loader.style.display !== "none") {
+          console.warn("Loader timeout! Forcing UI open.");
+          loader.style.display = "none"; // FORCE HIDE
+
+          // If no data loaded, init defaults to prevent blank screen
+          if (!state.dataLoaded) {
+              console.log("Initializing defaults...");
+              applyData({ loans: [], nextId: 1, admins: [] });
+          }
+      }
+  }, 3000);
+
   if (TEST_MODE) {
     setTimeout(() => {
       try {
@@ -349,12 +341,18 @@ function loadFromFirebase() {
         let parsed = localData ? JSON.parse(localData) : null;
         if (!parsed) parsed = { loans: [], nextId: 1, admins: [{ id: 1, name: "Test Owner", email: "test@admin.com", role: "Owner" }] };
         applyData(parsed);
-      } catch(e) { console.error("Load Error:", e); }
+      } catch(e) {
+          console.error("Data Corrupt. Resetting.", e);
+          // FALLBACK: Corrupt data? Load empty.
+          applyData({ loans: [], nextId: 1, admins: [] });
+      }
     }, 500);
     return;
   }
+
   if (!dataRef) {
-      console.warn("No DB connection. Cannot load live data.");
+      console.warn("No DB connection.");
+      applyData({});
       return;
   }
   dataRef.on("value", (snapshot) => {
@@ -363,11 +361,13 @@ function loadFromFirebase() {
 }
 
 function applyData(parsed) {
+  // 1. Hide Loader IMMEDIATELY
   const loader = el("loadingOverlay");
   if (loader) {
-     loader.style.opacity = "0";
-     setTimeout(() => loader.style.display = "none", 500);
+     loader.style.display = "none";
   }
+
+  // 2. Load Data
   state.dataLoaded = true;
   state.loans = parsed.loans || [];
   state.nextId = parsed.nextId || 1;
@@ -379,7 +379,14 @@ function applyData(parsed) {
   state.nextRepaymentId = parsed.nextRepaymentId || 1;
   state.admins = parsed.admins || [];
   state.nextAdminId = parsed.nextAdminId || 1;
-  refreshUI();
+
+  // 3. Render
+  try {
+      refreshUI();
+      updateWelcomeUI();
+  } catch(e) {
+      console.error("Render error:", e);
+  }
 }
 
 function saveState() {
@@ -402,8 +409,6 @@ function saveState() {
   } else {
     if (dataRef) {
         dataRef.set(payload).catch((e) => console.error("Save failed:", e));
-    } else {
-        console.warn("Save failed: No database connection.");
     }
   }
 }
@@ -475,10 +480,6 @@ function generateLoanId() { return state.nextId++; }
 function generateRepaymentId() { return state.nextRepaymentId++; }
 function generateCapitalTxnId() { return state.nextCapitalTxnId++; }
 
-// ==========================================
-// 5. PRINT RECEIPTS
-// ==========================================
-
 function openReceipt(loanId) {
   const loan = state.loans.find(l => l.id == loanId);
   if (!loan) return;
@@ -531,25 +532,17 @@ function refreshUI() {
   try { renderAdminsTable(); } catch(e) { console.error("Admins Table Error:", e); }
 }
 
-// --- RESTORED DASHBOARD FUNCTION ---
 function renderDashboard() {
   const container = el("dashboardStats");
   if (!container) return;
 
   const loans = state.loans || [];
-
-  // 1. Calculate Stats
   const totalLoaned = loans.reduce((s, l) => s + (l.amount || 0), 0);
-
-  // FIX: Exclude DEFAULTED loans from "Outstanding" calculation
   const totalOutstanding = loans.reduce((s, l) => {
-      if (l.status === "DEFAULTED") return s; // Don't count bad debt
+      if (l.status === "DEFAULTED") return s;
       return s + Math.max(0, l.balance || 0);
   }, 0);
-
   const totalProfit = loans.reduce((s, l) => s + (l.profitCollected || 0), 0);
-
-  // Active Count (Excludes Defaulted/Paid)
   const activeCount = loans.filter(l => l.status === "ACTIVE" || l.status === "OVERDUE").length;
 
   const starting = state.startingCapital || 0;
@@ -557,7 +550,6 @@ function renderDashboard() {
   const paidIn = loans.reduce((s, l) => s + (l.paid || 0), 0);
   const cashOnHand = starting + added + paidIn - totalLoaned;
 
-  // 2. Logic: Red Text if Cash is Negative
   const cashEl = el("cashOnHandValue");
   if(cashEl) {
     cashEl.textContent = formatMoney(cashOnHand);
@@ -565,7 +557,6 @@ function renderDashboard() {
     else cashEl.classList.remove("text-danger-glow");
   }
 
-  // 3. Capital Tab Logic
   if (state.startingCapital > 0) {
       if(el("startingCapitalSetupRow")) el("startingCapitalSetupRow").style.display = "none";
       if(el("startingCapitalInfoRow")) {
@@ -587,26 +578,22 @@ function renderDashboard() {
      `).join("");
   }
 
-  // 4. Render Cards
   container.innerHTML = `
     <div class="stat-card" style="border-color: var(--primary);">
       <div class="stat-label">Active Deals</div>
       <div class="stat-value" style="font-size: 1.8rem;">${activeCount}</div>
       <div class="stat-sub">Clients with open balances</div>
     </div>
-
     <div class="stat-card stat-purple">
       <div class="stat-label">Total Loaned</div>
       <div class="stat-value" id="statLoaned">K0.00</div>
       <div class="stat-sub">Lifetime capital deployed</div>
     </div>
-
     <div class="stat-card stat-orange">
       <div class="stat-label">Outstanding</div>
       <div class="stat-value" id="statOutstanding">K0.00</div>
       <div class="stat-sub">Pending collection (Excl. Bad Debt)</div>
     </div>
-
     <div class="stat-card stat-green">
       <div class="stat-label">Profit Made</div>
       <div class="stat-value" id="statProfit">K0.00</div>
@@ -619,7 +606,6 @@ function renderDashboard() {
   animateValue(el("statProfit"), 0, totalProfit, 2500);
 }
 
-// --- UPDATED LOANS TABLE (With Receipt, WhatsApp & Write Off) ---
 function renderLoansTable() {
   const overdueCount = (state.loans || []).filter(l => l.status === "OVERDUE").length;
   const badge = el("clientBadge");
@@ -650,30 +636,26 @@ function renderLoansTable() {
   }
 
   tbody.innerHTML = visibleLoans.map((l, index) => {
-    // Progress Logic
     const percent = Math.min(100, Math.round(((l.paid || 0) / (l.totalDue || 1)) * 100));
     let progressColor = "var(--primary)";
     if (percent >= 100) progressColor = "#22c55e";
     else if (l.status === "OVERDUE") progressColor = "#ef4444";
-    else if (l.status === "DEFAULTED") progressColor = "#64748b"; // Grey for bad debt
+    else if (l.status === "DEFAULTED") progressColor = "#64748b";
 
     const isOverdue = l.status === "OVERDUE";
     const balanceStyle = isOverdue ? 'class="text-danger-glow" style="font-weight:bold;"' : 'style="font-weight:bold;"';
     const avatarClass = `avatar-${l.id % 5}`;
 
-    // --- WHATSAPP MESSAGE GENERATOR ---
     const waNumber = formatWhatsApp(l.clientPhone);
     const waMsg = encodeURIComponent(`Hi ${l.clientName}, friendly reminder from Stallz Loans. Your balance of ${formatMoney(l.balance)} was due on ${formatDate(l.dueDate)}. Please make payment today.`);
     const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMsg}` : "#";
     const waStyle = waNumber ? "color:#4ade80;" : "color:#64748b; cursor:not-allowed;";
 
-    // Disable actions if Defaulted/Paid
     const isClosed = l.status === "PAID" || l.status === "DEFAULTED";
 
     return `
     <tr class="row-${(l.status || 'active').toLowerCase()}">
       <td data-label="ID"><span style="opacity:0.5; font-size:0.8rem;">#${l.id}</span></td>
-
       <td data-label="Client">
         <div class="client-flex">
           <div class="avatar ${avatarClass}">${getInitials(l.clientName)}</div>
@@ -683,9 +665,7 @@ function renderLoansTable() {
           </div>
         </div>
       </td>
-
       <td data-label="Item"><span style="color:var(--text-muted);">${l.collateralItem || '-'}</span></td>
-
       <td data-label="Progress">
         <div style="min-width: 100px;">
           <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:4px;">
@@ -697,26 +677,21 @@ function renderLoansTable() {
           </div>
         </div>
       </td>
-
       <td data-label="Start">${formatDate(l.startDate)}</td>
       <td data-label="Due">${formatDate(l.dueDate)}</td>
       <td data-label="Balance" ${balanceStyle}>${formatMoney(l.balance)}</td>
       <td data-label="Status"><span class="status-pill status-${(l.status||'active').toLowerCase()}">${l.status}</span></td>
-
       <td data-label="Actions" style="text-align:right; white-space:nowrap;">
         <button class="btn-icon" onclick="openReceipt(${l.id})" title="Print Receipt">🧾</button>
-
         <a href="${waLink}" target="_blank" class="btn-icon" style="${waStyle}; text-decoration:none; display:inline-block;" title="Send WhatsApp Reminder">💬</a>
-
         <button class="btn-icon" onclick="openActionModal('PAY', ${l.id})" title="Pay" style="color:#38bdf8;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>💵</button>
-
         <button class="btn-icon" onclick="openActionModal('WRITEOFF', ${l.id})" title="Write Off (Bad Debt)" style="color:#f87171;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>🚫</button>
-
         <button class="btn-icon" onclick="openActionModal('NOTE', ${l.id})" title="Edit Note">✏️</button>
       </td>
     </tr>
   `}).join("");
 }
+
 function renderRepaymentsTable() {
   const tbody = el("repaymentsTableBody");
   if (!tbody) return;
@@ -732,6 +707,7 @@ function renderRepaymentsTable() {
      </tr>`;
   }).join("");
 }
+
 function renderMonthlyTable() {
   const tbody = el("monthlyTableBody");
   if (!tbody) return;
@@ -768,20 +744,11 @@ function renderMonthlyTable() {
 function renderClientsTable() {
   const tbody = el("clientsTableBody");
   if (!tbody) return;
-
   const clientMap = {};
-
-  // 1. Group all loans by Client Name
   (state.loans || []).forEach(loan => {
     const name = (loan.clientName || "Unknown").trim();
     if (!clientMap[name]) {
-        clientMap[name] = {
-            name: name,
-            phone: loan.clientPhone,
-            loans: [],
-            defaults: 0,
-            overdues: 0
-        };
+        clientMap[name] = { name: name, phone: loan.clientPhone, loans: [], defaults: 0, overdues: 0 };
     }
     clientMap[name].loans.push(loan);
     if (loan.status === "DEFAULTED") clientMap[name].defaults++;
@@ -793,36 +760,22 @@ function renderClientsTable() {
     const paid = c.loans.reduce((s, l) => s + (Number(l.paid) || 0), 0);
     const balance = c.loans.reduce((s, l) => s + (Number(l.balance) || 0), 0);
     const activeCount = c.loans.filter(l => l.status === "ACTIVE" || l.status === "OVERDUE").length;
-
-    // --- PERFORMANCE SCORE LOGIC ---
-    // Start with 100 points
     let score = 100;
-
-    // Deduct 50 points for every Bad Debt (Write-off)
     score -= (c.defaults * 50);
-
-    // Deduct 15 points for currently Overdue loans
     score -= (c.overdues * 15);
-
-    // Determine Star Rating based on score
-    let stars = "⭐⭐⭐⭐⭐"; // 100+
-    let ratingColor = "#4ade80"; // Green
-
+    let stars = "⭐⭐⭐⭐⭐";
+    let ratingColor = "#4ade80";
     if (score < 50) { stars = "⚠️ RISKY"; ratingColor = "#ef4444"; }
     else if (score < 70) { stars = "⭐⭐"; ratingColor = "#fbbf24"; }
     else if (score < 90) { stars = "⭐⭐⭐"; ratingColor = "#facc15"; }
     else if (score < 100) { stars = "⭐⭐⭐⭐"; ratingColor = "#a3e635"; }
-
     return { ...c, borrowed, paid, balance, activeCount, stars, ratingColor };
   });
 
-  // Render
   tbody.innerHTML = clientRows.map(c => {
-    // If they have no active loans, show "Clear", otherwise show "Active"
     const statusHtml = c.activeCount > 0
         ? '<span class="status-pill status-active">Active</span>'
         : '<span class="status-pill status-paid">Clear</span>';
-
     return `
     <tr>
       <td data-label="Client">
@@ -855,8 +808,249 @@ function renderAdminsTable() {
 }
 
 // ==========================================
-// 7. LISTENERS
+// 8. MOBILE UX
 // ==========================================
+function vibrate(pattern = [15]) {
+  if (typeof navigator !== "undefined" && navigator.vibrate) {
+    navigator.vibrate(pattern);
+  }
+}
+
+function setupMobileUX() {
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const btn = el("installAppBtn");
+    if (btn) {
+      btn.style.display = "inline-flex";
+      btn.addEventListener('click', () => {
+        vibrate([30]);
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            btn.style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      });
+    }
+  });
+
+  let longPressTimer;
+  const touchDuration = 800;
+  document.addEventListener("touchstart", (e) => {
+    const row = e.target.closest("tr");
+    if (!row) return;
+    const idCell = row.querySelector("td[data-label='ID'] span");
+    if (!idCell) return;
+    const idText = idCell.textContent.replace('#', '');
+    const loanId = parseInt(idText);
+    if (loanId) {
+      longPressTimer = setTimeout(() => {
+        vibrate([40, 40]);
+        openActionModal("PAY", loanId);
+      }, touchDuration);
+    }
+  }, { passive: true });
+
+  document.addEventListener("touchend", () => clearTimeout(longPressTimer));
+  document.addEventListener("touchmove", () => clearTimeout(longPressTimer));
+
+  function checkIosInstall() {
+    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isStandalone = window.navigator.standalone === true;
+    if (isIos && !isStandalone) {
+        setTimeout(() => {
+            const modal = document.getElementById("iosInstallModal");
+            if(modal) modal.classList.remove("modal-hidden");
+        }, 2000);
+    }
+  }
+  document.getElementById("closeIosModalBtn")?.addEventListener("click", () => {
+    document.getElementById("iosInstallModal").classList.add("modal-hidden");
+  });
+  checkIosInstall();
+}
+
+// --- NEW: Toggle between Dashboard and Loans tabs ---
+// This function is now explicitly attached to window to ensure clickability
+window.switchOverviewTab = function(tabName, btnElement) {
+  // 1. Haptic Feedback (Mobile feel)
+  if (typeof vibrate === "function") vibrate([15]);
+
+  // 2. Get Sections
+  const dash = document.getElementById("tab-dashboard");
+  const loans = document.getElementById("tab-loans");
+
+  // 3. Reset Classes (to allow re-animation)
+  if(dash) { dash.style.display = "none"; dash.classList.remove("animate-in"); }
+  if(loans) { loans.style.display = "none"; loans.classList.remove("animate-in"); }
+
+  // 4. Show & Animate Target
+  const target = document.getElementById("tab-" + tabName);
+  if (target) {
+    target.style.display = "block";
+    // Small delay to trigger animation
+    setTimeout(() => target.classList.add("animate-in"), 10);
+  }
+
+  // 5. Update Buttons (Visual Pop)
+  const buttons = document.querySelectorAll(".sketch-btn");
+  buttons.forEach(b => b.classList.remove("active"));
+  if (btnElement) btnElement.classList.add("active");
+};
+
+// ==========================================
+// 9. INIT
+// ==========================================
+function init() {
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (typeof vibrate === "function") vibrate([10]);
+      setActiveView(btn.dataset.view);
+    });
+  });
+
+  el("openLoanModalBtn")?.addEventListener("click", () => {
+    if (typeof vibrate === "function") vibrate([10]);
+    wizardStep=0;
+    wizardDraft={};
+    updateWizard();
+    el("loanModal").classList.remove("modal-hidden");
+  });
+
+  el("modalCloseBtn")?.addEventListener("click", () => el("loanModal").classList.add("modal-hidden"));
+  el("modalNextBtn")?.addEventListener("click", () => {
+      if (typeof vibrate === "function") vibrate([10]);
+      handleWizardNext();
+  });
+  el("modalBackBtn")?.addEventListener("click", () => {
+      if (typeof vibrate === "function") vibrate([10]);
+      handleWizardBack();
+  });
+
+  el("actionModalCloseBtn")?.addEventListener("click", () => el("actionModal").classList.add("modal-hidden"));
+  el("actionModalCancelBtn")?.addEventListener("click", () => el("actionModal").classList.add("modal-hidden"));
+
+  el("actionModalConfirmBtn")?.addEventListener("click", () => {
+     if (typeof vibrate === "function") vibrate([20]);
+     const loan = state.loans.find(l => l.id === currentLoanId);
+     if (currentAction === "PAY" && loan) {
+        const inputAmt = Number(el("actAmount").value);
+        const maxPay = loan.balance;
+        const safeAmt = Math.min(inputAmt, maxPay);
+        if (safeAmt > 0) {
+            loan.paid = (loan.paid || 0) + safeAmt;
+            state.repayments.unshift({
+                id: generateRepaymentId(),
+                loanId: loan.id,
+                amount: safeAmt,
+                date: el("actDate").value,
+                recordedBy: state.user ? (state.user.email || "Admin") : "System"
+            });
+        }
+     }
+     else if (currentAction === "NOTE" && loan) {
+        loan.notes = el("actNote").value;
+     }
+     else if (currentAction === "WRITEOFF" && loan) {
+        loan.isDefaulted = true;
+        loan.status = "DEFAULTED";
+        const reason = el("actNote").value;
+        if(reason) loan.notes = (loan.notes ? loan.notes + "\n" : "") + "[Write-Off]: " + reason;
+     }
+     saveState();
+     refreshUI();
+     el("actionModal").classList.add("modal-hidden");
+     if (currentAction === "PAY") showToast("Payment recorded!", "success");
+     else if (currentAction === "WRITEOFF") showToast("Loan written off as Bad Debt", "error");
+     else showToast("Note updated!", "success");
+  });
+
+  document.querySelectorAll('.mini-tab').forEach(b => {
+      b.addEventListener('click', () => {
+          if (typeof vibrate === "function") vibrate([10]);
+          document.querySelectorAll('.mini-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          b.classList.add('active');
+          el(b.dataset.target).classList.add('active');
+      });
+  });
+
+  el("setStartingCapitalBtn")?.addEventListener("click", () => {
+      const val = Number(el("startingCapitalInitial").value);
+      if (val > 0) { state.startingCapital = val; state.startingCapitalSetDate = new Date().toISOString(); saveState(); refreshUI(); }
+  });
+
+  el("addCapitalBtn")?.addEventListener("click", () => {
+      const input = el("addCapitalInput");
+      const val = Number(input.value);
+      if (val <= 0) {
+          showToast("Enter a valid positive amount", "error");
+          return;
+      }
+      state.capitalTxns.unshift({ id: generateCapitalTxnId(), amount: val, date: new Date().toISOString(), note: "Manual Add" });
+      input.value = "";
+      saveState(); refreshUI();
+      showToast("Capital added successfully!", "success");
+  });
+
+  el("exportBtn")?.addEventListener("click", () => {
+     if (typeof vibrate === "function") vibrate([20]);
+     try {
+       const loansData = state.loans.map(l => ({
+           ID: l.id,
+           Client: l.clientName,
+           Phone: l.clientPhone,
+           Amount: l.amount,
+           Plan: l.plan,
+           Start: l.startDate ? l.startDate.split('T')[0] : '-',
+           Due: l.dueDate ? l.dueDate.split('T')[0] : '-',
+           Balance: l.balance,
+           Status: l.status
+       }));
+       const ws = XLSX.utils.json_to_sheet(loansData);
+       const wb = XLSX.utils.book_new();
+       XLSX.utils.book_append_sheet(wb, ws, "Loans");
+       XLSX.writeFile(wb, "Stallz_Loans.xlsx");
+     } catch (e) {
+         showToast("Export failed. Check internet connection.", "error");
+         console.error(e);
+     }
+  });
+
+  let lastScroll = 0;
+  const nav = document.querySelector('.top-nav');
+  if (nav) {
+    window.addEventListener('scroll', () => {
+      const currentScroll = window.pageYOffset;
+      if (currentScroll > lastScroll && currentScroll > 50) {
+        nav.classList.add('nav-hidden');
+      } else {
+        nav.classList.remove('nav-hidden');
+      }
+      lastScroll = currentScroll;
+    }, { passive: true });
+  }
+
+  ["searchInput", "statusFilter", "planFilter"].forEach(id => el(id)?.addEventListener("input", renderLoansTable));
+
+  checkTimeBasedTheme();
+  setInterval(checkTimeBasedTheme, 60000);
+
+  // Set default view
+  setActiveView("main");
+
+  // Start the auth check
+  showWelcomeScreen();
+
+  checkAppVersion();
+  setupMobileUX();
+}
+
+// 10. Start the App
+document.addEventListener("DOMContentLoaded", init);
 
 function setActiveView(view) {
   document.querySelectorAll("[id^='view-']").forEach(v => v.classList.add("view-hidden"));
@@ -872,21 +1066,17 @@ function updateWizard(direction = "next") {
   const step = LOAN_STEPS[wizardStep];
   const wrapper = el("wizardWrapper");
 
-  // Animation classes
   wrapper.classList.remove("slide-in-right", "slide-out-left", "slide-in-left");
   wrapper.classList.add(direction === "next" ? "slide-in-right" : "slide-in-left");
 
-  // Update Labels
   el("modalStepLabel").textContent = `Step ${wizardStep + 1} of ${LOAN_STEPS.length}`;
   el("modalFieldLabel").textContent = step.label;
   el("modalHelper").textContent = step.helper;
 
-  // Update Dots
   el("modalStepDots").innerHTML = LOAN_STEPS.map((_, i) =>
     `<div class="step-dot ${i === wizardStep ? 'active' : ''}"></div>`
   ).join("");
 
-  // Create Input Container
   const container = el("modalFieldContainer");
   container.innerHTML = "";
 
@@ -908,7 +1098,6 @@ function updateWizard(direction = "next") {
     if(step.placeholder) input.placeholder = step.placeholder;
     input.setAttribute("autocomplete", "off");
 
-    // Client Auto-complete Logic
     if (step.key === "clientName") {
        input.setAttribute("list", "clientList");
        const uniqueClients = [...new Set(state.loans.map(l => l.clientName))].sort();
@@ -917,34 +1106,28 @@ function updateWizard(direction = "next") {
     }
   }
 
-  // Set existing value if drafting
   if (wizardDraft[step.key]) input.value = wizardDraft[step.key];
   input.id = "wizardInput";
   container.appendChild(input);
 
-  // --- NEW: SMART DATE CHIPS ---
   if (step.type === "date") {
     const chipContainer = document.createElement("div");
     chipContainer.style.cssText = "display:flex; gap:10px; margin-top:12px;";
 
-    // Helper to create chips
     const createChip = (text, dateVal) => {
       const btn = document.createElement("button");
-      btn.type = "button"; // Prevent form submit
+      btn.type = "button";
       btn.className = "btn-secondary btn-sm";
       btn.style.cssText = "padding:6px 12px; font-size:0.75rem; border-radius:20px; border:1px solid var(--primary); color:var(--primary); background:rgba(59, 130, 246, 0.1);";
       btn.textContent = text;
       btn.onclick = () => {
         el("wizardInput").value = dateVal;
-        vibrate([20]); // Haptic feedback
+        vibrate([20]);
       };
       return btn;
     };
 
-    // 'Today' Chip
     chipContainer.appendChild(createChip("Today", getLocalDateVal()));
-
-    // 'Yesterday' Chip
     const y = new Date(); y.setDate(y.getDate() - 1);
     const yesterdayStr = y.toISOString().split('T')[0];
     chipContainer.appendChild(createChip("Yesterday", yesterdayStr));
@@ -952,10 +1135,8 @@ function updateWizard(direction = "next") {
     container.appendChild(chipContainer);
   }
 
-  // Focus Input
   setTimeout(() => input.focus(), 100);
 
-  // Button States
   el("modalBackBtn").style.visibility = wizardStep === 0 ? "hidden" : "visible";
   el("modalNextBtn").textContent = wizardStep === LOAN_STEPS.length - 1 ? "Finish & Save" : "Next →";
 }
@@ -1038,260 +1219,3 @@ function openActionModal(action, loanId) {
     `;
   }
 }
-
-// ==========================================
-// 8. MOBILE UX ENHANCEMENTS (Vibration, Long Press, Install)
-// ==========================================
-
-// 1. HAPTIC ENGINE
-function vibrate(pattern = [15]) {
-  if (typeof navigator !== "undefined" && navigator.vibrate) {
-    navigator.vibrate(pattern);
-  }
-}
-
-// 2. SETUP MOBILE LISTENERS (Call this inside init())
-function setupMobileUX() {
-  // --- A. INSTALL APP PROMPT ---
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const btn = el("installAppBtn");
-    if (btn) {
-      btn.style.display = "inline-flex"; // Show button
-      btn.addEventListener('click', () => {
-        vibrate([30]);
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            btn.style.display = 'none';
-          }
-          deferredPrompt = null;
-        });
-      });
-    }
-  });
-
-  // --- B. LONG PRESS TO PAY (Touch Devices) ---
-  let longPressTimer;
-  const touchDuration = 800; // 800ms hold time
-
-  document.addEventListener("touchstart", (e) => {
-    // Find the closest row
-    const row = e.target.closest("tr");
-    if (!row) return;
-
-    // Check if it's a loan row (has an ID cell)
-    const idCell = row.querySelector("td[data-label='ID'] span");
-    if (!idCell) return;
-
-    // Extract ID (remove #)
-    const idText = idCell.textContent.replace('#', '');
-    const loanId = parseInt(idText);
-
-    if (loanId) {
-      longPressTimer = setTimeout(() => {
-        vibrate([40, 40]); // Double buzz confirmation
-        openActionModal("PAY", loanId); // Open Pay modal
-      }, touchDuration);
-    }
-  }, { passive: true });
-
-  document.addEventListener("touchend", () => clearTimeout(longPressTimer));
-  document.addEventListener("touchmove", () => clearTimeout(longPressTimer));
-
-  // --- C. iOS INSTALL MODAL (iPhone Only) ---
-  function checkIosInstall() {
-    // Check if user agent is iPhone/iPad/iPod
-    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-    // Check if already in standalone mode (installed)
-    const isStandalone = window.navigator.standalone === true;
-
-    if (isIos && !isStandalone) {
-        // Show instructions after 2 seconds
-        setTimeout(() => {
-            const modal = document.getElementById("iosInstallModal");
-            if(modal) modal.classList.remove("modal-hidden");
-        }, 2000);
-    }
-  }
-
-  // Listener for closing the iOS modal
-  document.getElementById("closeIosModalBtn")?.addEventListener("click", () => {
-    document.getElementById("iosInstallModal").classList.add("modal-hidden");
-  });
-
-  // Run the check
-  checkIosInstall();
-}
-
-// 3. OVERRIDE TOAST TO VIBRATE
-const originalShowToast = showToast;
-showToast = function(message, type = "success") {
-  if (type === "success") vibrate([30]);     // Short buzz for success
-  if (type === "error") vibrate([40, 40, 40]); // 3 buzzes for error
-  originalShowToast(message, type);
-};
-
-// ==========================================
-// 9. MAIN INIT (The "Start Button")
-// ==========================================
-function init() {
-  // 1. Navigation Listeners
-  document.querySelectorAll(".nav-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (typeof vibrate === "function") vibrate([10]); // Tiny click feedback
-      setActiveView(btn.dataset.view);
-    });
-  });
-
-  // 2. Wizard Modal Listeners (New Loan)
-  el("openLoanModalBtn")?.addEventListener("click", () => {
-    if (typeof vibrate === "function") vibrate([10]);
-    wizardStep=0;
-    wizardDraft={};
-    updateWizard();
-    el("loanModal").classList.remove("modal-hidden");
-  });
-
-  el("modalCloseBtn")?.addEventListener("click", () => el("loanModal").classList.add("modal-hidden"));
-  el("modalNextBtn")?.addEventListener("click", () => {
-      if (typeof vibrate === "function") vibrate([10]);
-      handleWizardNext();
-  });
-  el("modalBackBtn")?.addEventListener("click", () => {
-      if (typeof vibrate === "function") vibrate([10]);
-      handleWizardBack();
-  });
-
-  // 3. Action Modal Listeners
-  el("actionModalCloseBtn")?.addEventListener("click", () => el("actionModal").classList.add("modal-hidden"));
-  el("actionModalCancelBtn")?.addEventListener("click", () => el("actionModal").classList.add("modal-hidden"));
-
-  // 4. CONFIRM ACTION LISTENER (Handles Pay, Note, Write-Off)
-  el("actionModalConfirmBtn")?.addEventListener("click", () => {
-     if (typeof vibrate === "function") vibrate([20]); // Haptic feedback on confirm
-     const loan = state.loans.find(l => l.id === currentLoanId);
-
-     if (currentAction === "PAY" && loan) {
-        const inputAmt = Number(el("actAmount").value);
-        const maxPay = loan.balance;
-        const safeAmt = Math.min(inputAmt, maxPay);
-
-        if (safeAmt > 0) {
-            loan.paid = (loan.paid || 0) + safeAmt;
-            state.repayments.unshift({
-                id: generateRepaymentId(),
-                loanId: loan.id,
-                amount: safeAmt,
-                date: el("actDate").value,
-                recordedBy: state.user ? (state.user.email || "Admin") : "System"
-            });
-        }
-     }
-     else if (currentAction === "NOTE" && loan) {
-        loan.notes = el("actNote").value;
-     }
-     else if (currentAction === "WRITEOFF" && loan) {
-        // --- BAD DEBT LOGIC ---
-        loan.isDefaulted = true;
-        loan.status = "DEFAULTED";
-        const reason = el("actNote").value;
-        if(reason) loan.notes = (loan.notes ? loan.notes + "\n" : "") + "[Write-Off]: " + reason;
-     }
-
-     saveState();
-     refreshUI();
-     el("actionModal").classList.add("modal-hidden");
-
-     if (currentAction === "PAY") showToast("Payment recorded!", "success");
-     else if (currentAction === "WRITEOFF") showToast("Loan written off as Bad Debt", "error");
-     else showToast("Note updated!", "success");
-  });
-
-  // 5. Capital Tabs Logic
-  document.querySelectorAll('.mini-tab').forEach(b => {
-      b.addEventListener('click', () => {
-          if (typeof vibrate === "function") vibrate([10]);
-          document.querySelectorAll('.mini-tab').forEach(t => t.classList.remove('active'));
-          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-          b.classList.add('active');
-          el(b.dataset.target).classList.add('active');
-      });
-  });
-
-  // 6. Capital Buttons
-  el("setStartingCapitalBtn")?.addEventListener("click", () => {
-      const val = Number(el("startingCapitalInitial").value);
-      if (val > 0) { state.startingCapital = val; state.startingCapitalSetDate = new Date().toISOString(); saveState(); refreshUI(); }
-  });
-
-  el("addCapitalBtn")?.addEventListener("click", () => {
-      const input = el("addCapitalInput");
-      const val = Number(input.value);
-      if (val <= 0) {
-          showToast("Enter a valid positive amount", "error");
-          return;
-      }
-      state.capitalTxns.unshift({ id: generateCapitalTxnId(), amount: val, date: new Date().toISOString(), note: "Manual Add" });
-      input.value = "";
-      saveState(); refreshUI();
-      showToast("Capital added successfully!", "success");
-  });
-
-  // 7. Export Excel
-  el("exportBtn")?.addEventListener("click", () => {
-     if (typeof vibrate === "function") vibrate([20]);
-     try {
-       const loansData = state.loans.map(l => ({
-           ID: l.id,
-           Client: l.clientName,
-           Phone: l.clientPhone,
-           Amount: l.amount,
-           Plan: l.plan,
-           Start: l.startDate ? l.startDate.split('T')[0] : '-',
-           Due: l.dueDate ? l.dueDate.split('T')[0] : '-',
-           Balance: l.balance,
-           Status: l.status
-       }));
-       const ws = XLSX.utils.json_to_sheet(loansData);
-       const wb = XLSX.utils.book_new();
-       XLSX.utils.book_append_sheet(wb, ws, "Loans");
-       XLSX.writeFile(wb, "Stallz_Loans.xlsx");
-     } catch (e) {
-         showToast("Export failed. Check internet connection.", "error");
-         console.error(e);
-     }
-  });
-
-  // 8. Smart Hide Navigation (Scroll Listener)
-  let lastScroll = 0;
-  const nav = document.querySelector('.top-nav');
-  if (nav) {
-    window.addEventListener('scroll', () => {
-      const currentScroll = window.pageYOffset;
-      if (currentScroll > lastScroll && currentScroll > 50) {
-        nav.classList.add('nav-hidden');
-      } else {
-        nav.classList.remove('nav-hidden');
-      }
-      lastScroll = currentScroll;
-    }, { passive: true });
-  }
-
-  // 9. Filters
-  ["searchInput", "statusFilter", "planFilter"].forEach(id => el(id)?.addEventListener("input", renderLoansTable));
-
-  // 10. Startup Logic
-  checkTimeBasedTheme();
-  setInterval(checkTimeBasedTheme, 60000);
-
-  setActiveView("main");
-  showWelcomeScreen();
-
-  checkAppVersion();
-  setupMobileUX();
-}
-
-document.addEventListener("DOMContentLoaded", init);
