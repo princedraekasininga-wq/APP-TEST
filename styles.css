@@ -446,6 +446,20 @@ tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--pr
 .mini-tab:not(.active):hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
 [data-theme="light"] .mini-tab:not(.active):hover { background: rgba(0, 0, 0, 0.1); }
 
+/* =========================================
+   TAB CONTENT UTILITY
+   (Paste this into styles.css to make tabs work)
+   ========================================= */
+
+.tab-content {
+  display: none; /* Hides content by default */
+  animation: fadeIn 0.4s ease; /* smooth fade in */
+}
+
+.tab-content.active {
+  display: block; /* Shows content only when it has the 'active' class */
+}
+
 /* ANIMATIONS */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 .welcome-screen { background: #000; position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; }
