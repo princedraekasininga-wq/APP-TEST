@@ -1,7 +1,7 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.7.5"; // Force Refresh for New UI
+const APP_VERSION = "1.7.2"; // Force Refresh for New UI
 
 
 // ==========================================
@@ -337,13 +337,16 @@ function loadFromFirebase() {
           console.warn("Loader timeout! Forcing UI open.");
           loader.style.display = "none";
           if (!state.dataLoaded) {
-              console.log("Initializing defaults (READ ONLY MODE)...");
-              isSafeToSave = false;
-              showToast("Connection slow. Loaded in READ-ONLY mode.", "error");
+              console.log("Initializing defaults (OFFLINE/SLOW MODE)...");
+
+              // FIXED: Removed 'isSafeToSave = false' so you can still save data even if connection is slow.
+              // We want users to be able to work offline.
+
+              showToast("Connection slow. Loaded in Offline Mode.", "error");
               applyData({ loans: [], nextId: 1, admins: [] });
           }
       }
-  }, 3500);
+  }, 8000); // FIXED: Increased timeout from 3500 to 8000ms to give slow networks a chance
 
   if (TEST_MODE) {
     setTimeout(() => {
@@ -648,6 +651,9 @@ function renderDashboard() {
 // ==========================================
 
 function renderLoansTable() {
+  // FIXED: Ensure statuses (Overdue/Active) are fresh before filtering
+  recomputeAllLoans();
+
   const tbody = document.getElementById("loansTableBody");
   if (!tbody) return;
 
@@ -1084,8 +1090,15 @@ function init() {
       showToast("Capital added successfully!", "success");
   });
 
+  // FIXED: Added check for XLSX existence to prevent offline crashes
   el("exportBtn")?.addEventListener("click", () => {
      if (typeof vibrate === "function") vibrate([20]);
+
+     if (typeof XLSX === "undefined") {
+         showToast("Export unavailable offline", "error");
+         return;
+     }
+
      try {
        const loansData = state.loans.map(l => ({
            ID: l.id,
@@ -1284,4 +1297,3 @@ window.openActionModal = function(action, loanId) {
       <div class="field" style="margin-top:16px;"><label>Reason (Optional)</label><textarea id="actNote" placeholder="e.g. Client relocated, uncontactable..."></textarea></div>
     `;
   }
-}

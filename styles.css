@@ -383,7 +383,11 @@ tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--pr
   backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
 
   display: flex; align-items: center; justify-content: center;
-  z-index: 2000; padding: 20px;
+
+  /* FIXED: Increased to 3000 to sit ABOVE the mobile nav bar (which is 2200) */
+  z-index: 3000;
+
+  padding: 20px;
 }
 .modal-hidden { display: none; }
 
