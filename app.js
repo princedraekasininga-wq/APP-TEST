@@ -1,7 +1,7 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.8.1"; // Force Refresh for New UI
+const APP_VERSION = "1.7.2"; // Force Refresh for New UI
 
 
 // ==========================================
@@ -83,9 +83,19 @@ function formatWhatsApp(phone) {
 function updateWelcomeUI() {
   if (!state.user || !state.user.email) return;
 
-  // 1. Get User Name
-  const name = state.user.email.split('@')[0];
-  const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+  // 1. Get User Name (Check Admin List first, fallback to Email)
+  let displayName = state.user.email.split('@')[0]; // Default to email prefix
+
+  // Search for the admin profile that matches the logged-in email
+  if (state.admins && state.admins.length > 0) {
+      const adminProfile = state.admins.find(a => a.email && a.email.toLowerCase() === state.user.email.toLowerCase());
+      if (adminProfile && adminProfile.name) {
+          displayName = adminProfile.name.split(' ')[0]; // Use first name only (optional)
+          // To use full name instead, just use: displayName = adminProfile.name;
+      }
+  }
+
+  const formattedName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
 
   // 2. Determine Time-Based Greeting
   const hour = new Date().getHours();
@@ -1297,4 +1307,4 @@ window.openActionModal = function(action, loanId) {
       <div class="field" style="margin-top:16px;"><label>Reason (Optional)</label><textarea id="actNote" placeholder="e.g. Client relocated, uncontactable..."></textarea></div>
     `;
   }
-  }
+}
