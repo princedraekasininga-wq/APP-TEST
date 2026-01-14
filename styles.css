@@ -148,121 +148,101 @@ header {
 
 .nav-icon { width: 20px; height: 20px; transition: all 0.3s ease; }
 
-/* MOBILE NAVIGATION (Floating Pill) */
-@media (max-width: 768px) {
-  .top-nav {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2200;
+/* =========================================
+   UPDATED MOBILE NAVIGATION (Tight Gap Fix)
+   Paste inside @media (max-width: 768px)
+   ========================================= */
 
-    width: 95%;
-    max-width: 400px;
-    height: 75px;
-
-    border-radius: 50px;
-    background: var(--glass-bg);
-    border: var(--glass-border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-
-    margin: 0;
-    padding: 0 10px;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: none;
-    overflow: visible;
-  }
-
+  /* 1. CONTAINER */
   .nav-btn {
-    flex: 1;
-    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
 
-    background: transparent;
-    border: none;
-    padding: 0 0 14px 0;
-    height: 100%;
+    /* TIGHT GAP: Keeps text close to icon */
+    gap: 2px;
 
-    font-size: 0.65rem;
+    font-size: 0.6rem;
+    line-height: 1;
     color: var(--text-muted);
-    position: relative;
+    border-bottom: none;
+    padding: 0 0 12px 0;
+    height: 100%;
+    flex: 1;
     border-radius: 0;
+    position: relative;
+    background: transparent;
+    overflow: visible;
   }
 
-  /* --- BIGGER ICONS --- */
+  /* 2. ICON (Bigger & Squircle) */
   .nav-btn .nav-icon {
-    width: 30px;  /* Increased size */
-    height: 30px; /* Increased size */
-    margin-bottom: 5px;
+    width: 30px;
+    height: 30px;
 
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                stroke 0.3s ease,
-                background 0.3s ease,
-                box-shadow 0.3s ease;
+    margin-bottom: 2px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
     stroke: currentColor;
     background: transparent;
-    border-radius: 50%;
+    border-radius: 12px; /* Squircle shape */
+
     z-index: 10;
   }
 
-  /* --- NEW: ALERT BADGE (Red Dot) --- */
-  .nav-alert-badge {
-    position: absolute;
-    top: 15px;      /* Position relative to button top */
-    right: 35%;     /* Position relative to button width */
-    width: 10px;
-    height: 10px;
-    background-color: #ef4444; /* Red */
-    border-radius: 50%;
-    border: 2px solid var(--glass-bg); /* Cutout effect */
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
-
-    display: none; /* Hidden by default */
-    z-index: 25;
-    pointer-events: none;
-    animation: pulseRed 2s infinite;
-  }
-
-  .nav-alert-badge.show {
-    display: block;
-  }
-
-  /* --- ACTIVE STATE --- */
+  /* 3. ACTIVE STATE: Icon Pops Up */
   .nav-btn-active .nav-icon {
-    /* Adjusted pop-up height for bigger icon */
-    transform: translateY(-42px) scale(1.25);
+    /* Lower float height (-28px) to stay close to text */
+    transform: translateY(-28px) scale(1.2);
 
     stroke: var(--primary);
     background: var(--bg-color);
-    box-shadow: 0 -5px 20px rgba(59, 130, 246, 0.6);
+
+    /* Glow & Padding */
+    box-shadow: 0 -5px 15px rgba(59, 130, 246, 0.4);
     padding: 5px;
   }
 
+  /* 4. ACTIVE STATE: Text Slides Up */
+  .nav-btn-active div {
+    font-weight: 700;
+    color: var(--primary);
+
+    /* Moves text UP (-8px) to touch the icon */
+    transform: translateY(-8px);
+
+    transition: transform 0.3s ease;
+  }
+
+  /* 5. General Active Cleanup */
   .nav-btn-active {
     color: var(--text-main);
     border-bottom: none;
   }
 
-  .nav-btn-active div {
-    font-weight: 700;
-    color: var(--primary);
-    transform: translateY(-2px);
-    transition: transform 0.3s ease;
+  /* 6. Alert Badge (Keep this if you use it) */
+  .nav-alert-badge {
+    position: absolute;
+    top: 15px;
+    right: 35%;
+    width: 10px;
+    height: 10px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    border: 2px solid var(--glass-bg);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+    display: none;
+    z-index: 25;
+    pointer-events: none;
+    animation: pulseRed 2s infinite;
   }
+  .nav-alert-badge.show { display: block; }
 
+  /* 7. Hidden Utility */
   .nav-hidden {
     transform: translate(-50%, 150%) !important;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-}
 
 /* =========================================
    4. LAYOUT & CARDS (Glass Shine)
