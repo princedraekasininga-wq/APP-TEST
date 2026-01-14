@@ -82,13 +82,27 @@ function formatWhatsApp(phone) {
 
 function updateWelcomeUI() {
   if (!state.user || !state.user.email) return;
+
+  // 1. Get User Name
   const name = state.user.email.split('@')[0];
   const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-  const msg = `Welcome back, ${formattedName}`;
+
+  // 2. Determine Time-Based Greeting
+  const hour = new Date().getHours();
+  let greeting = "Welcome";
+  if (hour < 12) greeting = "Good Morning";
+  else if (hour < 18) greeting = "Good Afternoon";
+  else greeting = "Good Evening";
+
+  // 3. Construct Message
+  const msg = `${greeting}, ${formattedName}`;
+
+  // 4. Update UI
   const pc = document.getElementById("welcomeDesktop");
   const mob = document.getElementById("welcomeMobile");
+
   if(pc) pc.textContent = msg;
-  if(mob) mob.textContent = msg + " 👋";
+  if(mob) mob.textContent = msg;
 }
 
 function showToast(message, type = "success") {
@@ -166,13 +180,27 @@ const state = {
   isLoggedIn: false
 };
 
+// ==========================================
+// UPDATED FILTER LOGIC (Paste in Section 4)
+// ==========================================
+
 let activeFilters = { status: 'ACTIVE', plan: 'All' };
 
 window.setFilter = function(type, value, btnElement) {
+  // 1. Feedback
+  if (typeof vibrate === "function") vibrate([15]);
+
+  // 2. Update State
   activeFilters[type] = value;
+
+  // 3. Update Visual Buttons (Remove active from siblings, add to clicked)
   const parent = btnElement.parentElement;
-  parent.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  btnElement.classList.add('active');
+  if (parent) {
+    parent.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btnElement.classList.add('active');
+  }
+
+  // 4. Refresh the Table
   renderLoansTable();
 }
 
@@ -615,54 +643,69 @@ function renderDashboard() {
   animateValue(el("statProfit"), 0, totalProfit, 2500);
 }
 
+// ==========================================
+// UPDATED TABLE RENDERER (Paste in Section 6)
+// ==========================================
+
 function renderLoansTable() {
-  const overdueCount = (state.loans || []).filter(l => l.status === "OVERDUE").length;
-  const badge = el("clientBadge");
-
-  if (badge) {
-    if (overdueCount > 0) badge.classList.add("show");
-    else badge.classList.remove("show");
-  }
-
-  const tbody = el("loansTableBody");
+  const tbody = document.getElementById("loansTableBody");
   if (!tbody) return;
 
-  const search = (el("searchInput")?.value || "").toLowerCase();
+  // 1. Get Search & Filter Values
+  const search = (document.getElementById("searchInput")?.value || "").toLowerCase();
   const statusFilter = activeFilters.status;
   const planFilter = activeFilters.plan;
 
+  // 2. Filter the Data
   const visibleLoans = (state.loans || []).filter(l => {
-     const matchSearch = !search || (l.clientName && l.clientName.toLowerCase().includes(search));
+     // Search Logic (Name or ID)
+     const matchSearch = !search ||
+                         (l.clientName && l.clientName.toLowerCase().includes(search)) ||
+                         (l.id && l.id.toString().includes(search));
+
+     // Status Logic
      const matchStatus = statusFilter === "All" || l.status === statusFilter;
+
+     // Plan Logic
      const matchPlan = planFilter === "All" || l.plan === planFilter;
+
      return matchSearch && matchStatus && matchPlan;
   });
 
-  if (el("loansCountLabel")) el("loansCountLabel").textContent = `${visibleLoans.length} records`;
-  if(el("emptyState")) {
-      const shouldShow = state.dataLoaded && visibleLoans.length === 0;
-      el("emptyState").style.display = shouldShow ? "block" : "none";
+  // 3. Update UI Counters
+  if (document.getElementById("loansCountLabel")) {
+    document.getElementById("loansCountLabel").textContent = `${visibleLoans.length} records`;
   }
 
-  tbody.innerHTML = visibleLoans.map((l, index) => {
-    const percent = Math.min(100, Math.round(((l.paid || 0) / (l.totalDue || 1)) * 100));
-    let progressColor = "var(--primary)";
-    if (percent >= 100) progressColor = "#22c55e";
-    else if (l.status === "OVERDUE") progressColor = "#ef4444";
-    else if (l.status === "DEFAULTED") progressColor = "#64748b";
+  // 4. Show/Hide Empty State
+  if(document.getElementById("emptyState")) {
+      const shouldShow = visibleLoans.length === 0;
+      document.getElementById("emptyState").style.display = shouldShow ? "block" : "none";
+  }
 
+  // 5. Generate HTML
+  tbody.innerHTML = visibleLoans.map((l, index) => {
+    // Progress Calculation
+    const percent = Math.min(100, Math.round(((l.paid || 0) / (l.totalDue || 1)) * 100));
+
+    // Color Logic
+    let progressColor = "var(--primary)";
+    if (percent >= 100) progressColor = "#22c55e"; // Green
+    else if (l.status === "OVERDUE") progressColor = "#ef4444"; // Red
+    else if (l.status === "DEFAULTED") progressColor = "#64748b"; // Grey
+
+    // Styling logic
     const isOverdue = l.status === "OVERDUE";
     const balanceStyle = isOverdue ? 'class="text-danger-glow" style="font-weight:bold;"' : 'style="font-weight:bold;"';
     const avatarClass = `avatar-${l.id % 5}`;
+    const isClosed = l.status === "PAID" || l.status === "DEFAULTED";
 
+    // WhatsApp Message
     const waNumber = formatWhatsApp(l.clientPhone);
-    const waMsg = encodeURIComponent(`Hi ${l.clientName}, friendly reminder from Stallz Loans. Your balance of ${formatMoney(l.balance)} was due on ${formatDate(l.dueDate)}. Please make payment today.`);
+    const waMsg = encodeURIComponent(`Hi ${l.clientName}, reminder: Balance of ${formatMoney(l.balance)} was due on ${formatDate(l.dueDate)}.`);
     const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMsg}` : "#";
     const waStyle = waNumber ? "color:#4ade80;" : "color:#64748b; cursor:not-allowed;";
 
-    const isClosed = l.status === "PAID" || l.status === "DEFAULTED";
-
-    // UPDATED: Using ICONS object for buttons
     return `
     <tr class="row-${(l.status || 'active').toLowerCase()}">
       <td data-label="ID"><span style="opacity:0.5; font-size:0.8rem;">#${l.id}</span></td>
@@ -692,15 +735,16 @@ function renderLoansTable() {
       <td data-label="Balance" ${balanceStyle}>${formatMoney(l.balance)}</td>
       <td data-label="Status"><span class="status-pill status-${(l.status||'active').toLowerCase()}">${l.status}</span></td>
       <td data-label="Actions" style="text-align:right; white-space:nowrap;">
-        <button class="btn-icon" onclick="openReceipt(${l.id})" title="Print Receipt">${ICONS.receipt}</button>
-        <a href="${waLink}" target="_blank" class="btn-icon" style="${waStyle}; text-decoration:none; display:inline-flex;" title="Send WhatsApp Reminder">${ICONS.whatsapp}</a>
-        <button class="btn-icon" onclick="openActionModal('PAY', ${l.id})" title="Pay" style="color:#38bdf8;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>${ICONS.pay}</button>
-        <button class="btn-icon" onclick="openActionModal('WRITEOFF', ${l.id})" title="Write Off (Bad Debt)" style="color:#f87171;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>${ICONS.writeoff}</button>
-        <button class="btn-icon" onclick="openActionModal('NOTE', ${l.id})" title="Edit Note">${ICONS.note}</button>
+        <button class="btn-icon" onclick="openReceipt(${l.id})" title="Print Receipt">🖨️</button>
+        <a href="${waLink}" target="_blank" class="btn-icon" style="${waStyle}; text-decoration:none; display:inline-flex;" title="WhatsApp">💬</a>
+        <button class="btn-icon" onclick="openActionModal('PAY', ${l.id})" title="Pay" style="color:#38bdf8;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>💳</button>
+        <button class="btn-icon" onclick="openActionModal('WRITEOFF', ${l.id})" title="Bad Debt" style="color:#f87171;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>🗑️</button>
+        <button class="btn-icon" onclick="openActionModal('NOTE', ${l.id})" title="Note">📝</button>
       </td>
     </tr>
   `}).join("");
 }
+
 
 function renderRepaymentsTable() {
   const tbody = el("repaymentsTableBody");
