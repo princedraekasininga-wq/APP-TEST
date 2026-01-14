@@ -1297,3 +1297,4 @@ window.openActionModal = function(action, loanId) {
       <div class="field" style="margin-top:16px;"><label>Reason (Optional)</label><textarea id="actNote" placeholder="e.g. Client relocated, uncontactable..."></textarea></div>
     `;
   }
+  }
