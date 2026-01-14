@@ -247,7 +247,7 @@ header {
        - translateY changed from -28px to -22px (Lowers it)
        - scale changed from 1.2 to 1.35 (Makes it bigger)
     */
-    transform: translateY(-22px) scale(1.35);
+    transform: translateY(-19px) scale(1.45);
 
     stroke: var(--primary);
     background: var(--bg-color);
