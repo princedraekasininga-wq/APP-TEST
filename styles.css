@@ -36,79 +36,84 @@
   --glass-blur: blur(20px);
 }
 
-/* --- LIGHT MODE (FROSTED SKY GLASS) --- */
+/* --- LIGHT MODE (TRUE BLUE GLASS) --- */
 [data-theme="light"] {
-  /* 1. Background: Very subtle cool grey-blue */
-  --bg-color: #f0f9ff;
+  /* 1. Background: Clean cool grey/white (removes greenish tint) */
+  --bg-color: #f1f5f9;
 
-  /* 2. Glass Cards: High transparency with a blue tint */
-  --card-bg: rgba(255, 255, 255, 0.75);
-  --card-border: 1px solid rgba(186, 230, 253, 0.6); /* Soft Sky Border */
-  --card-shadow: 0 10px 30px -5px rgba(14, 165, 233, 0.15); /* Blue-tinted shadow */
+  /* 2. Glass Cards: White with high transparency */
+  --card-bg: rgba(255, 255, 255, 0.65);
+  --card-border: 1px solid rgba(255, 255, 255, 0.9);
 
-  /* 3. Header & Glass Elements */
-  --glass-bg: rgba(224, 242, 254, 0.65); /* Sky Blue 100 (Frosted) */
-  --glass-border: 1px solid rgba(255, 255, 255, 0.6);
-  --glass-text: #0c4a6e; /* Deep Sky Navy for contrast */
+  /* 3. SHADOWS: Dark and neutral (No blue glow) */
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
 
-  --divider: rgba(186, 230, 253, 0.5);
+  /* 4. Header & Glass Elements */
+  --glass-bg: rgba(255, 255, 255, 0.6); /* Pure white glass */
+  --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+  --glass-text: #1e293b; /* Slate 800 for strong contrast */
 
-  /* 4. Inputs: See-through */
-  --input-bg: rgba(255, 255, 255, 0.6);
-  --input-border: #bfdbfe;
+  --divider: rgba(148, 163, 184, 0.2);
 
-  --primary: #0284c7; /* Sky Blue 600 */
+  /* 5. Inputs: Subtle grey glass */
+  --input-bg: rgba(241, 245, 249, 0.7);
+  --input-border: #cbd5e1;
+
+  /* 6. ACCENT: True Blue (Not Green/Teal) */
+  --primary: #3b82f6; /* Standard Royal Blue */
   --text-main: #0f172a;
-  --text-muted: #475569;
+  --text-muted: #64748b;
 
-  --glass-blur: blur(20px); /* Stronger blur for the frosted look */
+  --glass-blur: blur(16px);
 }
 
 /* =========================================
    LIGHT MODE SPECIFIC OVERRIDES
    ========================================= */
 
-/* 1. FLOATING NAV BAR (Mobile) - Frosted Sky */
+/* 1. FLOATING NAV BAR (Mobile) - Clear Glass with Dark Shadow */
 [data-theme="light"] .top-nav {
-    background: rgba(224, 242, 254, 0.75) !important; /* Icy Blue */
+    background: rgba(255, 255, 255, 0.65) !important;
     border: 1px solid rgba(255, 255, 255, 0.8) !important;
-    box-shadow: 0 15px 35px rgba(14, 165, 233, 0.25) !important;
+    /* Dark shadow for depth */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
 }
 
-/* 2. TABS - Sky Blue Accents */
+/* 2. TABS - Subtle Blue Active State */
 [data-theme="light"] .sketch-btn {
     background: rgba(255, 255, 255, 0.4) !important;
-    border: 1px solid rgba(186, 230, 253, 0.5) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
     color: #64748b !important;
 }
 
 [data-theme="light"] .sketch-btn.active {
-    background: rgba(224, 242, 254, 0.9) !important; /* Sky Blue Active */
-    border: 1px solid #7dd3fc !important;
-    color: #0284c7 !important; /* Deep Blue Text */
-    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.2) !important;
+    background: rgba(239, 246, 255, 0.85) !important; /* Very pale blue tint */
+    border: 1px solid #bfdbfe !important; /* Soft blue border */
+    color: #2563eb !important; /* Strong Blue Text */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
 }
 
 /* 3. WELCOME TEXT */
 [data-theme="light"] .welcome-text-pc {
-    background: rgba(224, 242, 254, 0.5);
-    border-color: #7dd3fc;
-    color: #0284c7;
+    background: rgba(239, 246, 255, 0.6);
+    border-color: #bfdbfe;
+    color: #2563eb;
 }
 
 /* 4. INPUTS & FIELDS */
 [data-theme="light"] input,
 [data-theme="light"] select,
 [data-theme="light"] textarea {
-  background: rgba(255, 255, 255, 0.6) !important;
-  border-color: #bfdbfe !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-color: #cbd5e1 !important;
   color: #0f172a !important;
 }
 [data-theme="light"] input:focus {
     background: #ffffff !important;
-    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2) !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important; /* Blue Ring */
 }
 
 /* --- STATUS PILLS --- */
