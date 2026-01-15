@@ -554,18 +554,17 @@ window.openReceipt = function(loanId) {
 // ==========================================
 
 function refreshUI() {
-  // --- 1. Re-calculate all math (Interest, Totals, Status) ---
   try { recomputeAllLoans(); } catch(e) { console.error("Error computing loans:", e); }
 
-  // --- 2. Check for Attention Items (Overdue) & Toggle Badge ---
+  // --- UPDATED BADGE LOGIC ---
   const attentionCount = (state.loans || []).filter(l => l.status === "OVERDUE").length;
-  const navBadge = document.getElementById("overviewAlertBadge");
+  // Target the NEW ID "clientAlertBadge" instead of the old "overviewAlertBadge"
+  const navBadge = document.getElementById("clientAlertBadge");
   if (navBadge) {
       if (attentionCount > 0) navBadge.classList.add("show");
       else navBadge.classList.remove("show");
   }
 
-  // --- 3. Re-render all sections ---
   try { renderDashboard(); } catch(e) { console.error("Dash Error:", e); }
   try { renderLoansTable(); } catch(e) { console.error("Loans Table Error:", e); }
   try { renderRepaymentsTable(); } catch(e) { console.error("Repay Table Error:", e); }
@@ -843,13 +842,24 @@ function renderClientsTable() {
   });
 
   tbody.innerHTML = clientRows.map(c => {
-    const statusHtml = c.activeCount > 0
-        ? '<span class="status-pill status-active">Active</span>'
-        : '<span class="status-pill status-paid">Clear</span>';
+    // --- UPDATED: Show Red Attention Dot if Overdue ---
+    let statusHtml = '';
+    if (c.overdues > 0) {
+        // Red "Needs Attention" pill
+        statusHtml = '<span class="status-pill status-overdue" style="animation:pulseRed 1.5s infinite;">⚠️ Action Needed</span>';
+    } else if (c.activeCount > 0) {
+        statusHtml = '<span class="status-pill status-active">Active</span>';
+    } else {
+        statusHtml = '<span class="status-pill status-paid">Clear</span>';
+    }
+
+    // Also add a red dot next to name if they have issues
+    const nameAlert = c.overdues > 0 ? '<span style="color:#ef4444; margin-left:6px; font-size:1.2rem; line-height:0; position:relative; top:2px;">•</span>' : '';
+
     return `
     <tr>
       <td data-label="Client">
-        <div style="font-weight:bold;">${c.name}</div>
+        <div style="font-weight:bold;">${c.name} ${nameAlert}</div>
         <div style="font-size:0.75rem; color:${c.ratingColor}; margin-top:2px;">${c.stars}</div>
       </td>
       <td data-label="Phone">${c.phone||"-"}</td>
