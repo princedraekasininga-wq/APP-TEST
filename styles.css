@@ -67,24 +67,20 @@
   --glass-blur: blur(16px);
 }
 
-/* =========================================
-   LIGHT MODE SPECIFIC OVERRIDES
-   ========================================= */
-
-/* 1. FLOATING NAV BAR (Mobile) - Transparent Sky Blue */
+/* 1. FLOATING NAV BAR (Mobile) - Heavy Frosted Glass */
 [data-theme="light"] .top-nav {
-    /* Lowered opacity to 0.75 for a glassier look */
-    background: rgba(224, 242, 254, 0.45) !important;
+    /* Very transparent background so the blur is visible */
+    background: rgba(224, 242, 254, 0.3) !important;
 
-    border: 1px solid rgba(186, 230, 253, 0.8) !important;
+    /* Slightly stronger white border to define the edges */
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
 
-    /* Kept the dark shadow for contrast so it pops */
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+    /* Soft but deep shadow to lift it off the page */
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15) !important;
 
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-}
-
+    /* THE MAGIC: High blur (30px) + Saturation (180%) makes it look like real frosted glass */
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
 }
 
 /* 2. TABS - Subtle Blue Active State */
@@ -282,8 +278,8 @@ header {
   /* --- 4. RED ALERT DOT (Hidden by Default) --- */
   .nav-alert-badge {
     position: absolute;
-    top: 1px;
-    right: -5%;
+    top: 5px;
+    right: 1%;
     width: 10px;
     height: 10px;
     background-color: #ef4444;
