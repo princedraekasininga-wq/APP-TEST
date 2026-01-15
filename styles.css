@@ -71,14 +71,20 @@
    LIGHT MODE SPECIFIC OVERRIDES
    ========================================= */
 
-/* 1. FLOATING NAV BAR (Mobile) - Clear Glass with Dark Shadow */
+/* 1. FLOATING NAV BAR (Mobile) - Transparent Sky Blue */
 [data-theme="light"] .top-nav {
-    background: rgba(255, 255, 255, 0.65) !important;
-    border: 1px solid rgba(255, 255, 255, 0.8) !important;
-    /* Dark shadow for depth */
+    /* Lowered opacity to 0.75 for a glassier look */
+    background: rgba(224, 242, 254, 0.75) !important;
+
+    border: 1px solid rgba(186, 230, 253, 0.8) !important;
+
+    /* Kept the dark shadow for contrast so it pops */
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
+}
+
 }
 
 /* 2. TABS - Subtle Blue Active State */
