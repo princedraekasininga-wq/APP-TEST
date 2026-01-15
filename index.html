@@ -167,9 +167,24 @@
             </h2>
 
             <div class="mini-tabs">
-              <button class="mini-tab active" data-target="cap-status">📊 Status</button>
-              <button class="mini-tab" data-target="cap-actions">➕ Manage Capital</button>
-            </div>
+  <button class="mini-tab active" data-target="cap-status">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10"></line>
+      <line x1="12" y1="20" x2="12" y2="4"></line>
+      <line x1="6" y1="20" x2="6" y2="14"></line>
+    </svg>
+    Status
+  </button>
+
+  <button class="mini-tab" data-target="cap-actions">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="16"></line>
+      <line x1="8" y1="12" x2="16" y2="12"></line>
+    </svg>
+    Manage Capital
+  </button>
+</div>
 
             <div id="cap-status" class="tab-content active">
                <div class="stat-card" style="margin-top:16px; text-align:center; padding:24px;">
@@ -425,7 +440,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" defer></script>
-  <script src="app.js?v=1.7.7" defer></script>
+  <script src="app.js?v=1.7.8" defer></script>
 
 </body>
 </html>

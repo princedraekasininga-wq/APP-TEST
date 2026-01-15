@@ -562,12 +562,38 @@ tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--pr
 
 /* MINI TABS */
 .mini-tabs { display: flex; background: transparent; padding: 0; border: none; gap: 12px; margin-bottom: 24px; }
-.mini-tab { flex: 1; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-muted); padding: 14px 0; font-size: 0.95rem; font-weight: 700; border-radius: 16px; cursor: pointer; text-align: center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
+
+.mini-tab {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+  padding: 14px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 16px;
+  cursor: pointer;
+
+  /* --- NEW: Flex Alignment for SVGs --- */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Space between icon and text */
+
+  text-align: center;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
 [data-theme="light"] .mini-tab { background: rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.1); }
+
 .mini-tab.active { background: #ffffff; border-color: #ffffff; color: #0f172a; box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25); transform: translateY(-3px) scale(1.02); }
 [data-theme="light"] .mini-tab.active { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); }
+
 .mini-tab:not(.active):hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
 [data-theme="light"] .mini-tab:not(.active):hover { background: rgba(0, 0, 0, 0.1); }
+
 
 /* =========================================
    TAB CONTENT UTILITY
