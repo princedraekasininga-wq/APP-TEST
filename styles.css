@@ -1,5 +1,5 @@
 /* =========================================
-   STALLZ LOANS - CYBER BLUE (PREMIUM)
+   STALLZ LOANS - CYBER BLUE (PRODUCTION READY)
    ========================================= */
 
 /* 1. TYPOGRAPHY & VARIABLES */
@@ -8,6 +8,7 @@
 :root {
   /* --- DEFAULT: DARK MODE (DEEP SPACE) --- */
   --bg-color: #020617;
+  --bg-gradient: radial-gradient(circle at 50% -20%, #0f172a 0%, #020617 80%);
 
   /* Glass Cards */
   --card-bg: rgba(15, 23, 42, 0.75);
@@ -39,41 +40,69 @@
 /* --- LIGHT MODE (MODERN BANKING LOOK) --- */
 [data-theme="light"] {
   --bg-color: #f1f5f9; /* Soft Grey-Blue */
+  --bg-gradient: none;
 
-  /* Crisp White Cards */
+  /* Crisp White Cards with Shadow */
   --card-bg: #ffffff;
   --card-border: 1px solid #e2e8f0;
   --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
 
-  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-bg: rgba(255, 255, 255, 0.8); /* Frosted White Header */
   --glass-border: 1px solid rgba(203, 213, 225, 0.5);
   --glass-text: #0f172a;
 
-  --divider: #e2e8f0;
+  --divider: #e2e8f0; /* Visible Grey Lines */
   --input-bg: #f8fafc;
   --input-border: #cbd5e1;
 
   --primary: #2563eb;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
+  --text-main: #0f172a; /* Deep Navy */
+  --text-muted: #64748b; /* Slate Grey */
 
   --glass-blur: blur(12px);
 }
 
-/* --- STATUS PILLS --- */
-[data-theme="light"] .status-active { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
-[data-theme="light"] .status-overdue { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
-[data-theme="light"] .status-paid { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
-[data-theme="light"] h2 { text-shadow: none; }
+/* --- DAY MODE HIGH CONTRAST STATUS PILLS --- */
+[data-theme="light"] .status-active {
+  background: #dbeafe;       /* Very light blue bg */
+  color: #1e40af;           /* Dark Navy Blue text */
+  border-color: #93c5fd;
+}
+[data-theme="light"] .status-overdue {
+  background: #fee2e2;       /* Very light red bg */
+  color: #991b1b;           /* Dark Red text */
+  border-color: #fca5a5;
+}
+[data-theme="light"] .status-paid {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+[data-theme="light"] h2 {
+  text-shadow: none; /* Remove neon glow for crisp text */
+}
+/* BAD DEBT / WRITE OFF STYLE */
+.status-defaulted {
+  background: rgba(15, 23, 42, 0.5);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-decoration: line-through;
+}
 
-.status-defaulted { background: rgba(15, 23, 42, 0.5); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1); text-decoration: line-through; }
-[data-theme="light"] .status-defaulted { background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1; }
+/* Light Mode Override for Bad Debt */
+[data-theme="light"] .status-defaulted {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border: 1px solid #cbd5e1;
+}
 
 /* Force light inputs in light mode */
 [data-theme="light"] input,
 [data-theme="light"] select,
 [data-theme="light"] textarea {
-  color: #0f172a !important; background: #f8fafc !important; border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
 }
 
@@ -82,14 +111,8 @@
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  background-color: var(--bg-color);
-
-  /* UPGRADE: Mesh Gradient Background */
-  background-image:
-    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-
+  background: var(--bg-color);
+  background-image: var(--bg-gradient);
   background-attachment: fixed;
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
@@ -97,15 +120,15 @@ body {
   line-height: 1.5;
   overflow-x: hidden;
   padding-bottom: 100px;
-
-  /* UPGRADE: Tabular Numbers */
-  font-feature-settings: "tnum" on, "cv11" on;
   transition: background 0.5s ease, color 0.5s ease;
 }
 
-[data-theme="light"] body { background-image: none; background-color: #f1f5f9; }
-
-.app-shell { max-width: 1200px; margin: 0 auto; padding: 16px; width: 100%; }
+.app-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  width: 100%;
+}
 
 /* =========================================
    2. HEADER (Adaptive Glass)
@@ -113,165 +136,267 @@ body {
 header {
   display: flex; justify-content: space-between; align-items: center;
   padding: 16px 24px; margin-bottom: 24px;
-  background: var(--glass-bg); border: var(--glass-border);
-  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-  border-radius: 20px; box-shadow: var(--card-shadow); flex-wrap: wrap; gap: 16px; transition: 0.3s;
+
+  /* ADAPTIVE VARIABLES */
+  background: var(--glass-bg);
+  border: var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+
+  border-radius: 20px;
+  box-shadow: var(--card-shadow);
+  flex-wrap: wrap; gap: 16px; transition: 0.3s;
 }
 
-.header-brand h1 { font-size: 1.5rem; margin: 0; display: flex; align-items: center; gap: 12px; font-weight: 700; white-space: nowrap; color: var(--text-main); }
+.header-brand h1 {
+  font-size: 1.5rem; margin: 0; display: flex; align-items: center; gap: 12px;
+  font-weight: 700; white-space: nowrap; color: var(--text-main);
+}
 
-.hud-rates { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; max-width: 100%; }
+/* HUD Badges Container */
+.hud-rates {
+  display: flex; gap: 8px; overflow-x: auto;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch; max-width: 100%;
+}
 .hud-rates::-webkit-scrollbar { display: none; }
 
+/* The Glass Chips */
 .hud-badge {
-  background: var(--input-bg); border: var(--glass-border); color: var(--text-main);
-  padding: 8px 12px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; flex-shrink: 0;
+  background: var(--input-bg);
+  border: var(--glass-border);
+  color: var(--text-main);
+  padding: 8px 12px; border-radius: 8px;
+  display: flex; flex-direction: column; align-items: center;
+  transition: 0.3s; flex-shrink: 0;
 }
-.hud-badge span { font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; font-weight: 400; text-transform: uppercase; }
-.hud-badge:hover, .hud-badge.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); transform: translateY(-2px); }
+.hud-badge span {
+  font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; font-weight: 400; text-transform: uppercase;
+}
+.hud-badge:hover, .hud-badge.active {
+  border-color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
+}
 
 /* =========================================
-   3. NAVIGATION (SVG & Bottom Sheet Ready)
+   3. NAVIGATION (Fixed Glitch)
    ========================================= */
+
+/* DESKTOP DEFAULT: Clean tabs under header */
 .top-nav {
-  display: flex; justify-content: center; gap: 30px; border-bottom: 1px solid var(--divider);
-  margin-bottom: 24px; padding-bottom: 0; background: transparent;
+  display: flex; justify-content: center; gap: 30px;
+  border-bottom: 1px solid var(--divider);
+  margin-bottom: 24px; padding-bottom: 0;
+  background: transparent;
 }
 
+/* DESKTOP BUTTONS */
 .nav-btn {
-  position: relative; background: transparent; border: none; color: var(--text-muted); font-size: 0.95rem; font-weight: 600;
-  cursor: pointer; padding: 10px 4px; border-bottom: 3px solid transparent; transition: all 0.2s;
+  position: relative;
+  background: transparent; border: none;
+  color: var(--text-muted); font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; padding: 10px 4px;
+  border-bottom: 3px solid transparent; transition: all 0.2s;
   display: flex; align-items: center; gap: 8px;
 }
+.nav-btn .icon { font-size: 1.1rem; }
 .nav-btn:hover { color: var(--text-main); }
-.nav-btn-active { color: var(--primary); border-bottom-color: var(--primary); }
 
-.nav-icon { width: 20px; height: 20px; transition: all 0.3s ease; }
+.nav-btn-active {
+  color: var(--primary); border-bottom-color: var(--primary);
+}
 
-/* =========================================
-   MOBILE VIEW (Phone Adjustments)
-   ========================================= */
+/* MOBILE OVERRIDE: The Floating "Magic Pill" */
 @media (max-width: 768px) {
-
-  /* --- 1. FLOATING BAR CONTAINER --- */
   .top-nav {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000;
+    width: 90%; max-width: 400px; height: 70px; border-radius: 50px;
 
-    /* FIXED: Set to 3100.
-       Higher than Tabs (3000) so it floats ON TOP.
-       Lower than Critical Modals (3200) so buttons aren't blocked. */
-    z-index: 3100;
-
-    width: 95%;
-    max-width: 400px;
-    height: 70px;
-
-    border-radius: 50px;
+    /* DYNAMIC GLASS EFFECT */
     background: var(--glass-bg);
     border: var(--glass-border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 
-    margin: 0;
-    padding: 0 5px;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: none;
-
-    overflow: visible; /* Allows icon to pop outside */
+    margin: 0; padding: 0 10px;
+    justify-content: space-between; align-items: center; border-bottom: none;
   }
 
-  /* --- 2. BUTTONS --- */
   .nav-btn {
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 3.5px; /* Tight spacing between icon and text */
-
-    font-size: 0.6rem;
-    line-height: 1;
-    color: var(--text-muted);
-    border-bottom: none;
-    padding: 0 0 12px 0;
-    height: 100%;
-    flex: 1;
-    border-radius: 0;
-    position: relative;
-    background: transparent;
-    overflow: visible;
+    flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    font-size: 0.65rem; color: var(--text-muted);
+    border-bottom: none; padding: 0; height: 100%; flex: 1; border-radius: 0;
   }
 
-  /* --- 3. ICONS (Bigger & Squircle) --- */
-  .nav-btn .nav-icon {
-    width: 30px;
-    height: 30px;
-    margin-bottom: 2px;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    stroke: currentColor;
-    background: transparent;
-    border-radius: 10px;
-    z-index: 10;
+  .nav-btn .icon {
+    font-size: 1.5rem; margin-bottom: 2px;
+    transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background: rgba(125, 125, 125, 0.1);
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
   }
 
-  /* --- 4. RED ALERT DOT (Hidden by Default) --- */
-  .nav-alert-badge {
-    position: absolute;
-    top: 5px;
-    left: 80%;
-    width: 10px;
-    height: 10px;
-    background-color: #ef4444;
-    border-radius: 50%;
-    border: 2px solid var(--glass-bg);
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+  .nav-btn-active { color: var(--text-main); border-bottom: none; }
 
-    /* CRITICAL: Hidden unless JS adds .show */
-    display: none;
+  /* --- FIXED: Grey Background, WHITE Icon (No Blue) --- */
+  .nav-btn-active .icon {
+    /* Background remains subtle grey/glass */
+    background: rgba(125, 125, 125, 0.15);
 
-    z-index: 25;
-    pointer-events: none;
-    animation: pulseRed 2s infinite;
+    /* Icon stays WHITE (instead of blue) */
+    color: #ffffff;
+
+    /* Pop-up animation */
+    transform: translateY(-15px) scale(1.1);
+
+    /* Shadow is neutral */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+    /* Border cutout effect */
+    border: 4px solid var(--bg-color);
   }
 
-  .nav-alert-badge.show {
-    display: block; /* Only visible when you have attention items */
+  /* Hiding Logic (for scrolling) */
+  .nav-hidden {
+    transform: translate(-50%, 150%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+}
 
- /* --- 5. ACTIVE STATE (Pop Up) --- */
-  .nav-btn-active .nav-icon {
-    /* CHANGED:
-       - translateY changed from -28px to -22px (Lowers it)
-       - scale changed from 1.2 to 1.35 (Makes it bigger)
-    */
-    transform: translateY(-19px) scale(1.45);
+/* =========================================
+   4. LAYOUT & CARDS
+   ========================================= */
+.layout {
+  display: grid; grid-template-columns: 360px 1fr; gap: 24px;
+}
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 16px; } }
 
-    stroke: var(--primary);
-    background: var(--bg-color);
-    box-shadow: 0 -5px 15px rgba(59, 130, 246, 0.4);
-    padding: 5px;
-  }
+.view-hidden { display: none; }
 
-  .nav-btn-active div {
-    font-weight: 700;
-    color: var(--primary);
-    transform: translateY(-8px);
-    transition: transform 0.3s ease;
-  }
+/* =========================================
+   UPDATED CARD STYLE ("The Pop")
+   ========================================= */
+.card {
+  background: var(--card-bg);
 
-  .nav-btn-active {
-    color: var(--text-main);
-    border-bottom: none;
-  }
+  /* 1. Stronger Glass Blur */
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
 
-  /* --- 6. UTILITIES (Keep these for tables) --- */
-  header { justify-content: space-between; }
-  .welcome-text-pc { display: none; }
-  .welcome-text-mobile { display: block; }
+  /* 2. Brighter Border for edge definition */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.2); /* Top light highlight */
 
+  border-radius: var(--radius);
+  padding: 24px;
+
+  /* 3. THE POP EFFECT (Deep Shadow + Subtle Glow) */
+  box-shadow:
+    0 20px 40px -5px rgba(0, 0, 0, 0.4),  /* Lifts the card up */
+    0 8px 10px -6px rgba(0, 0, 0, 0.2),   /* Sharper shadow near base */
+    0 0 15px rgba(59, 130, 246, 0.15);    /* Ambient Cyber Blue Glow */
+
+  position: relative;
+  overflow: hidden;
+
+  /* Smooth entrance animation */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+@media (max-width: 600px) { .card { padding: 16px; } }
+
+.card h2 {
+  font-size: 1.1rem; margin: 0 0 20px 0;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--divider);
+  padding-bottom: 16px; position: relative; z-index: 2;
+  color: var(--text-main);
+}
+
+.section-title {
+  margin-top: 24px; margin-bottom: 12px;
+  font-size: 0.75rem; font-weight: 700;
+  color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.1em; opacity: 0.8;
+}
+
+/* =========================================
+   5. INPUTS & FILTERS
+   ========================================= */
+.filters-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
+.filters-row .field { margin-bottom: 0; flex: 1; min-width: 120px; }
+
+input, select, textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  padding: 14px; border-radius: 10px;
+  font-size: 1rem; font-family: 'Inter', sans-serif;
+  outline: none; transition: all 0.3s ease; -webkit-appearance: none;
+}
+
+select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; padding-right: 2.5rem;
+}
+
+input:focus, select:focus, textarea:focus {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+.field label {
+  display: block; font-size: 0.85rem; color: var(--text-muted);
+  margin-bottom: 8px; font-weight: 500;
+}
+
+/* =========================================
+   6. TABLES & CARDS (Adaptive)
+   ========================================= */
+.table-wrapper {
+  overflow-x: auto; margin-top: 16px;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: rgba(0,0,0,0.02);
+  -webkit-overflow-scrolling: touch;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+
+th {
+  text-align: left; padding: 14px 16px;
+  color: var(--text-muted); font-weight: 600;
+  background: rgba(0,0,0,0.02); white-space: nowrap;
+}
+
+td {
+  padding: 14px 16px;
+  border-top: 1px solid var(--divider);
+  color: var(--text-main); white-space: nowrap;
+}
+
+tbody tr { transition: all 0.2s; border-left: 3px solid transparent; }
+tbody tr:hover {
+  background: rgba(125,125,125,0.05); border-left-color: var(--primary);
+  transform: scale(1.01); z-index: 10; position: relative;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* STATUS PILLS */
+.status-pill { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;}
+.status-active { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); animation: softBluePulse 3s infinite; }
+.status-overdue { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); animation: pulseRed 2s infinite; }
+.status-paid { background: rgba(255, 255, 255, 0.1); color: #cbd5e1; }
+
+@keyframes softBluePulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+@keyframes pulseRed { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+/* MOBILE CARD VIEW */
+@media (max-width: 768px) {
   thead { display: none; }
   tbody tr {
     display: flex; flex-direction: column;
@@ -281,8 +406,7 @@ header {
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
   }
   tbody td {
-    display: flex; flex-direction: row-reverse;
-    justify-content: space-between; align-items: center;
+    display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center;
     border: none !important; padding: 10px 0 !important;
     border-bottom: 1px solid var(--divider) !important;
     white-space: normal !important; text-align: left;
@@ -292,174 +416,34 @@ header {
     flex-direction: row; justify-content: flex-end; gap: 12px;
   }
   tbody td::before {
-    content: attr(data-label); font-size: 0.7rem;
-    color: var(--text-muted); font-weight: 700;
-    text-transform: uppercase; text-align: right;
-    min-width: 80px; margin-left: 12px; opacity: 0.7; flex-shrink: 0;
-  }
-
-  /* Hides the Nav Bar when keyboard opens (optional util) */
-  .nav-hidden {
-    transform: translate(-50%, 150%) !important;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    content: attr(data-label);
+    font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;
+    text-align: right; min-width: 80px; margin-left: 12px; opacity: 0.7; flex-shrink: 0;
   }
 }
 
 /* =========================================
-   4. LAYOUT & CARDS (Glass Shine)
-   ========================================= */
-.layout { display: grid; grid-template-columns: 360px 1fr; gap: 24px; }
-@media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 16px; } }
-.view-hidden { display: none; }
-
-.card {
-  background: var(--card-bg);
-  backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-
-  /* UPGRADE: Shine Border */
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
-
-  border-radius: var(--radius); padding: 24px;
-  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-  position: relative; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-@media (max-width: 600px) { .card { padding: 16px; } }
-
-.card h2 {
-  font-size: 1.1rem; margin: 0 0 20px 0; display: flex; justify-content: space-between; align-items: center;
-  border-bottom: 1px solid var(--divider); padding-bottom: 16px; position: relative; z-index: 2; color: var(--text-main);
-}
-
-.section-title {
-  margin-top: 24px; margin-bottom: 12px; font-size: 0.75rem; font-weight: 700;
-  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8;
-}
-
-/* =========================================
-   5. INPUTS (Neon Focus)
-   ========================================= */
-.filters-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
-.filters-row .field { margin-bottom: 0; flex: 1; min-width: 120px; }
-
-input, select, textarea {
-  width: 100%; background: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: white !important;
-  padding: 14px; border-radius: 10px; font-size: 1rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.3s ease; -webkit-appearance: none;
-}
-
-select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; padding-right: 2.5rem; }
-
-/* UPGRADE: Neon Ring */
-input:focus, select:focus, textarea:focus {
-  background: rgba(15, 23, 42, 0.9) !important; border-color: var(--primary) !important; outline: none;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2), 0 0 20px rgba(59, 130, 246, 0.3) !important;
-  transform: translateY(-1px);
-}
-
-.field label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
-
-/* =========================================
-   6. TABLES & CARDS
-   ========================================= */
-.table-wrapper { overflow-x: auto; margin-top: 16px; border: 1px solid var(--card-border); border-radius: 12px; background: rgba(0,0,0,0.02); -webkit-overflow-scrolling: touch; }
-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-th { text-align: left; padding: 14px 16px; color: var(--text-muted); font-weight: 600; background: rgba(0,0,0,0.02); white-space: nowrap; }
-td { padding: 14px 16px; border-top: 1px solid var(--divider); color: var(--text-main); white-space: nowrap; font-variant-numeric: tabular-nums; }
-tbody tr { transition: all 0.2s; border-left: 3px solid transparent; }
-tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--primary); transform: scale(1.01); z-index: 10; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-
-.status-pill { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;}
-.status-active { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); animation: softBluePulse 3s infinite; }
-.status-overdue { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); animation: pulseRed 2s infinite; }
-.status-paid { background: rgba(255, 255, 255, 0.1); color: #cbd5e1; }
-
-@keyframes softBluePulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
-@keyframes pulseRed { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-@media (max-width: 768px) {
-  thead { display: none; }
-  tbody tr { display: flex; flex-direction: column; background: var(--card-bg) !important; border: 1px solid var(--divider); border-radius: 16px; margin-bottom: 16px; padding: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-  tbody td { display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; border: none !important; padding: 10px 0 !important; border-bottom: 1px solid var(--divider) !important; white-space: normal !important; text-align: left; }
-  tbody td:last-child { border-bottom: none !important; margin-top: 8px; flex-direction: row; justify-content: flex-end; gap: 12px; }
-  tbody td::before { content: attr(data-label); font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; text-align: right; min-width: 80px; margin-left: 12px; opacity: 0.7; flex-shrink: 0; }
-}
-
-/* =========================================
-   7. MODALS - GENERAL & BOTTOM SHEET
+   7. MODALS
    ========================================= */
 .modal-overlay {
   position: fixed; inset: 0;
-
-  /* UPGRADE: Reduced Blur & More Transparency to see dashboard */
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
-
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
   display: flex; align-items: center; justify-content: center;
-
-  /* FIXED: Set to 3200.
-     This ensures critical popups (New Loan, Pay) are ALWAYS on top
-     of the mobile nav bar (which is 3100). */
-  z-index: 3200;
-
-  padding: 20px;
+  z-index: 2000; padding: 20px;
 }
 .modal-hidden { display: none; }
-
 .modal {
-  background: var(--card-bg); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-
-  /* Shine Border */
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
-
-  width: 100%; max-width: 420px; border-radius: 24px; padding: 24px;
+  background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.15); width: 100%; max-width: 420px; border-radius: 24px; padding: 24px;
   position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden;
 }
-
 .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
 .modal-title { font-size: 1.4rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
 .modal-step { font-size: 0.85rem; color: var(--primary); font-weight: 600; }
-.modal-close { background: rgba(255,255,255,0.1); color: var(--text-main); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.8rem; line-height: 0; padding-bottom: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-
-/* === NEW: BOTTOM SHEET STYLE === */
-/* Applied to the Modal Overlay when opening nav items (Monthly, Clients) */
-.modal-bottom-sheet {
-  align-items: flex-end; /* Pushes content to bottom */
-  padding-bottom: 100px; /* Sits exactly above the 70px nav bar + spacing */
-  justify-content: center;
-
-  /* FIXED: Set to 3000.
-     This is LOWER than the Nav Bar (3100).
-     This forces these specific sheets to sit BEHIND the floating Nav Bar. */
-  z-index: 3000;
-}
-
-.modal-bottom-sheet .modal {
-  width: 95%; max-width: 600px;
-  border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
-  border-top-left-radius: 30px; border-top-right-radius: 30px;
-  max-height: 80vh; /* Don't cover the whole screen */
-  display: flex; flex-direction: column;
-
-  /* Slide Up Animation */
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
-}
-
-@keyframes slideUp {
-  0% { transform: translateY(100%); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-
-@keyframes slideUp {
-  0% { transform: translateY(100%); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+.modal-close {
+  background: rgba(255,255,255,0.1); color: var(--text-main); border: none; width: 40px; height: 40px;
+  border-radius: 50%; font-size: 1.8rem; line-height: 0; padding-bottom: 6px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
 
 /* WIZARD ANIMATIONS */
@@ -476,124 +460,409 @@ tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--pr
 .step-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: 0.3s; }
 .step-dot.active { background: var(--primary); transform: scale(1.3); }
 
-/* BUTTONS */
-.btn { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); width: auto; }
+/* =========================================
+   8. BUTTONS & WIDGETS
+   ========================================= */
+.btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white; border: none; padding: 12px 20px; border-radius: 10px;
+  font-weight: 600; font-size: 0.95rem; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); width: auto;
+}
 .btn:active { transform: scale(0.96); }
-.btn-secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: var(--text-main); padding: 12px 16px; border-radius: 10px; cursor: pointer; }
+.btn-secondary {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
+  color: var(--text-main); padding: 12px 16px; border-radius: 10px; cursor: pointer;
+}
 .btn-sm { padding: 8px 14px; font-size: 0.85rem; width: auto !important; }
-.btn-icon { background: transparent; border: none; padding: 6px; cursor: pointer; border-radius: 50%; transition: all 0.2s; opacity: 0.8; display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); }
-.btn-icon:hover { background: rgba(255,255,255,0.1); transform: scale(1.1); opacity: 1; color: var(--text-main); }
-.btn-icon svg { width: 18px; height: 18px; stroke-width: 2px; }
-
-/* MISC */
+.btn-icon {
+  background: transparent; border: none; font-size: 1.1rem; padding: 6px;
+  cursor: pointer; border-radius: 50%; transition: all 0.2s; opacity: 0.7;
+}
+.btn-icon:hover { background: rgba(255,255,255,0.1); transform: scale(1.2); opacity: 1; }
 .fab-add { display: none !important; }
 
+/* DASHBOARD STATS */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
 .stat-card { background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid var(--divider); }
 .stat-value {
   font-size: 1.2rem; font-weight: 700; margin-top: 8px;
-  background: linear-gradient(to right, #fff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+  background: linear-gradient(to right, #fff, #cbd5e1);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
-[data-theme="light"] .stat-value { background: none; -webkit-text-fill-color: #0f172a; color: #0f172a; }
-.stat-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; opacity: 0.8; letter-spacing: 0.02em; }
+/* Adapts stat text color for Light Mode */
+[data-theme="light"] .stat-value {
+  background: none; -webkit-text-fill-color: #0f172a; color: #0f172a;
+}
+.stat-sub {
+  font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; opacity: 0.8; letter-spacing: 0.02em;
+}
+
 .stat-purple .stat-value { background: linear-gradient(to right, #e879f9, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .stat-orange .stat-value { background: linear-gradient(to right, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .stat-green .stat-value { background: linear-gradient(to right, #4ade80, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .text-danger-glow { color: #ef4444 !important; text-shadow: 0 0 10px rgba(239, 68, 68, 0.6) !important; background: none !important; -webkit-text-fill-color: #ef4444 !important; }
 
-/* MINI TABS */
-.mini-tabs { display: flex; background: transparent; padding: 0; border: none; gap: 12px; margin-bottom: 24px; }
-.mini-tab { flex: 1; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-muted); padding: 14px 0; font-size: 0.95rem; font-weight: 700; border-radius: 16px; cursor: pointer; text-align: center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
-[data-theme="light"] .mini-tab { background: rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.1); }
-.mini-tab.active { background: #ffffff; border-color: #ffffff; color: #0f172a; box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25); transform: translateY(-3px) scale(1.02); }
-[data-theme="light"] .mini-tab.active { box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); }
-.mini-tab:not(.active):hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
-[data-theme="light"] .mini-tab:not(.active):hover { background: rgba(0, 0, 0, 0.1); }
+/* =========================================
+   MINI TABS (Updated to match Big Sketch Design)
+   ========================================= */
+.mini-tabs {
+  display: flex;
+  background: transparent; /* Removed old container background */
+  padding: 0;
+  border: none;
+  gap: 12px; /* Space between buttons */
+  margin-bottom: 24px;
+}
+
+.mini-tab {
+  flex: 1;
+  /* Frost Glass Base */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+
+  padding: 14px 0;         /* Good touch size */
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 16px;     /* Smooth corners */
+  cursor: pointer;
+  text-align: center;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Light Mode Override for Inactive Tabs */
+[data-theme="light"] .mini-tab {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* ACTIVE STATE (The "Pop") */
+.mini-tab.active {
+  background: #ffffff;     /* Bright White */
+  border-color: #ffffff;
+  color: #0f172a;          /* Dark Text for Contrast */
+
+  /* White Glow Shadow */
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px) scale(1.02); /* Pop Up Animation */
+}
+
+/* Light Mode Active Shadow (Darker shadow instead of glow) */
+[data-theme="light"] .mini-tab.active {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Hover Effect */
+.mini-tab:not(.active):hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+[data-theme="light"] .mini-tab:not(.active):hover {
+  background: rgba(0, 0, 0, 0.1);
+}
 
 /* =========================================
-   TAB CONTENT UTILITY
-   (Paste this into styles.css to make tabs work)
+   9. MISC UI & ANIMATIONS
    ========================================= */
-
-.tab-content {
-  display: none; /* Hides content by default */
-  animation: fadeIn 0.4s ease; /* smooth fade in */
-}
-
-.tab-content.active {
-  display: block; /* Shows content only when it has the 'active' class */
-}
-
-/* ANIMATIONS */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-.welcome-screen { background: #000; position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; }
+
+/* Welcome Screen */
+.welcome-screen { background: #000; position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center; }
 .welcome-box { text-align: center; width: 90%; max-width: 340px; }
 .welcome-input { margin-bottom: 12px; text-align: center; }
 .welcome-btn { width: 100%; background: var(--primary); border: none; padding: 12px; border-radius: 10px; font-weight: 700; color: white; box-shadow: var(--primary-glow); }
-#toast-container { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; width: auto; min-width: 220px; }
-.toast { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: #000000; padding: 12px 24px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-align: center; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); opacity: 0; transform: translateY(15px); animation: toastLift 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-.toast.success { border-left: 3px solid #10b981; } .toast.error { border-left: 3px solid #ef4444; }
-@keyframes toastLift { to { opacity: 1; transform: translateY(0); } }
-@keyframes toastFadeOut { to { opacity: 0; transform: translateY(5px); } }
-.logo-img { height: 50px; width: auto; margin-right: 15px; border-radius: 50%; transform: perspective(500px) rotateY(10deg); transition: transform 0.3s ease; filter: drop-shadow(0.2px 2px 4px rgba(0, 0, 0, 0.4)); }
-.client-flex { display: flex; align-items: center; gap: 12px; }
-.avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: white; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3); flex-shrink: 0; }
-.avatar-0 { background: linear-gradient(135deg, #ef4444, #b91c1c); } .avatar-1 { background: linear-gradient(135deg, #f59e0b, #d97706); } .avatar-2 { background: linear-gradient(135deg, #10b981, #047857); } .avatar-3 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); } .avatar-4 { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
-.filter-container { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
-.filter-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 8px; }
-.chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-.chip:hover { background: rgba(255,255,255,0.1); color: white; }
-.chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); transform: translateY(-1px); }
-.spinner { width: 50px; height: 50px; border: 3px solid rgba(59, 130, 246, 0.3); border-radius: 50%; border-top-color: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); animation: spin 1s ease-in-out infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-@media (max-width: 768px) { .nav-hidden { transform: translate(-50%, 150%) !important; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); } }
-.nav-badge { position: absolute; top: 5px; right: 25%; background: #ef4444; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #020617; box-shadow: 0 0 5px rgba(239, 68, 68, 0.8); display: none; }
-.nav-badge.show { display: block; }
-@media (max-width: 600px) { header { padding: 12px 16px; flex-direction: column; align-items: center; gap: 12px; } .header-brand h1 { font-size: 1.6rem; justify-content: center; width: 100%; text-align: center; display: flex; align-items: center; } .logo-img { height: 48px; margin-right: 10px; margin-top: 6px; transform: none; } .hud-rates { width: 100%; justify-content: center; padding-bottom: 4px; } }
-.sketch-tabs { background: transparent; box-shadow: none; border: none; display: flex; justify-content: center; gap: 20px; width: 100%; max-width: 600px; margin: 0 auto 24px auto; padding: 0 8px; }
-.sketch-btn { flex: 1; padding: 18px 0; font-size: 1.1rem; font-weight: 700; border-radius: 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-muted); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-[data-theme="light"] .sketch-btn { background: rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.1); color: var(--text-muted); }
-.sketch-btn.active { background: #ffffff; border-color: #ffffff; color: #0f172a; box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3); transform: translateY(-4px) scale(1.02); }
-[data-theme="light"] .sketch-btn.active { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); }
-.sketch-btn:not(.active):hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
-[data-theme="light"] .sketch-btn:not(.active):hover { background: rgba(0, 0, 0, 0.1); }
-.animate-in { animation: slideUpFade 1.9s cubic-bezier(0.3, 0.8, 0.2, 1) forwards; }
-@keyframes slideUpFade { 0% { opacity: 0; transform: translateY(20px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-.welcome-text-pc { font-size: 0.95rem; font-weight: 600; color: var(--primary); background: rgba(59, 130, 246, 0.1); padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(59, 130, 246, 0.2); display: block; }
-.welcome-text-mobile { font-size: 1.1rem; font-weight: 700; color: var(--text-main); text-align: center; margin-bottom: 16px; display: none; animation: fadeIn 0.8s ease; }
-@media (max-width: 768px) { .welcome-text-pc { display: none; } .welcome-text-mobile { display: block; } header { justify-content: space-between; } }
 
 /* =========================================
-   SKELETON LOADER ANIMATIONS
+   HIGH-END TRANSPARENT GLASS TOASTS
+   ========================================= */
+#toast-container {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  width: auto;
+  min-width: 220px;
+}
+
+.toast {
+  /* TRANSPARENT FROSTED GLASS */
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  /* High Contrast Text */
+  color: #000000;
+
+  padding: 12px 24px;
+  border-radius: 8px; /* Professional Soft Rectangle */
+
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+
+  /* Very subtle border and shadow */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+  /* Animation */
+  opacity: 0;
+  transform: translateY(15px);
+  animation: toastLift 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Slim professional indicators on the left */
+.toast.success { border-left: 3px solid #10b981; }
+.toast.error   { border-left: 3px solid #ef4444; }
+
+@keyframes toastLift {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastFadeOut {
+  to { opacity: 0; transform: translateY(5px); }
+}
+
+.logo-img {
+  height: 50px;
+  width: auto;
+  margin-right: 15px;
+  border-radius: 50%;
+
+  /* 3D tilt for desktop */
+  transform: perspective(500px) rotateY(10deg);
+  transition: transform 0.3s ease;
+
+  /* THE SHADOW FIX: Makes the logo pop out */
+  filter: drop-shadow(0.2px 2px 4px rgba(0, 0, 0, 0.4));
+}
+/* Client Avatar */
+.client-flex { display: flex; align-items: center; gap: 12px; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700; color: white; border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3); flex-shrink: 0;
+}
+.avatar-0 { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.avatar-1 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.avatar-2 { background: linear-gradient(135deg, #10b981, #047857); }
+.avatar-3 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.avatar-4 { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+
+/* Filter Chips */
+.filter-container { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.filter-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 8px; }
+.chip {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);
+  padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.chip:hover { background: rgba(255,255,255,0.1); color: white; }
+.chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); transform: translateY(-1px); }
+
+/* Loading Spinner */
+.spinner {
+  width: 50px; height: 50px;
+  border: 3px solid rgba(59, 130, 246, 0.3); border-radius: 50%;
+  border-top-color: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+/* =========================================
+   10. MOBILE FIXES & UTILS
+   ========================================= */
+/* Hide the nav bar when scrolling down (MOBILE ONLY) */
+@media (max-width: 768px) {
+  .nav-hidden {
+    transform: translate(-50%, 150%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Red Notification Badge */
+.nav-badge {
+  position: absolute; top: 5px; right: 25%; background: #ef4444;
+  width: 10px; height: 10px; border-radius: 50%; border: 2px solid #020617;
+  box-shadow: 0 0 5px rgba(239, 68, 68, 0.8); display: none;
+}
+.nav-badge.show { display: block; }
+
+@media (max-width: 600px) {
+  header {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Container setup */
+  .header-brand h1 {
+    font-size: 1.6rem;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+    display: flex;       /* Ensures flex behavior */
+    align-items: center; /* Vertically centers items */
+  }
+
+  /* The Fix: Pushing the logo down */
+  .logo-img {
+    height: 48px;       /* Slightly reduced for better mobile proportion */
+    margin-right: 10px;
+    margin-top: 6px;    /* <--- THIS moves the logo down. Increase to 8px or 10px if needed. */
+    transform: none;    /* Removes the 3D tilt on mobile for a cleaner look */
+  }
+
+  .hud-rates {
+    width: 100%;
+    justify-content: center;
+    padding-bottom: 4px;
+  }
+}
+/* --- BRIGHTER GREY & WHITE TABS (Theme Adaptive) --- */
+.sketch-tabs {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 24px auto;
+  padding: 0 8px;
+}
+
+.sketch-btn {
+  flex: 1;
+  padding: 18px 0;
+  font-size: 1.1rem;
+  font-weight: 700; /* Bolder text */
+  border-radius: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* DEFAULT (DARK MODE): White Glass look */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted); /* Uses theme variable */
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* LIGHT MODE OVERRIDE (For visibility on light backgrounds) */
+[data-theme="light"] .sketch-btn {
+  background: rgba(0, 0, 0, 0.05); /* Darker glass for contrast */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--text-muted);
+}
+
+/* --- ACTIVE STATE (The "Pop") --- */
+.sketch-btn.active {
+  /* Solid Bright White for BOTH themes */
+  background: #ffffff;
+  border-color: #ffffff;
+
+  /* Text is always dark on the white button for max contrast */
+  color: #0f172a;
+
+  /* Strong pop-up shadow */
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3); /* White Glow */
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Light Mode Active Shadow (Darker shadow instead of glow) */
+[data-theme="light"] .sketch-btn.active {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Hover Effect */
+.sketch-btn:not(.active):hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+[data-theme="light"] .sketch-btn:not(.active):hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================
+   11. VIEW SWITCHING ANIMATIONS
    ========================================= */
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+/* The class added by app.js when you switch tabs */
+.animate-in {
+  animation: slideUpFade 1.9s cubic-bezier(0.3, 0.8, 0.2, 1) forwards;
 }
 
-.skeleton {
-  background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.05) 25%,
-      rgba(255, 255, 255, 0.1) 37%,
-      rgba(255, 255, 255, 0.05) 63%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite linear;
-  border-radius: 8px;
+/* The Animation Keyframes */
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98); /* Start slightly lower and smaller */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);       /* End in normal position */
+  }
 }
 
-[data-theme="light"] .skeleton {
-    background: linear-gradient(90deg,
-      rgba(0, 0, 0, 0.05) 25%,
-      rgba(0, 0, 0, 0.1) 37%,
-      rgba(0, 0, 0, 0.05) 63%
-  );
+/* =========================================
+   WELCOME MESSAGE STYLING (PC vs MOBILE)
+   ========================================= */
+
+/* 1. DESKTOP STYLE (In Header) */
+.welcome-text-pc {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary); /* Blue text */
+  background: rgba(59, 130, 246, 0.1);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  display: block; /* Visible by default on PC */
 }
 
-.sk-header { width: 100%; height: 80px; border-radius: 20px; margin-bottom: 20px; }
-.sk-card { width: 100%; height: 250px; border-radius: 16px; margin-bottom: 20px; }
-.sk-row { width: 100%; height: 60px; border-radius: 10px; margin-bottom: 10px; }
-/* END OF FILE - DO NOT PUT AN EXTRA '}' HERE */
+/* 2. MOBILE STYLE (Under Header) */
+.welcome-text-mobile {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+  margin-bottom: 16px; /* Space before the Tabs */
+  display: none; /* Hidden by default on PC */
+  animation: fadeIn 0.8s ease;
+}
+
+/* --- MEDIA QUERY SWITCH --- */
+@media (max-width: 768px) {
+  /* Hide PC version */
+  .welcome-text-pc {
+    display: none;
+  }
+
+  /* Show Mobile version */
+  .welcome-text-mobile {
+    display: block;
+  }
+
+  /* Adjust header layout to ignore the hidden element */
+  header {
+    justify-content: space-between;
+  }
+}
+
