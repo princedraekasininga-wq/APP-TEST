@@ -70,7 +70,7 @@
 /* 1. FLOATING NAV BAR (Mobile) - Heavy Frosted Glass */
 [data-theme="light"] .top-nav {
     /* Very transparent background so the blur is visible */
-    background: rgba(224, 242, 254, 0.3) !important;
+    background: rgba(224, 242, 254, 0.2) !important;
 
     /* Slightly stronger white border to define the edges */
     border: 1px solid rgba(255, 255, 255, 0.6) !important;
@@ -80,7 +80,7 @@
 
     /* THE MAGIC: High blur (30px) + Saturation (180%) makes it look like real frosted glass */
     backdrop-filter: blur(30px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
 }
 
 /* 2. TABS - Subtle Blue Active State */
@@ -650,7 +650,7 @@ tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--pr
 @media (max-width: 768px) { .welcome-text-pc { display: none; } .welcome-text-mobile { display: block; } header { justify-content: space-between; } }
 
 /* =========================================
-   SKELETON LOADER ANIMATIONS
+   SKELETON LOADER (Dual Mode Support)
    ========================================= */
 
 @keyframes shimmer {
@@ -659,25 +659,26 @@ tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--pr
 }
 
 .skeleton {
+  /* Default (Dark Mode) Skeleton Colors */
   background: linear-gradient(90deg,
       rgba(255, 255, 255, 0.05) 25%,
       rgba(255, 255, 255, 0.1) 37%,
       rgba(255, 255, 255, 0.05) 63%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite linear;
+  animation: shimmer 1.5s infinite;
   border-radius: 8px;
 }
 
+/* Light Mode Overrides for Skeleton */
 [data-theme="light"] .skeleton {
-    background: linear-gradient(90deg,
-      rgba(0, 0, 0, 0.05) 25%,
-      rgba(0, 0, 0, 0.1) 37%,
-      rgba(0, 0, 0, 0.05) 63%
+  background: linear-gradient(90deg,
+      rgba(0, 0, 0, 0.06) 25%,
+      rgba(0, 0, 0, 0.12) 37%,
+      rgba(0, 0, 0, 0.06) 63%
   );
 }
 
-.sk-header { width: 100%; height: 80px; border-radius: 20px; margin-bottom: 20px; }
-.sk-card { width: 100%; height: 250px; border-radius: 16px; margin-bottom: 20px; }
-.sk-row { width: 100%; height: 60px; border-radius: 10px; margin-bottom: 10px; }
-/* END OF FILE - DO NOT PUT AN EXTRA '}' HERE */
+.sk-header { height: 80px; width: 100%; margin-bottom: 24px; border-radius: 20px; }
+.sk-card { height: 200px; width: 100%; margin-bottom: 24px; border-radius: 16px; }
+.sk-row { height: 60px; width: 100%; margin-bottom: 12px; border-radius: 12px; }

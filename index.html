@@ -6,38 +6,27 @@
   <link rel="icon" type="image/png" href="myfavicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-  <link rel="stylesheet" href="styles.css?v=1.8">
-
+  <link rel="stylesheet" href="styles.css?v=1.9.2">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
-  <link rel="apple-touch-icon" href="my-logo.png">
+  <link rel="apple-touch-icon" href="apple-touch.png">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <script>
     (function() {
-      // 1. Instant Theme Check (Day/Night)
       const hour = new Date().getHours();
       if (hour >= 6 && hour < 18) {
         document.documentElement.setAttribute("data-theme", "light");
         const metaTheme = document.querySelector('meta[name="theme-color"]');
         if(metaTheme) metaTheme.setAttribute("content", "#f1f5f9");
       }
-
-      // 2. Instant Session Check (The "No Flash" Fix)
-      // If NO session exists, hide the loader immediately.
-      const hasTest = localStorage.getItem("stallz_test_session");
-      const hasFire = localStorage.getItem("firebase:authUser:AIzaSyBRMITHX8gm0jKpEXuC4iePGWoYON85BDU:[DEFAULT]");
-
-      if (!hasTest && !hasFire) {
-          document.write('<style>#loadingOverlay { display: none !important; }</style>');
-      }
     })();
   </script>
 </head>
 <body>
 
-  <div id="loadingOverlay" style="position:fixed; inset:0; background:var(--bg-color); z-index:9999; padding:16px; transition: opacity 0.3s;">
+  <div id="loadingOverlay" style="position:fixed; inset:0; background:var(--bg-color); z-index:9999; padding:16px; display:flex; flex-direction:column; transition: opacity 0.4s ease;">
     <div style="max-width:1200px; margin:0 auto; width:100%;">
         <div class="skeleton sk-header"></div>
 
@@ -54,8 +43,8 @@
         </div>
     </div>
 
-    <div style="position:absolute; bottom:30px; left:0; width:100%; text-align:center; color:#64748b; font-size:0.8rem; opacity:0.7;">
-        Loading Secure Data...
+    <div style="position:absolute; bottom:30px; left:0; width:100%; text-align:center; color:var(--text-muted); font-size:0.8rem; opacity:0.7;">
+        Loading Stallz Secure...
     </div>
   </div>
 
@@ -63,12 +52,20 @@
     setTimeout(function() {
       const loader = document.getElementById("loadingOverlay");
       if(loader && loader.style.display !== "none") {
-         loader.style.display = "none";
+         // Only hide if we are stuck (failsafe)
+         console.warn("Loader timed out - forcing visibility check");
+         const welcome = document.getElementById("welcomeScreen");
+         // If welcome is hidden and main view is hidden, show welcome
+         if (welcome && getComputedStyle(welcome).display === "none") {
+             welcome.style.display = "flex";
+         }
+         loader.style.opacity = "0";
+         setTimeout(() => loader.style.display = "none", 400);
       }
-    }, 8000);
+    }, 10000); // 10 seconds failsafe
   </script>
 
-  <div id="welcomeScreen" class="welcome-screen">
+  <div id="welcomeScreen" class="welcome-screen" style="display:none;">
     <div class="welcome-box">
       <h1 class="welcome-title" style="color:white; margin-bottom:10px;">STALLZ LOANS</h1>
       <h2 class="welcome-subtitle" style="color:#94a3b8; font-size:1rem; margin-bottom:24px;">Secure Admin Login</h2>
@@ -85,7 +82,7 @@
 
   <datalist id="clientList"></datalist>
 
-  <div class="app-shell">
+  <div class="app-shell" id="mainAppShell" style="display:none;">
 
     <header>
       <div class="header-brand">
@@ -438,7 +435,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" defer></script>
-  <script src="app.js?v=1.8" defer></script>
+  <script src="app.js?v=1.9.2" defer></script>
 
 </body>
 </html>

@@ -1,7 +1,7 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.8"; // Force Refresh for New UI
+const APP_VERSION = "1.9.2"; // Force Refresh for New UI
 
 
 // ==========================================
@@ -247,8 +247,11 @@ function showWelcomeScreen() {
   const loginBtn = el("authLoginBtn");
   const errorMsg = el("authError");
   const loader = el("loadingOverlay");
+  const mainApp = el("mainAppShell");
 
+  // Define Login Button Logic
   if (loginBtn) {
+    // Clone to remove old listeners
     const newBtn = loginBtn.cloneNode(true);
     loginBtn.parentNode.replaceChild(newBtn, loginBtn);
 
@@ -261,6 +264,8 @@ function showWelcomeScreen() {
         if (typeof vibrate === "function") vibrate([50, 50]);
         return;
       }
+
+      // Show loader while checking credentials
       if (loader) { loader.style.display = "flex"; loader.style.opacity = "1"; }
 
       if (TEST_MODE) {
@@ -269,11 +274,15 @@ function showWelcomeScreen() {
           state.user = { email: email || "test@admin.com", uid: "test-user-123" };
           state.isLoggedIn = true;
           updateSessionActivity();
+
+          // Switch to App View
           screen.style.display = "none";
+          mainApp.style.display = "block";
+
           loadFromFirebase();
           updateWelcomeUI();
           showToast(`Welcome back!`, "success");
-        }, 500);
+        }, 800);
         return;
       }
 
@@ -283,28 +292,35 @@ function showWelcomeScreen() {
         updateSessionActivity();
         updateWelcomeUI();
         showToast(`Login Successful`, "success");
+        // Firebase listener will handle the UI switch
       } catch (error) {
-        if (loader) loader.style.display = "none";
+        if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.style.display = "none", 300); }
         errorMsg.textContent = "Login failed: " + error.message;
         if (typeof vibrate === "function") vibrate([50, 50, 50]);
       }
     };
   }
 
+  // --- SESSION CHECK LOGIC ---
   const lastActive = localStorage.getItem("stallz_last_active");
   const now = Date.now();
   const THIRTY_MINUTES = 30 * 60 * 1000;
 
+  // 1. Check for Expiry
   if (lastActive && (now - lastActive > THIRTY_MINUTES)) {
     console.log("Session expired. Logging out.");
     if (typeof firebase !== "undefined" && firebase.auth) firebase.auth().signOut();
     localStorage.removeItem("stallz_last_active");
     localStorage.removeItem("stallz_test_session");
-    if (loader) loader.style.display = "none";
+
+    // Show Login Screen, Hide Loader
     screen.style.display = "flex";
+    mainApp.style.display = "none";
+    if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.style.display = "none", 300); }
     return;
   }
 
+  // 2. Check Valid Session
   const testSession = localStorage.getItem("stallz_test_session");
 
   if (TEST_MODE) {
@@ -312,12 +328,17 @@ function showWelcomeScreen() {
        state.user = { email: "test@admin.com", uid: "test-user-123" };
        state.isLoggedIn = true;
        updateSessionActivity();
+
+       // Show App, Hide Login
        screen.style.display = "none";
-       if (loader) loader.style.display = "flex";
+       mainApp.style.display = "block";
+
        loadFromFirebase();
     } else {
-       if (loader) loader.style.display = "none";
+       // No Session -> Show Login
        screen.style.display = "flex";
+       mainApp.style.display = "none";
+       if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.style.display = "none", 300); }
     }
   }
   else if (typeof firebase !== "undefined" && firebase.auth) {
@@ -326,17 +347,24 @@ function showWelcomeScreen() {
           updateSessionActivity();
           state.user = user;
           state.isLoggedIn = true;
+
+          // Show App, Hide Login
           screen.style.display = "none";
-          if (loader) { loader.style.display = "flex"; loader.style.opacity = "1"; }
-          loadFromFirebase();
+          mainApp.style.display = "block";
+
+          loadFromFirebase(); // This will eventually hide the loader
         } else {
-          if (loader) loader.style.display = "none";
+          // Logged Out -> Show Login
           screen.style.display = "flex";
+          mainApp.style.display = "none";
+          if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.style.display = "none", 300); }
         }
       });
   } else {
-      if (loader) loader.style.display = "none";
+      // Fallback
       screen.style.display = "flex";
+      mainApp.style.display = "none";
+      if (loader) { loader.style.opacity = "0"; setTimeout(() => loader.style.display = "none", 300); }
   }
 }
 
