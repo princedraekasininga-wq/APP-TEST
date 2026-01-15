@@ -221,7 +221,7 @@ header {
   .nav-alert-badge {
     position: absolute;
     top: -2px;
-    right: -5%;
+    right: -2%;
     width: 10px;
     height: 10px;
     background-color: #ef4444;
