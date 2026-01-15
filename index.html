@@ -6,7 +6,7 @@
   <link rel="icon" type="image/png" href="myfavicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-  <link rel="stylesheet" href="styles.css?v=1.7.2">
+  <link rel="stylesheet" href="styles.css?v=1.7.3">
 
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
@@ -19,7 +19,6 @@
       const hour = new Date().getHours();
       if (hour >= 6 && hour < 18) {
         document.documentElement.setAttribute("data-theme", "light");
-        // Update the browser toolbar color for mobile
         const metaTheme = document.querySelector('meta[name="theme-color"]');
         if(metaTheme) metaTheme.setAttribute("content", "#f1f5f9");
       }
@@ -28,7 +27,7 @@
 </head>
 <body>
 
-  <div id="loadingOverlay" style="position:fixed; inset:0; background:var(--bg-color); z-index:9999; padding:16px; transition: opacity 0.5s;">
+  <div id="loadingOverlay" style="position:fixed; inset:0; background:var(--bg-color); z-index:9999; padding:16px; transition: opacity 0.3s;">
     <div style="max-width:1200px; margin:0 auto; width:100%;">
         <div class="skeleton sk-header"></div>
 
@@ -51,13 +50,25 @@
   </div>
 
   <script>
+    (function() {
+        // Check if a session exists in LocalStorage
+        const hasTestSession = localStorage.getItem("stallz_test_session");
+        const hasFbSession = localStorage.getItem("firebase:authUser:AIzaSyBRMITHX8gm0jKpEXuC4iePGWoYON85BDU:[DEFAULT]");
+
+        // If NO session is found, hide the loader INSTANTLY so Login screen shows
+        if (!hasTestSession && !hasFbSession) {
+            const loader = document.getElementById("loadingOverlay");
+            if(loader) loader.style.display = "none";
+        }
+    })();
+
+    // Safety Timeout (Backup)
     setTimeout(function() {
       const loader = document.getElementById("loadingOverlay");
       if(loader && loader.style.display !== "none") {
-         // If loader is still there after 10 seconds, hide it so user sees the UI (or error)
          loader.style.display = "none";
       }
-    }, 10000);
+    }, 8000);
   </script>
 
   <div id="welcomeScreen" class="welcome-screen">
@@ -415,7 +426,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" defer></script>
-  <script src="app.js?v=1.7.3" defer></script>
+  <script src="app.js?v=1.7.4" defer></script>
 
 </body>
 </html>

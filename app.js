@@ -1,7 +1,7 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.7.3"; // Force Refresh for New UI
+const APP_VERSION = "1.7.4"; // Force Refresh for New UI
 
 
 // ==========================================
@@ -1309,3 +1309,4 @@ window.openActionModal = function(action, loanId) {
       <div class="field" style="margin-top:16px;"><label>Reason (Optional)</label><textarea id="actNote" placeholder="e.g. Client relocated, uncontactable..."></textarea></div>
     `;
   }
+}
