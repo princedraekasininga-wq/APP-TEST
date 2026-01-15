@@ -897,8 +897,9 @@ function updateSettingsBadges() {
     if(el("menuSoundBadge")) el("menuSoundBadge").textContent = sound ? "On" : "Off";
 
     // User Name
-    if(state.user && state.user.email && el("sidebarName")) {
-        el("sidebarName").textContent = state.user.email.split("@")[0];
+    // User Name
+    if(state.user && state.user.email && el("sidebarUserName")) {
+        el("sidebarUserName").textContent = state.user.email.split("@")[0];
     }
 }
 
