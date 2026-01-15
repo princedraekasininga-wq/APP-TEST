@@ -1,7 +1,7 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.7.4"; // Force Refresh for New UI
+const APP_VERSION = "1.7.2"; // Force Refresh for New UI
 
 
 // ==========================================
@@ -1100,12 +1100,14 @@ function init() {
       showToast("Capital added successfully!", "success");
   });
 
-  // FIXED: Added check for XLSX existence to prevent offline crashes
+  // --- FIXED EXCEL EXPORT ---
   el("exportBtn")?.addEventListener("click", () => {
      if (typeof vibrate === "function") vibrate([20]);
 
-     if (typeof XLSX === "undefined") {
-         showToast("Export unavailable offline", "error");
+     // Check if the library is actually loaded
+     if (typeof window.XLSX === "undefined") {
+         showToast("Export library missing. Check internet.", "error");
+         console.warn("XLSX not loaded. CDN blocked or offline.");
          return;
      }
 
@@ -1126,7 +1128,7 @@ function init() {
        XLSX.utils.book_append_sheet(wb, ws, "Loans");
        XLSX.writeFile(wb, "Stallz_Loans.xlsx");
      } catch (e) {
-         showToast("Export failed. Check internet connection.", "error");
+         showToast("Export failed. Check console.", "error");
          console.error(e);
      }
   });
@@ -1307,4 +1309,3 @@ window.openActionModal = function(action, loanId) {
       <div class="field" style="margin-top:16px;"><label>Reason (Optional)</label><textarea id="actNote" placeholder="e.g. Client relocated, uncontactable..."></textarea></div>
     `;
   }
-}
