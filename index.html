@@ -6,7 +6,7 @@
   <link rel="icon" type="image/png" href="myfavicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-  <link rel="stylesheet" href="styles.css?v=1.7.3">
+  <link rel="stylesheet" href="styles.css?v=1.7.5">
 
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
@@ -16,11 +16,23 @@
 
   <script>
     (function() {
+      // 1. Instant Theme Check (Day/Night)
       const hour = new Date().getHours();
       if (hour >= 6 && hour < 18) {
         document.documentElement.setAttribute("data-theme", "light");
         const metaTheme = document.querySelector('meta[name="theme-color"]');
         if(metaTheme) metaTheme.setAttribute("content", "#f1f5f9");
+      }
+
+      // 2. Instant Session Check (The "No Flash" Fix)
+      // We check for the session keys BEFORE the page renders.
+      const hasTest = localStorage.getItem("stallz_test_session");
+      const hasFire = localStorage.getItem("firebase:authUser:AIzaSyBRMITHX8gm0jKpEXuC4iePGWoYON85BDU:[DEFAULT]");
+
+      // If NO session exists, we inject a style to HIDE the loader immediately.
+      // This prevents the skeleton from ever appearing for logged-out users.
+      if (!hasTest && !hasFire) {
+          document.write('<style>#loadingOverlay { display: none !important; }</style>');
       }
     })();
   </script>
@@ -50,19 +62,6 @@
   </div>
 
   <script>
-    (function() {
-        // Check if a session exists in LocalStorage
-        const hasTestSession = localStorage.getItem("stallz_test_session");
-        const hasFbSession = localStorage.getItem("firebase:authUser:AIzaSyBRMITHX8gm0jKpEXuC4iePGWoYON85BDU:[DEFAULT]");
-
-        // If NO session is found, hide the loader INSTANTLY so Login screen shows
-        if (!hasTestSession && !hasFbSession) {
-            const loader = document.getElementById("loadingOverlay");
-            if(loader) loader.style.display = "none";
-        }
-    })();
-
-    // Safety Timeout (Backup)
     setTimeout(function() {
       const loader = document.getElementById("loadingOverlay");
       if(loader && loader.style.display !== "none") {
