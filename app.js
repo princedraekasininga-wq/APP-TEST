@@ -1,7 +1,7 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.7.9"; // Force Refresh for New UI
+const APP_VERSION = "1.8"; // Force Refresh for New UI
 
 
 // ==========================================
@@ -1026,6 +1026,28 @@ window.closeAllModals = function(resetNav = true) {
 // ==========================================
 function init() {
 
+  // 1. SHORTCUT HANDLING (New Loan / Stats from Home Screen)
+  // ------------------------------------------------
+  const urlParams = new URLSearchParams(window.location.search);
+  const action = urlParams.get('action');
+
+  if (action === 'new_loan') {
+      // Wait a moment for app to render, then open the modal
+      setTimeout(() => {
+          const btn = el("openLoanModalBtn");
+          if (btn) btn.click();
+      }, 600);
+  }
+  else if (action === 'dashboard') {
+      setTimeout(() => {
+          // Find the dashboard tab button and click it
+          const btn = document.querySelector("button[onclick*='switchOverviewTab'][onclick*='dashboard']");
+          if (btn) btn.click();
+      }, 600);
+  }
+  // ------------------------------------------------
+
+  // 2. EVENT LISTENERS
   el("openLoanModalBtn")?.addEventListener("click", () => {
     if (typeof vibrate === "function") vibrate([10]);
     wizardStep=0;
@@ -1114,7 +1136,6 @@ function init() {
   el("exportBtn")?.addEventListener("click", () => {
      if (typeof vibrate === "function") vibrate([20]);
 
-     // Check if the library is actually loaded
      if (typeof window.XLSX === "undefined") {
          showToast("Export library missing. Check internet.", "error");
          console.warn("XLSX not loaded. CDN blocked or offline.");
