@@ -220,8 +220,8 @@ header {
   /* --- 4. RED ALERT DOT (Hidden by Default) --- */
   .nav-alert-badge {
     position: absolute;
-    top: 15px;
-    right: 35%;
+    top: 20px;
+    right: 50%;
     width: 10px;
     height: 10px;
     background-color: #ef4444;
