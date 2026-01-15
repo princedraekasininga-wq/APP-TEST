@@ -63,13 +63,27 @@ function getLocalDateVal() {
 }
 
 function checkTimeBasedTheme() {
-  const hour = new Date().getHours();
-  const isDayTime = hour >= 6 && hour < 18;
-  if (isDayTime) {
-    document.documentElement.setAttribute("data-theme", "light");
-  } else {
-    document.documentElement.removeAttribute("data-theme");
+  // STOP if user has manually set a preference
+  const override = localStorage.getItem("stallz_theme_override");
+  if (override) {
+      document.documentElement.setAttribute("data-theme", override);
+      const icon = el("themeIcon");
+      if(icon) icon.textContent = override === "light" ? "🌙" : "☀️";
+      return;
   }
+
+  // Otherwise, run standard time check
+  const hour = new Date().getHours();
+  const isDay = hour >= 6 && hour < 18;
+  const theme = isDay ? "light" : "dark";
+
+  document.documentElement.setAttribute("data-theme", theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content", isDay ? "#f1f5f9" : "#0f172a");
+
+  // Update Icon automatically based on time
+  const icon = el("themeIcon");
+  if(icon) icon.textContent = isDay ? "🌙" : "☀️";
 }
 
 function formatWhatsApp(phone) {
@@ -1048,6 +1062,32 @@ window.closeAllModals = function(resetNav = true) {
     }
 }
 
+// ==========================================
+// THEME TOGGLE LOGIC
+// ==========================================
+function toggleTheme() {
+    // 1. Get current theme
+    const root = document.documentElement;
+    const current = root.getAttribute("data-theme") || "dark";
+    const newTheme = current === "light" ? "dark" : "light";
+
+    // 2. Apply New Theme
+    root.setAttribute("data-theme", newTheme);
+
+    // 3. Update Icon
+    const icon = el("themeIcon");
+    if(icon) icon.textContent = newTheme === "light" ? "🌙" : "☀️";
+
+    // 4. Update Meta Color (Browser Bar)
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = newTheme === "light" ? "#f1f5f9" : "#0f172a";
+
+    // 5. SAVE PREFERENCE (Overrides Time Logic)
+    localStorage.setItem("stallz_theme_override", newTheme);
+
+    // 6. Provide Feedback
+    if (typeof vibrate === "function") vibrate([10]);
+}
 
 // ==========================================
 // 9. INIT
@@ -1060,22 +1100,23 @@ function init() {
   const action = urlParams.get('action');
 
   if (action === 'new_loan') {
-      // Wait a moment for app to render, then open the modal
       setTimeout(() => {
           const btn = el("openLoanModalBtn");
           if (btn) btn.click();
-      }, 600);
+      }, 800);
   }
   else if (action === 'dashboard') {
       setTimeout(() => {
-          // Find the dashboard tab button and click it
           const btn = document.querySelector("button[onclick*='switchOverviewTab'][onclick*='dashboard']");
           if (btn) btn.click();
-      }, 600);
+      }, 800);
   }
   // ------------------------------------------------
 
-  // 2. EVENT LISTENERS
+  // 2. THEME TOGGLE LISTENER (New)
+  el("themeToggleBtn")?.addEventListener("click", toggleTheme);
+
+  // 3. EVENT LISTENERS
   el("openLoanModalBtn")?.addEventListener("click", () => {
     if (typeof vibrate === "function") vibrate([10]);
     wizardStep=0;
@@ -1160,7 +1201,7 @@ function init() {
       showToast("Capital added successfully!", "success");
   });
 
-  // --- FIXED EXCEL EXPORT ---
+  // --- EXCEL EXPORT ---
   el("exportBtn")?.addEventListener("click", () => {
      if (typeof vibrate === "function") vibrate([20]);
 
@@ -1194,7 +1235,8 @@ function init() {
 
   ["searchInput", "statusFilter", "planFilter"].forEach(id => el(id)?.addEventListener("input", renderLoansTable));
 
-  checkTimeBasedTheme();
+  // 4. STARTUP ROUTINES
+  checkTimeBasedTheme(); // Checks for override or time
   setInterval(checkTimeBasedTheme, 60000);
 
   showWelcomeScreen();

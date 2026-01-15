@@ -85,13 +85,18 @@
   <div class="app-shell" id="mainAppShell" style="display:none;">
 
     <header>
-      <div class="header-brand">
-        <h1>
+      <div class="header-brand" style="display:flex; align-items:center; gap:12px;">
+        <h1 style="display:flex; align-items:center; margin:0;">
             <img src="my-logo.png" class="logo-img" alt="Stallz Logo">
             STALLZ LOANS
         </h1>
-        <button id="installAppBtn" class="btn-secondary btn-sm" style="display:none; margin-left:12px; border-color:#22c55e; color:#22c55e;">
-            ⬇ Install App
+
+        <button id="themeToggleBtn" class="btn-icon" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+            <span id="themeIcon" style="font-size:1.2rem;">☀️</span>
+        </button>
+
+        <button id="installAppBtn" class="btn-secondary btn-sm" style="display:none; border-color:#22c55e; color:#22c55e;">
+            ⬇ Install
         </button>
       </div>
 
