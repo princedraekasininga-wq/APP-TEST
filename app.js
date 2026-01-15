@@ -1,7 +1,7 @@
 // ==========================================
 // APP VERSION CONTROL
 // ==========================================
-const APP_VERSION = "1.7.4"; // Force Refresh for New UI
+const APP_VERSION = "1.7.5"; // Force Refresh for New UI
 
 
 // ==========================================
