@@ -218,51 +218,100 @@ body::after {
 @keyframes pulse-red { 0%, 100% { filter: drop-shadow(0 0 2px #f87171); } 50% { filter: drop-shadow(0 0 10px #f87171); } }
 
 /* ==========================================================================
-   10. MOBILE APP MODE (Focus Layouts)
+   10. MOBILE BLOCK LAYOUT (PHONE OPTIMIZED)
    ========================================================================== */
 @media (max-width: 768px) {
-    .portal-shell { padding: 15px; max-width: 100%; }
-    .mobile-swipe-hint { display: block; }
 
-    /* Compact Header */
-    .glass-header { flex-direction: row; padding: 15px; gap: 10px; margin-bottom: 20px; }
-    .header-left .logo-box { width: 40px; height: 40px; }
-    .portal-logo { width: 24px; }
-    .header-center { text-align: left; flex-grow: 1; padding-left: 5px; }
-    .greeting-sub { font-size: 0.7rem; margin-bottom: 0; }
-    .client-name-title { font-size: 1.2rem; }
+    .portal-shell {
+        padding: 10px; /* Tighter padding for mobile */
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 20px; /* Space between the big blocks */
+    }
+
+    /* BLOCK 1: HEADER */
+    .glass-header {
+        flex-direction: row;
+        padding: 15px;
+        gap: 15px;
+        margin-bottom: 0; /* Let the parent gap handle spacing */
+    }
+    .client-name-title { font-size: 1.4rem; }
     .header-right { position: static; }
 
-    /* Swipeable Stats Carousel */
+    /* BLOCK 2: STATS CAROUSEL */
+    /* This stays swipeable because it saves vertical space,
+       but we make the cards look like solid blocks */
     .stats-grid {
-        display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 15px;
-        padding-bottom: 10px; margin-right: -15px; padding-right: 15px;
-        -ms-overflow-style: none; scrollbar-width: none;
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 15px;
+        padding-bottom: 10px;
+        margin-right: -10px; /* Bleed to edge */
+        padding-right: 10px;
+        margin-bottom: 0;
     }
-    .stats-grid::-webkit-scrollbar { display: none; }
-    .stat-card { min-width: 85%; scroll-snap-align: center; flex-direction: column; align-items: flex-start; margin: 0; }
-    .stat-card .icon-box { margin-bottom: 10px; }
-    .countdown-card { align-items: center; text-align: center; }
+    .stat-card {
+        min-width: 85%; /* Make it wide */
+        scroll-snap-align: center;
+        margin: 0;
+        background: rgba(30, 41, 59, 0.9); /* Solid backing */
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .mobile-swipe-hint { display: block; margin-bottom: -15px; z-index: 10; }
 
-    /* Thumb-Friendly Buttons */
-    .panel-header { flex-direction: column; align-items: flex-start; gap: 15px; }
-    .action-group { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-    .action-btn-pay, .action-btn-upload { width: 100%; justify-content: center; padding: 12px; font-size: 1rem; }
+    /* BLOCK 3: ACTION BUTTONS */
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        padding-bottom: 20px;
+    }
+    .action-group {
+        width: 100%;
+        display: flex;
+        flex-direction: column; /* Stack buttons vertically */
+        gap: 12px;
+    }
+    /* Make buttons big and touchable */
+    .action-btn-pay, .action-btn-upload {
+        width: 100%;
+        justify-content: center;
+        padding: 14px; /* Taller button for thumbs */
+        font-size: 1rem;
+    }
 
-    /* Card View Tables */
+    /* BLOCK 4: HISTORY CARDS */
+    /* Transform table rows into separate block cards */
     .portal-table thead { display: none; }
+
     .portal-table tr {
-        display: block; background: rgba(255, 255, 255, 0.03); margin-bottom: 15px;
-        border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); padding: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        display: block;
+        background: rgba(255, 255, 255, 0.05); /* Lighter background */
+        margin-bottom: 15px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Subtle drop shadow */
     }
+
     .portal-table td {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); text-align: right;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        text-align: right;
     }
-    .portal-table td:last-child { border-bottom: none; }
+    .portal-table td:last-child { border-bottom: none; padding-bottom: 0; }
+
     .portal-table td::before {
-        content: attr(data-label); font-size: 0.75rem; text-transform: uppercase;
-        color: var(--text-muted); font-weight: 700;
+        content: attr(data-label);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--primary); /* Green labels for better contrast */
+        font-weight: 700;
     }
 }
