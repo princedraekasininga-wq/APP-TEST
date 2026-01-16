@@ -511,12 +511,12 @@ window.openReceipt = function(loanId) {
   const loan = state.loans.find(l => l.id == loanId);
   if (!loan) return;
 
-  // 1. Get Payment History (Newest first)
+  // 1. Get Payment History
   const history = state.repayments
       .filter(r => r.loanId === loan.id)
       .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  // 2. Define Colors & Status Text
+  // 2. Define Colors & Status
   let statusColor = "#333";
   let statusText = loan.status;
 
@@ -528,26 +528,22 @@ window.openReceipt = function(loanId) {
   }
 
   // 3. Create the Receipt Window
-  const printWindow = window.open('', '', 'width=600,height=800');
+  const printWindow = window.open('', '', 'width=600,height=850');
   printWindow.document.write(`
     <!DOCTYPE html>
     <html>
       <head>
         <title>Receipt #${loan.id}</title>
         <style>
-          /* FORCE A5 SIZE */
           @page { size: A5 portrait; margin: 0; }
 
           body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #1e293b;
-            background: white;
-            padding: 30px;
-            margin: 0 auto;
+            color: #1e293b; background: white; padding: 30px; margin: 0 auto;
             -webkit-print-color-adjust: exact;
           }
 
-          /* HEADER */
+          /* HEADER & BRANDING */
           .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 25px; }
           .brand { display: flex; align-items: center; gap: 12px; }
           .brand img { height: 45px; width: auto; }
@@ -558,35 +554,32 @@ window.openReceipt = function(loanId) {
           .meta-item { font-size: 12px; color: #64748b; margin-bottom: 3px; }
           .meta-item strong { color: #0f172a; }
 
-          /* DETAILS BOX */
+          /* INFO BOXES */
           .details-box { display: flex; justify-content: space-between; margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9; }
-
           .col h3 { font-size: 10px; text-transform: uppercase; color: #94a3b8; margin: 0 0 10px 0; letter-spacing: 0.5px; font-weight: 700; }
           .info-group { margin-bottom: 8px; }
           .info-label { font-size: 10px; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
           .info-val { font-size: 14px; font-weight: 600; color: #334155; }
 
-          /* SUMMARY TABLE */
+          /* TABLE */
           table { width: 100%; border-collapse: collapse; margin-bottom: 10px; margin-top: 10px; }
           th { text-align: left; font-size: 10px; text-transform: uppercase; color: #64748b; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
           td { padding: 10px 0; font-size: 14px; border-bottom: 1px solid #f1f5f9; color: #334155; }
           .text-right { text-align: right; }
-
           .total-row td { border-top: 2px solid #0f172a; border-bottom: none; font-weight: 700; font-size: 16px; color: #0f172a; padding-top: 15px; }
           .balance-row td { color: ${statusColor}; font-size: 18px; }
 
-          /* PAYMENT HISTORY */
-          .history-section { margin-top: 35px; }
+          /* TERMS (Kept as requested) */
+          .terms { margin-top: 25px; font-size: 9px; color: #94a3b8; text-align: justify; line-height: 1.4; border-top: 1px solid #f1f5f9; padding-top: 10px; }
+
+          /* HISTORY */
+          .history-section { margin-top: 25px; }
           .history-header { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px; }
           .history-row { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; padding: 5px 0; border-bottom: 1px dashed #f1f5f9; }
 
-          /* THANK YOU MESSAGE */
-          .thank-you { text-align: center; margin-top: 40px; font-size: 13px; font-weight: 600; color: #1e293b; letter-spacing: 0.5px; }
+          .thank-you { text-align: center; margin-top: 30px; font-size: 13px; font-weight: 600; color: #1e293b; }
+          .footer { margin-top: 10px; text-align: center; font-size: 10px; color: #cbd5e1; }
 
-          /* FOOTER */
-          .footer { margin-top: 15px; text-align: center; font-size: 10px; color: #cbd5e1; border-top: 1px solid #f1f5f9; padding-top: 15px; }
-
-          /* BUTTON (Hidden when printing) */
           .no-print { margin-top: 30px; text-align: center; }
           .btn { background: #0f172a; color: white; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-size: 14px; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
           @media print { .no-print { display: none; } body { padding: 0; margin: 20px; } }
@@ -621,7 +614,6 @@ window.openReceipt = function(loanId) {
                 <div class="info-val">${loan.collateralItem}</div>
             </div>
           </div>
-
           <div class="col" style="text-align:right;">
             <h3>Loan Terms</h3>
             <div class="info-group">
@@ -640,46 +632,29 @@ window.openReceipt = function(loanId) {
             <tr><th>Description</th><th class="text-right">Amount</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Principal Loan Amount</td>
-              <td class="text-right">${formatMoney(loan.amount)}</td>
-            </tr>
-            <tr>
-              <td>Interest & Fees (${loan.plan})</td>
-              <td class="text-right">${formatMoney(loan.totalDue - loan.amount)}</td>
-            </tr>
-            <tr>
-              <td><strong>Total Repayment Due</strong></td>
-              <td class="text-right"><strong>${formatMoney(loan.totalDue)}</strong></td>
-            </tr>
-            <tr>
-              <td style="color:#16a34a;">Less: Total Amount Paid</td>
-              <td class="text-right" style="color:#16a34a;">- ${formatMoney(loan.paid)}</td>
-            </tr>
-            <tr class="total-row balance-row">
-              <td>Remaining Balance</td>
-              <td class="text-right">${formatMoney(loan.balance)}</td>
-            </tr>
+            <tr><td>Principal Loan Amount</td><td class="text-right">${formatMoney(loan.amount)}</td></tr>
+            <tr><td>Interest & Fees (${loan.plan})</td><td class="text-right">${formatMoney(loan.totalDue - loan.amount)}</td></tr>
+            <tr><td><strong>Total Repayment Due</strong></td><td class="text-right"><strong>${formatMoney(loan.totalDue)}</strong></td></tr>
+            <tr><td style="color:#16a34a;">Less: Total Amount Paid</td><td class="text-right" style="color:#16a34a;">- ${formatMoney(loan.paid)}</td></tr>
+            <tr class="total-row balance-row"><td>Remaining Balance</td><td class="text-right">${formatMoney(loan.balance)}</td></tr>
           </tbody>
         </table>
+
+        <div class="terms">
+           <strong>Terms & Conditions:</strong> By accepting this loan, you agree that failure to repay by the due date may result in the forfeiture and sale of the collateral item listed above to recover the loan amount. Late payments may attract additional penalties.
+        </div>
 
         ${history.length > 0 ? `
           <div class="history-section">
             <div class="history-header">Payment History</div>
             ${history.map(h => `
-              <div class="history-row">
-                <span>${formatDate(h.date)} &nbsp; &mdash; &nbsp; Payment Received</span>
-                <span>${formatMoney(h.amount)}</span>
-              </div>
+              <div class="history-row"><span>${formatDate(h.date)} &nbsp; &mdash; &nbsp; Payment Received</span><span>${formatMoney(h.amount)}</span></div>
             `).join('')}
           </div>
         ` : ''}
 
         <div class="thank-you">Thank you for your business!</div>
-
-        <div class="footer">
-          Generated by Stallz Loans Administrator
-        </div>
+        <div class="footer">Generated by Stallz Loans Administrator</div>
 
         <div class="no-print">
             <button class="btn" onclick="window.print()">Print / Save as PDF</button>
