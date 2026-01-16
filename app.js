@@ -521,9 +521,9 @@ window.openReceipt = function(loanId) {
   if (loan.balance <= 0) { statusColor = "#16a34a"; statusText = "PAID IN FULL"; }
   else if (loan.status === "OVERDUE") { statusColor = "#dc2626"; }
 
-  // 2. Build the Receipt HTML
+  // 2. Build the Receipt HTML (Fixed Width Design)
   const receiptHTML = `
-    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; padding: 30px; width: 100%; background: white; position: relative;">
+    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; padding: 30px; width: 100%; box-sizing: border-box;">
 
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;">
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -586,16 +586,38 @@ window.openReceipt = function(loanId) {
     </div>
   `;
 
-  // 3. Insert into Modal and Show
+  // 3. Inject Content
   const contentBox = document.getElementById("receiptContent");
   contentBox.innerHTML = receiptHTML;
 
   const modal = document.getElementById("receiptModal");
   modal.classList.remove("modal-hidden");
 
-  // 4. Attach Download Handler
+  // 4. SMART SCALING (The Fix for Mobile)
+  // 148mm is approx 560px. We check the user's screen width and shrink the receipt to fit.
+  setTimeout(() => {
+    const wrapper = document.getElementById("receiptWrapper");
+    const receiptWidth = 560; // Approx pixel width of A5
+    const screenWidth = window.innerWidth - 30; // 30px padding buffer
+
+    if (screenWidth < receiptWidth) {
+      const scale = screenWidth / receiptWidth;
+      // We scale the content down to fit
+      contentBox.style.transform = `scale(${scale})`;
+      contentBox.style.transformOrigin = "top center";
+      // We adjust the wrapper height because 'scale' doesn't physically shrink the div flow
+      wrapper.style.height = `${contentBox.offsetHeight * scale}px`;
+      wrapper.style.width = `${receiptWidth * scale}px`; // Force wrapper to fit scaled width
+    } else {
+      contentBox.style.transform = "none";
+      wrapper.style.height = "auto";
+      wrapper.style.width = "auto";
+    }
+  }, 50);
+
+  // 5. Download PDF Handler
   document.getElementById("downloadPdfBtn").onclick = function() {
-      showToast("Downloading PDF...", "success");
+      showToast("Generating PDF...", "success");
 
       const opt = {
         margin: 0,
@@ -605,7 +627,9 @@ window.openReceipt = function(loanId) {
         jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
       };
 
-      // Capture the element currently VISIBLE in the modal
+      // We pass 'contentBox' (the clean A5 div) to the generator.
+      // html2pdf usually ignores the CSS transform scaling, which is exactly what we want.
+      // It will print the full high-res receipt.
       html2pdf().from(contentBox).set(opt).save();
   };
 };
