@@ -23,34 +23,23 @@
             </div>
 
             <div class="rates-ticker">
-                <div class="rate-item">
-                    <span class="rate-percent">20%</span>
-                    <span class="rate-duration">1 Wk</span>
-                </div>
-                <div class="rate-item">
-                    <span class="rate-percent">30%</span>
-                    <span class="rate-duration">2 Wks</span>
-                </div>
-                <div class="rate-item">
-                    <span class="rate-percent">35%</span>
-                    <span class="rate-duration">3 Wks</span>
-                </div>
-                <div class="rate-item">
-                    <span class="rate-percent">40%</span>
-                    <span class="rate-duration">1 Mth</span>
-                </div>
+                <div class="rate-item"><span class="rate-percent">20%</span><span class="rate-duration">1 Wk</span></div>
+                <div class="rate-item"><span class="rate-percent">30%</span><span class="rate-duration">2 Wks</span></div>
+                <div class="rate-item"><span class="rate-percent">35%</span><span class="rate-duration">3 Wks</span></div>
+                <div class="rate-item"><span class="rate-percent">40%</span><span class="rate-duration">1 Mth</span></div>
             </div>
 
             <div class="header-right">
-                <div class="user-greeting-box">
-                    <div id="greetingText" class="greeting-sub">Welcome,</div>
-                    <h1 id="portalClientName" class="client-name-tiny">Loading...</h1>
-                </div>
                 <button class="profile-btn" onclick="openProfileModal()">
                     <i class="fas fa-user-cog"></i>
                 </button>
             </div>
         </header>
+
+        <div class="greeting-section">
+            <span id="greetingText" class="greeting-sub">Welcome back,</span>
+            <h1 id="portalClientName" class="client-name-main">Loading...</h1>
+        </div>
 
         <p class="mobile-swipe-hint"><i class="fas fa-arrow-right"></i> Swipe for details</p>
 
@@ -175,7 +164,8 @@
     </div>
 
     <div id="requestModal" class="modal-overlay">
-        <div class="modal-glass modal-large"> <div class="modal-header">
+        <div class="modal-glass modal-large">
+            <div class="modal-header">
                 <h3>Apply for Loan</h3>
                 <button onclick="closeRequestModal()" class="close-btn">&times;</button>
             </div>
@@ -233,7 +223,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
     <script src="client-portal.js"></script>
 </body>
 </html>

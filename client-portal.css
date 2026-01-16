@@ -63,7 +63,7 @@ body.day-mode {
 }
 
 /* ==========================================================================
-   2. GLOBAL RESETS
+   2. GLOBAL RESETS & BACKGROUND
    ========================================================================== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -121,11 +121,11 @@ body::after {
 }
 
 /* ==========================================================================
-   4. HEADER SECTION (Logo + Brand + Rates + Profile)
+   4. HEADER SECTION (Brand + Rates + Settings)
    ========================================================================== */
 .glass-header {
     padding: 15px 25px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -155,13 +155,8 @@ body::after {
 .rate-percent { font-size: 1rem; font-weight: 700; color: var(--primary); }
 .rate-duration { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
 
-/* Right: User Info */
-.header-right { display: flex; align-items: center; gap: 15px; }
-.user-greeting-box { text-align: right; }
-.greeting-sub { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px; }
-.client-name-tiny {
-    font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--text-main); white-space: nowrap;
-}
+/* Right: Profile Button */
+.header-right { display: flex; align-items: center; gap: 0; }
 
 .profile-btn {
     width: 40px; height: 40px; border-radius: 50%; background: var(--glass-bg);
@@ -171,7 +166,34 @@ body::after {
 .profile-btn:hover { color: white; border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
 
 /* ==========================================================================
-   5. HERO & STATS SECTION
+   5. NEW: GREETING SECTION (Standalone)
+   ========================================================================== */
+.greeting-section {
+    margin-bottom: 25px;
+    padding: 0 10px;
+    text-align: left;
+}
+
+.greeting-sub {
+    font-size: 0.9rem;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.client-name-main {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.1;
+}
+
+/* ==========================================================================
+   6. HERO & STATS SECTION
    ========================================================================== */
 .mobile-swipe-hint {
     display: none; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; text-align: right;
@@ -204,7 +226,7 @@ body::after {
 .money-text { font-size: 1.3rem; font-weight: 700; color: var(--text-main); }
 
 /* ==========================================================================
-   6. ACTIONS & HISTORY
+   7. ACTIONS & HISTORY
    ========================================================================== */
 .panel-header {
     display: flex; justify-content: space-between; align-items: center; padding: 20px;
@@ -237,7 +259,7 @@ body::after {
 }
 
 /* ==========================================================================
-   7. TABLE & STATUS
+   8. TABLE & STATUS
    ========================================================================== */
 .table-responsive { overflow-x: auto; }
 .portal-table { width: 100%; border-collapse: collapse; min-width: 500px; }
@@ -253,7 +275,7 @@ body::after {
 .status-overdue { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
 
 /* ==========================================================================
-   8. MODALS & FORMS
+   9. MODALS & FORMS
    ========================================================================== */
 .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
@@ -292,7 +314,7 @@ body::after {
 }
 
 /* ==========================================================================
-   9. COUNTDOWN RING
+   10. COUNTDOWN RING
    ========================================================================== */
 .countdown-card { position: relative; overflow: hidden; justify-content: center; }
 .ring-container { position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
@@ -306,29 +328,29 @@ body::after {
 @keyframes pulse-red { 0%, 100% { filter: drop-shadow(0 0 2px #ef4444); } 50% { filter: drop-shadow(0 0 10px #ef4444); } }
 
 /* ==========================================================================
-   10. MOBILE BLOCK LAYOUT (PHONE OPTIMIZED)
+   11. MOBILE ADJUSTMENTS (Layout & Logic)
    ========================================================================== */
 @media (max-width: 900px) {
-    /* Hide Rates on Tablets/Phones so header doesn't break */
+    /* Hide Rates on Tablets/Phones to prevent breaking layout */
     .rates-ticker { display: none; }
 }
 
 @media (max-width: 768px) {
     .portal-shell { padding: 10px; max-width: 100%; display: flex; flex-direction: column; gap: 20px; }
 
-    /* Optimized Mobile Header */
-    .glass-header { flex-direction: row; justify-content: space-between; padding: 15px; margin-bottom: 0; }
-    .header-left { gap: 8px; }
+    /* Header Layout */
+    .glass-header {
+        flex-direction: row; justify-content: space-between; padding: 15px; margin-bottom: 15px;
+    }
+
+    .brand-title { font-size: 1rem; }
     .header-left .logo-box { width: 35px; height: 35px; }
     .portal-logo { width: 20px; }
-    .brand-title { font-size: 1rem; } /* Smaller text for phone */
-
-    /* Hide specific desktop elements */
-    .header-center, .user-greeting-box { display: none; }
-
-    /* Profile Button Specifics */
-    .header-right { position: static; gap: 0; }
     .profile-btn { width: 35px; height: 35px; }
+
+    /* Greeting Section Mobile */
+    .greeting-section { margin-bottom: 20px; text-align: left; }
+    .client-name-main { font-size: 1.8rem; }
 
     /* Swipe Hint */
     .mobile-swipe-hint { display: block; margin-bottom: -15px; z-index: 10; }
