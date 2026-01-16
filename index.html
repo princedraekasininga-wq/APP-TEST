@@ -41,8 +41,6 @@
             <h1 id="portalClientName" class="client-name-main">Loading...</h1>
         </div>
 
-        <p class="mobile-swipe-hint"><i class="fas fa-arrow-right"></i> Swipe for details</p>
-
         <div class="hero-section">
             <div class="stat-card hero-card">
                 <div class="hero-ring-container">
@@ -64,40 +62,25 @@
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card blue-glow">
-                <div class="icon-box"><i class="fas fa-wallet"></i></div>
+            <div class="stat-card blue-glow compact-card">
+                <div class="icon-box small-icon"><i class="fas fa-wallet"></i></div>
                 <div class="stat-info">
-                    <p class="label">Current Balance</p>
-                    <h3 class="money-text" id="portalTotalDebt">K0.00</h3>
+                    <p class="label small-label">Balance</p>
+                    <h3 class="money-text small-money" id="portalTotalDebt">K0.00</h3>
                 </div>
             </div>
 
-            <div class="stat-card green-glow">
-                <div class="icon-box"><i class="fas fa-check-double"></i></div>
+            <div class="stat-card green-glow compact-card">
+                <div class="icon-box small-icon"><i class="fas fa-check-double"></i></div>
                 <div class="stat-info">
-                    <p class="label">Total Repaid</p>
-                    <h3 class="money-text" id="portalTotalPaid">K0.00</h3>
+                    <p class="label small-label">Paid</p>
+                    <h3 class="money-text small-money" id="portalTotalPaid">K0.00</h3>
                 </div>
             </div>
         </div>
 
-        <section class="glass-panel">
-            <div class="panel-header">
+        <section class="glass-panel" style="margin-bottom: 80px;"> <div class="panel-header">
                 <h2><i class="fas fa-history"></i> Loan History</h2>
-
-                <div class="action-group">
-                    <button onclick="openRequestModal()" class="action-btn-request">
-                        <i class="fas fa-hand-holding-usd"></i> Request Loan
-                    </button>
-
-                    <button onclick="openUploadModal()" class="action-btn-upload">
-                        <i class="fas fa-file-upload"></i> Sent Payment?
-                    </button>
-
-                    <a href="https://wa.me/260970000000?text=Hello,%20I%20would%20like%20to%20make%20a%20payment%20on%20my%20loan." target="_blank" class="action-btn-pay">
-                        <i class="fab fa-whatsapp"></i> Pay Now
-                    </a>
-                </div>
             </div>
 
             <div class="table-responsive">
@@ -121,6 +104,22 @@
 
     </div>
 
+    <nav class="mobile-bottom-nav">
+        <a href="#" class="nav-item" onclick="openRequestModal()">
+            <div class="nav-icon"><i class="fas fa-hand-holding-usd"></i></div>
+            <span class="nav-label">Request</span>
+        </a>
+
+        <a href="#" class="nav-item center-item" onclick="openCalcModal()">
+            <div class="nav-icon big-nav-icon"><i class="fas fa-calculator"></i></div>
+            </a>
+
+        <a href="#" class="nav-item" onclick="openUploadModal()">
+            <div class="nav-icon"><i class="fas fa-camera"></i></div>
+            <span class="nav-label">Proof</span>
+        </a>
+    </nav>
+
     <div id="profileModal" class="modal-overlay">
         <div class="modal-glass">
             <div class="modal-header">
@@ -137,8 +136,48 @@
                     </div>
                 </div>
                 <hr class="divider">
-                <p class="info-text">To update these details, please contact Stallz Loans admin support directly.</p>
                 <button onclick="closeProfileModal()" class="btn-full">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="calcModal" class="modal-overlay">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3>Loan Estimator</h3>
+                <button onclick="closeCalcModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="calc-group">
+                    <div class="calc-label-row">
+                        <label>I want to borrow</label>
+                        <span class="calc-value-display" id="calcAmountDisplay">K500</span>
+                    </div>
+                    <input type="range" min="100" max="5000" step="50" value="500" class="calc-slider" id="calcRange">
+                </div>
+
+                <div class="calc-group">
+                    <label style="display:block; margin-bottom:10px; font-size:0.8rem; color:var(--text-muted)">Duration</label>
+                    <div class="duration-toggles" id="durationSelector">
+                        <button class="dur-btn active" data-rate="0.20">1 Wk</button>
+                        <button class="dur-btn" data-rate="0.30">2 Wk</button>
+                        <button class="dur-btn" data-rate="0.35">3 Wk</button>
+                        <button class="dur-btn" data-rate="0.40">1 Mo</button>
+                    </div>
+                </div>
+
+                <div class="calc-result-box">
+                    <div class="result-row">
+                        <span>Interest</span>
+                        <span id="calcInterestDisplay" style="color:var(--primary)">20%</span>
+                    </div>
+                    <div class="result-row total-row">
+                        <span>Repay</span>
+                        <span id="calcTotalDisplay">K600.00</span>
+                    </div>
+                </div>
+
+                <button onclick="applyFromCalc()" class="btn-full">Apply Now</button>
             </div>
         </div>
     </div>
@@ -170,53 +209,41 @@
                 <button onclick="closeRequestModal()" class="close-btn">&times;</button>
             </div>
             <div class="modal-body scrollable-body">
-
                 <div class="form-group">
                     <label>Amount Needed (K)</label>
                     <input type="number" id="reqAmount" placeholder="e.g. 500" class="input-field">
                 </div>
-
                 <div class="form-group">
                     <label>Collateral Item</label>
-                    <input type="text" id="reqCollateral" placeholder="e.g. Samsung 55' TV" class="input-field">
+                    <input type="text" id="reqCollateral" placeholder="e.g. Samsung TV" class="input-field">
                 </div>
-
                 <div class="form-group">
-                    <label>Estimated Value (K)</label>
+                    <label>Value (K)</label>
                     <input type="number" id="reqValue" placeholder="e.g. 2500" class="input-field">
                 </div>
-
                 <hr class="divider">
-
                 <div class="nrc-section">
-                    <p class="section-label">Identity (One Time)</p>
                     <div class="checkbox-wrapper">
                         <input type="checkbox" id="nrcExists" onchange="toggleNRCUploads()">
-                        <label for="nrcExists">I have already submitted my NRC</label>
+                        <label for="nrcExists">NRC already on file</label>
                     </div>
-
                     <div id="nrcUploadContainer" class="upload-grid">
                         <div class="upload-box" onclick="document.getElementById('nrcFrontFile').click()">
-                            <i class="fas fa-id-card"></i> <span>NRC Front</span>
+                            <i class="fas fa-id-card"></i> <span>Front</span>
                             <input type="file" id="nrcFrontFile" hidden accept="image/*">
                         </div>
                         <div class="upload-box" onclick="document.getElementById('nrcBackFile').click()">
-                            <i class="fas fa-id-card"></i> <span>NRC Back</span>
+                            <i class="fas fa-id-card"></i> <span>Back</span>
                             <input type="file" id="nrcBackFile" hidden accept="image/*">
                         </div>
                     </div>
                 </div>
-
-                <p class="section-label" style="margin-top:15px">Collateral Photos</p>
+                <p class="section-label" style="margin-top:15px">Collateral Photo</p>
                 <div class="upload-zone small-zone" onclick="document.getElementById('collateralFile').click()">
-                    <i class="fas fa-camera"></i>
-                    <p>Add Photo of Item</p>
+                    <i class="fas fa-camera"></i> <p>Add Photo</p>
                     <input type="file" id="collateralFile" hidden accept="image/*">
                 </div>
-
-                <button onclick="submitLoanRequest()" class="btn-full" id="requestBtn">
-                    Submit Application
-                </button>
+                <button onclick="submitLoanRequest()" class="btn-full" id="requestBtn">Submit</button>
             </div>
         </div>
     </div>
