@@ -180,32 +180,64 @@ body::after {
 }
 
 /* ==========================================================================
-   6. LAYOUT: HERO COUNTDOWN
+   6. LAYOUT: HERO COUNTDOWN (Cleaned Up)
    ========================================================================== */
 .hero-section { margin-bottom: 20px; }
-.hero-card { flex-direction: column; justify-content: center; text-align: center; padding: 30px; }
+
+.hero-card {
+    flex-direction: column; justify-content: center; text-align: center; padding: 30px;
+    /* Subtle Gradient that works on both dark/light */
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, rgba(74, 222, 128, 0.05) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative; overflow: hidden;
+}
 
 .hero-ring-container {
     position: relative; width: 140px; height: 140px;
     display: flex; align-items: center; justify-content: center; margin-bottom: 15px;
+    z-index: 2;
 }
-.hero-ring-text { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; }
-.hero-days-num { font-size: 2.2rem; font-weight: 700; color: var(--text-main); }
-.hero-days-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; }
 
-.hero-date-text { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+.hero-ring-text {
+    position: absolute; display: flex; flex-direction: column;
+    align-items: center; line-height: 1;
+}
+
+.hero-days-num {
+    font-size: 2.5rem; font-weight: 800; color: var(--text-main);
+    /* Glow only applied in Night Mode via body class logic if needed, removed here for cleanness */
+}
+
+.hero-days-label {
+    font-size: 0.75rem; text-transform: uppercase; color: var(--primary);
+    letter-spacing: 2px; font-weight: 700; margin-top: 5px;
+}
+
+.hero-date-text {
+    font-size: 1.5rem; font-weight: 700; color: var(--text-main); z-index: 2;
+}
 
 /* SVG Progress Ring */
-.progress-ring__circle {
-    transition: stroke-dashoffset 0.5s ease-in-out, stroke 0.3s;
-    transform: rotate(-90deg); transform-origin: 50% 50%;
-    stroke-linecap: round; filter: drop-shadow(0 0 4px currentColor);
-}
-.ring-safe { stroke: #22c55e; color: #22c55e; }
-.ring-warning { stroke: #f59e0b; color: #f59e0b; }
-.ring-danger { stroke: #ef4444; color: #ef4444; animation: pulse-red 2s infinite; }
-@keyframes pulse-red { 0%, 100% { filter: drop-shadow(0 0 2px #ef4444); } 50% { filter: drop-shadow(0 0 10px #ef4444); } }
+.progress-ring__bg { stroke: rgba(128, 128, 128, 0.1); } /* Grey track for better visibility */
 
+.progress-ring__circle {
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transform-box: fill-box; /* FIX: Prevents wobble in some browsers */
+    stroke-linecap: round;
+}
+
+/* Urgency Colors */
+.ring-safe { stroke: #4ade80; filter: drop-shadow(0 0 4px #4ade80); }
+.ring-warning { stroke: #fbbf24; filter: drop-shadow(0 0 4px #fbbf24); }
+.ring-danger { stroke: #f87171; animation: pulse-red 2s infinite; }
+
+@keyframes pulse-red {
+    0% { filter: drop-shadow(0 0 2px #f87171); }
+    50% { filter: drop-shadow(0 0 8px #f87171); }
+    100% { filter: drop-shadow(0 0 2px #f87171); }
+}
 /* ==========================================================================
    7. LAYOUT: STATS GRID
    ========================================================================== */
@@ -356,40 +388,51 @@ body::after {
 .big-nav-icon i { font-size: 1.4rem; margin: 0; }
 
 /* ==========================================================================
-   12. RESPONSIVE DESIGN (Mobile Overrides)
+   12. RESPONSIVE DESIGN (Mobile Overrides - FIXED)
    ========================================================================== */
 @media (max-width: 900px) {
-    /* Hide desktop rates ticker */
     .rates-ticker { display: none; }
 }
 
 @media (max-width: 768px) {
-    .portal-shell { padding: 10px; }
+    .portal-shell { padding: 15px 15px 100px 15px; /* Added bottom padding for Nav */ }
 
     /* Header */
-    .glass-header { margin-bottom: 15px; }
+    .glass-header { margin-bottom: 15px; padding: 15px; }
     .header-center { display: none; }
     .brand-title { font-size: 1rem; }
     .header-left .logo-box, .profile-btn { width: 35px; height: 35px; }
     .portal-logo { width: 20px; }
 
     /* Greeting */
-    .greeting-section { text-align: left; }
+    .greeting-section { text-align: left; margin-bottom: 20px; padding: 0 5px; }
     .client-name-main { font-size: 1.8rem; }
 
-    /* Compact Stats for Mobile */
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; overflow-x: visible; }
-    .stat-card.compact-card { padding: 15px; gap: 10px; }
-    .small-icon { width: 35px; height: 35px; font-size: 1rem; }
-    .small-label { font-size: 0.7rem; margin-bottom: 2px; }
-    .small-money { font-size: 1.1rem; }
+    /* COMPACT STATS (The Fix: Vertical Layout) */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .stat-card.compact-card {
+        padding: 15px;
+        gap: 8px;
+        flex-direction: column; /* Icon on top */
+        align-items: flex-start; /* Left align */
+        text-align: left;
+    }
+    .small-icon {
+        width: 35px; height: 35px; font-size: 1rem; margin-bottom: 5px;
+    }
+    .small-label { font-size: 0.75rem; margin-bottom: 0; opacity: 0.8; }
+    .small-money { font-size: 1.2rem; }
 
-    /* Action Buttons in Panel (Stack them) */
+    /* Action Buttons in Panel */
     .panel-header { flex-direction: column; align-items: flex-start; gap: 15px; }
     .action-group { width: 100%; flex-direction: column; }
     .action-btn-pay, .action-btn-upload, .action-btn-request { width: 100%; justify-content: center; }
 
-    /* Mobile Table (Cards) */
+    /* Mobile Table Cards */
     .portal-table thead { display: none; }
     .portal-table tr {
         display: block; background: var(--glass-bg); margin-bottom: 15px;
@@ -404,6 +447,5 @@ body::after {
         content: attr(data-label); font-size: 0.75rem; color: var(--primary); font-weight: 700;
     }
 
-    /* Show Swipe Hint */
-    .mobile-swipe-hint { display: block; margin-bottom: -15px; z-index: 10; }
+    .mobile-swipe-hint { display: none; }
 }
