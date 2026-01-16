@@ -511,39 +511,185 @@ window.openReceipt = function(loanId) {
   const loan = state.loans.find(l => l.id == loanId);
   if (!loan) return;
 
-  const printWindow = window.open('', '', 'width=400,height=600');
+  // 1. Get Payment History (Newest first)
+  const history = state.repayments
+      .filter(r => r.loanId === loan.id)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  // 2. Define Colors & Status Text
+  let statusColor = "#333";
+  let statusText = loan.status;
+
+  if (loan.balance <= 0) {
+      statusColor = "#16a34a";
+      statusText = "PAID IN FULL";
+  } else if (loan.status === "OVERDUE") {
+      statusColor = "#dc2626";
+  }
+
+  // 3. Create the Receipt Window
+  const printWindow = window.open('', '', 'width=600,height=800');
   printWindow.document.write(`
+    <!DOCTYPE html>
     <html>
       <head>
+        <title>Receipt #${loan.id}</title>
         <style>
-          body { font-family: monospace; padding: 20px; text-align: center; }
-          .header { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 10px; }
-          .row { display: flex; justify-content: space-between; margin: 5px 0; }
-          .footer { margin-top: 20px; border-top: 1px solid #000; padding-top: 10px; font-size: 0.8em; }
+          /* FORCE A5 SIZE */
+          @page { size: A5 portrait; margin: 0; }
+
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #1e293b;
+            background: white;
+            padding: 30px;
+            margin: 0 auto;
+            -webkit-print-color-adjust: exact;
+          }
+
+          /* HEADER */
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 25px; }
+          .brand { display: flex; align-items: center; gap: 12px; }
+          .brand img { height: 45px; width: auto; }
+          .brand-text h1 { margin: 0; font-size: 20px; color: #1e293b; text-transform: uppercase; letter-spacing: 1px; }
+          .brand-text p { margin: 2px 0 0; font-size: 11px; color: #64748b; }
+
+          .meta { text-align: right; }
+          .meta-item { font-size: 12px; color: #64748b; margin-bottom: 3px; }
+          .meta-item strong { color: #0f172a; }
+
+          /* DETAILS BOX */
+          .details-box { display: flex; justify-content: space-between; margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9; }
+
+          .col h3 { font-size: 10px; text-transform: uppercase; color: #94a3b8; margin: 0 0 10px 0; letter-spacing: 0.5px; font-weight: 700; }
+          .info-group { margin-bottom: 8px; }
+          .info-label { font-size: 10px; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
+          .info-val { font-size: 14px; font-weight: 600; color: #334155; }
+
+          /* SUMMARY TABLE */
+          table { width: 100%; border-collapse: collapse; margin-bottom: 10px; margin-top: 10px; }
+          th { text-align: left; font-size: 10px; text-transform: uppercase; color: #64748b; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
+          td { padding: 10px 0; font-size: 14px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+          .text-right { text-align: right; }
+
+          .total-row td { border-top: 2px solid #0f172a; border-bottom: none; font-weight: 700; font-size: 16px; color: #0f172a; padding-top: 15px; }
+          .balance-row td { color: ${statusColor}; font-size: 18px; }
+
+          /* PAYMENT HISTORY */
+          .history-section { margin-top: 35px; }
+          .history-header { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px; }
+          .history-row { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; padding: 5px 0; border-bottom: 1px dashed #f1f5f9; }
+
+          /* THANK YOU MESSAGE */
+          .thank-you { text-align: center; margin-top: 40px; font-size: 13px; font-weight: 600; color: #1e293b; letter-spacing: 0.5px; }
+
+          /* FOOTER */
+          .footer { margin-top: 15px; text-align: center; font-size: 10px; color: #cbd5e1; border-top: 1px solid #f1f5f9; padding-top: 15px; }
+
+          /* BUTTON (Hidden when printing) */
+          .no-print { margin-top: 30px; text-align: center; }
+          .btn { background: #0f172a; color: white; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-size: 14px; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+          @media print { .no-print { display: none; } body { padding: 0; margin: 20px; } }
         </style>
       </head>
       <body>
-        <div class="header">STALLZ LOANS<br>OFFICIAL RECEIPT</div>
-        <div class="row"><span>Date:</span> <span>${new Date().toLocaleDateString()}</span></div>
-        <div class="row"><span>Loan ID:</span> <span>#${loan.id}</span></div>
-        <div class="row"><span>Client:</span> <span>${loan.clientName}</span></div>
-        <br>
-        <div class="row"><span>Principal:</span> <span>${formatMoney(loan.amount)}</span></div>
-        <div class="row"><span>Plan:</span> <span>${loan.plan}</span></div>
-        <div class="row"><span>Total Due:</span> <span>${formatMoney(loan.totalDue)}</span></div>
-        <div class="row"><span>Paid So Far:</span> <span>${formatMoney(loan.paid)}</span></div>
-        <br>
-        <div class="row" style="font-weight:bold; font-size:1.1em;"><span>BALANCE:</span> <span>${formatMoney(loan.balance)}</span></div>
-        <div class="footer">
-          Generated by: ${state.user ? state.user.email : 'System'}<br>
-          Thank you for your business.
+
+        <div class="header">
+          <div class="brand">
+            <img src="my-logo.png" alt="Logo" onerror="this.style.display='none'">
+            <div class="brand-text">
+              <h1>Stallz Loans</h1>
+              <p>Quick, Easy, Reliable</p>
+            </div>
+          </div>
+          <div class="meta">
+            <div class="meta-item">Receipt #: <strong>${loan.id}</strong></div>
+            <div class="meta-item">Date: <strong>${new Date().toLocaleDateString()}</strong></div>
+            <div class="meta-item">Status: <strong style="color:${statusColor}">${statusText}</strong></div>
+          </div>
         </div>
-        <script>window.print();</script>
+
+        <div class="details-box">
+          <div class="col">
+            <h3>Client Details</h3>
+            <div class="info-group">
+                <div class="info-val" style="font-size:15px;">${loan.clientName}</div>
+                <div class="info-label">${loan.clientPhone || ''}</div>
+            </div>
+            <div class="info-group" style="margin-top:10px;">
+                <div class="info-label">Item</div>
+                <div class="info-val">${loan.collateralItem}</div>
+            </div>
+          </div>
+
+          <div class="col" style="text-align:right;">
+            <h3>Loan Terms</h3>
+            <div class="info-group">
+                <div class="info-label">Date Taken</div>
+                <div class="info-val">${formatDate(loan.startDate)}</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Due Date</div>
+                <div class="info-val" style="color:${statusColor}">${formatDate(loan.dueDate)}</div>
+            </div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr><th>Description</th><th class="text-right">Amount</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Principal Loan Amount</td>
+              <td class="text-right">${formatMoney(loan.amount)}</td>
+            </tr>
+            <tr>
+              <td>Interest & Fees (${loan.plan})</td>
+              <td class="text-right">${formatMoney(loan.totalDue - loan.amount)}</td>
+            </tr>
+            <tr>
+              <td><strong>Total Repayment Due</strong></td>
+              <td class="text-right"><strong>${formatMoney(loan.totalDue)}</strong></td>
+            </tr>
+            <tr>
+              <td style="color:#16a34a;">Less: Total Amount Paid</td>
+              <td class="text-right" style="color:#16a34a;">- ${formatMoney(loan.paid)}</td>
+            </tr>
+            <tr class="total-row balance-row">
+              <td>Remaining Balance</td>
+              <td class="text-right">${formatMoney(loan.balance)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        ${history.length > 0 ? `
+          <div class="history-section">
+            <div class="history-header">Payment History</div>
+            ${history.map(h => `
+              <div class="history-row">
+                <span>${formatDate(h.date)} &nbsp; &mdash; &nbsp; Payment Received</span>
+                <span>${formatMoney(h.amount)}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <div class="thank-you">Thank you for your business!</div>
+
+        <div class="footer">
+          Generated by Stallz Loans Administrator
+        </div>
+
+        <div class="no-print">
+            <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+        </div>
+
       </body>
     </html>
   `);
   printWindow.document.close();
-}
+};
 
 // ==========================================
 // 6. UI RENDERING
