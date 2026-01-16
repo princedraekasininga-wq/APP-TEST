@@ -1,50 +1,75 @@
 /* ==========================================================================
-   1. VARIABLES & THEME CONFIGURATION (CONTRAST FIXED)
+   1. VARIABLES & THEME CONFIGURATION (DEEP GLASS & POP)
    ========================================================================== */
 :root {
     /* --- NIGHT MODE (Default) --- */
     --bg-color: #020617;
-    --bg-gradient: radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 80%);
+    /* Richer gradient for depth */
+    --bg-gradient: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #020617 60%);
 
     --primary: #3b82f6;
-    --primary-glow: rgba(59, 130, 246, 0.5);
+    --primary-glow: rgba(59, 130, 246, 0.6);
 
-    --glass-bg: rgba(15, 23, 42, 0.7);
-    --glass-border-side: 1px solid rgba(255, 255, 255, 0.05);
+    /* FROSTED GLASS SETTINGS (Night) */
+    /* More transparent to let the blur show */
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-blur: blur(20px);
 
-    --text-main: #f8fafc; /* Bright White-Blue */
+    /* 3D LIGHTING BORDERS (The "Pop" Secret) */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+    --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.1); /* Inner light */
+
+    --text-main: #f8fafc;
     --text-muted: #94a3b8;
 
-    /* Icon backgrounds */
     --icon-bg: rgba(255, 255, 255, 0.05);
 
-    --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    /* DEEP DROP SHADOWS */
+    --card-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.3),
+        0 10px 15px -3px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05); /* Subtle outline ring */
+
+    --card-hover-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.4),
+        0 10px 10px -5px rgba(0, 0, 0, 0.3),
+        0 0 15px var(--primary-glow);
 }
 
-/* --- DAY MODE (High Contrast) --- */
+/* --- DAY MODE (High Contrast Glass) --- */
 body.day-mode {
-    --bg-color: #f1f5f9; /* Crisp Gray-White */
-    --bg-gradient: linear-gradient(180deg, #e2e8f0 0%, #f1f5f9 100%);
+    --bg-color: #f0f4f8;
+    --bg-gradient: linear-gradient(135deg, #e2e8f0 0%, #f1f5f9 100%);
 
     --primary: #2563eb;
-    --primary-glow: rgba(37, 99, 235, 0.15);
+    --primary-glow: rgba(37, 99, 235, 0.3);
 
-    /* Whiter Glass for Cards */
-    --glass-bg: rgba(255, 255, 255, 0.95); /* More opaque for readability */
-    --glass-border-side: 1px solid rgba(0, 0, 0, 0.05);
+    /* FROSTED GLASS SETTINGS (Day) */
+    --glass-bg: rgba(255, 255, 255, 0.7); /* Milky white glass */
+    --glass-blur: blur(25px);
 
-    /* Text Colors (Darkest Navy - Almost Black) */
-    --text-main: #020617;
-    --text-muted: #475569;
+    /* 3D LIGHTING BORDERS (Day) */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.8);
+    --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
 
-    /* Icon backgrounds (Darker for visibility) */
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+
     --icon-bg: rgba(0, 0, 0, 0.05);
 
-    --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    /* CRISP DROP SHADOWS */
+    --card-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 10px 15px -3px rgba(0, 0, 0, 0.05),
+        0 0 0 1px rgba(255, 255, 255, 0.6);
+
+    --card-hover-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* ==========================================================================
-   2. GLOBAL RESETS & BODY ANIMATIONS
+   2. GLOBAL RESETS & ANIMATED BACKGROUND
    ========================================================================== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -57,19 +82,21 @@ body {
     min-height: 100vh;
     padding-bottom: 50px;
     overflow-x: hidden;
-    transition: background 0.5s ease, color 0.5s ease; /* Smooth Theme Switch */
+    transition: background 0.5s ease;
 }
 
-/* Ambient Light Orbs */
+/* Moving Orbs - INCREASED OPACITY FOR FROST EFFECT */
 body::before {
-    content: ''; position: fixed; top: -20%; left: -10%; width: 600px; height: 600px;
-    background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
-    opacity: 0.4; z-index: -1; animation: floatLight 15s ease-in-out infinite alternate;
+    content: ''; position: fixed; top: -10%; left: -10%; width: 500px; height: 500px;
+    background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+    opacity: 0.25; z-index: -1; filter: blur(60px);
+    animation: floatLight 15s ease-in-out infinite alternate;
 }
 body::after {
-    content: ''; position: fixed; bottom: -10%; right: -10%; width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
-    opacity: 0.3; z-index: -1; animation: floatLight 20s ease-in-out infinite alternate-reverse;
+    content: ''; position: fixed; bottom: -10%; right: -10%; width: 400px; height: 400px;
+    background: radial-gradient(circle, #38bdf8 0%, transparent 70%); /* Cyan accent */
+    opacity: 0.2; z-index: -1; filter: blur(60px);
+    animation: floatLight 20s ease-in-out infinite alternate-reverse;
 }
 @keyframes floatLight {
     0% { transform: translate(0, 0) scale(1); }
@@ -79,157 +106,164 @@ body::after {
 .portal-shell { max-width: 800px; margin: 0 auto; padding: 20px; }
 
 /* ==========================================================================
-   3. SHARED GLASS COMPONENT STYLES
+   3. THE "POP" GLASS STYLES (Cards, Headers, Panels)
    ========================================================================== */
-.glass-header, .stat-card, .glass-panel {
+.glass-header, .stat-card, .glass-panel, .hero-card, .modal-glass {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    border-top: var(--glass-border-top);
-    border-left: var(--glass-border-side);
-    border-right: var(--glass-border-side);
-    border-bottom: var(--glass-border-bottom);
-    box-shadow: var(--card-shadow);
+
+    /* 3D Edges */
+    border: var(--glass-border);
+    box-shadow: var(--glass-highlight), var(--card-shadow);
+
     border-radius: 24px;
-    transition: background 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+/* Hover Effect: Lift up */
+.stat-card:hover, .hero-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--glass-highlight), var(--card-hover-shadow);
+    border-color: var(--primary); /* Highlight border on hover */
 }
 
 /* ==========================================================================
-   4. HEADER SECTION
+   4. HEADER SECTION (UPDATED)
    ========================================================================== */
 .glass-header {
-    padding: 15px 25px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between;
+    padding: 15px 25px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px; /* Space between the 3 main sections */
 }
-.header-left .logo-box {
-    width: 50px; height: 50px; background: var(--icon-bg); border-radius: 12px;
-    display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);
-}
-.portal-logo { width: 32px; height: auto; }
-.header-center { text-align: center; }
-.greeting-sub { font-size: 0.85rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 2px; }
 
-/* FIXED: Changed from 'white' to variable */
-.client-name-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
-    font-weight: 700;
+/* --- LEFT: Logo & Brand --- */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-left .logo-box {
+    width: 45px; height: 45px;
+    background: var(--icon-bg);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.portal-logo { width: 28px; height: auto; }
+
+.brand-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800; /* Extra Bold */
+    text-transform: uppercase;
     color: var(--text-main);
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* --- CENTER: Rates Ticker --- */
+.rates-ticker {
+    display: flex;
+    gap: 20px;
+    background: var(--icon-bg);
+    padding: 8px 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.rate-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     line-height: 1.1;
 }
 
+.rate-percent {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.rate-duration {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* --- RIGHT: User Info --- */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-greeting-box {
+    text-align: right;
+}
+
+.greeting-sub { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px; }
+
+.client-name-tiny {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
 .profile-btn {
-    width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #1e293b, #0f172a);
-    border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 1.1rem; cursor: pointer; transition: 0.3s;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-muted); font-size: 1rem; cursor: pointer; transition: 0.3s;
     display: flex; align-items: center; justify-content: center;
 }
 .profile-btn:hover { color: white; border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
 
+
 /* ==========================================================================
-   5. STATS GRID & SWIPE HINT
+   5. HERO & STATS SECTION
    ========================================================================== */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-.stat-card { padding: 20px; display: flex; align-items: center; gap: 15px; transition: transform 0.3s; }
-.stat-card:hover { transform: translateY(-5px); }
-
-/* FIXED: Icon bg is now dynamic */
-.icon-box {
-    width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; background: var(--icon-bg);
-}
-.blue-glow .icon-box { color: #60a5fa; box-shadow: 0 0 15px rgba(59, 130, 246, 0.15); }
-.green-glow .icon-box { color: #4ade80; box-shadow: 0 0 15px rgba(74, 222, 128, 0.15); }
-
-.stat-info .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-
-/* FIXED: Changed from 'white' to variable */
-.money-text { font-size: 1.3rem; font-weight: 700; color: var(--text-main); }
-
 .mobile-swipe-hint {
-    display: none; /* Hidden on Desktop */
-    font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; text-align: right;
+    display: none; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; text-align: right;
     animation: bounceRight 2s infinite;
 }
 @keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
 
-/* ==========================================================================
-   NEW HERO SECTION (Big Countdown)
-   ========================================================================== */
-.hero-section {
-    margin-bottom: 20px;
-}
-
+.hero-section { margin-bottom: 20px; }
 .hero-card {
-    flex-direction: column; /* Stack Ring on top of Text */
-    justify-content: center;
-    text-align: center;
-    padding: 30px;
-    background: var(--glass-bg); /* Use variable for Day/Night support */
+    flex-direction: column; justify-content: center; text-align: center; padding: 30px;
 }
-
 .hero-ring-container {
-    position: relative;
-    width: 140px;
-    height: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 15px;
+    position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;
 }
+.hero-ring-text { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.hero-days-num { font-size: 2.2rem; font-weight: 700; color: var(--text-main); }
+.hero-days-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; }
+.hero-date-text { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
 
-.hero-ring-text {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    line-height: 1;
+/* Bottom Grid */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+.stat-card { padding: 20px; display: flex; align-items: center; gap: 15px; }
+
+.icon-box {
+    width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; background: var(--icon-bg);
 }
+.blue-glow .icon-box { color: #60a5fa; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+.green-glow .icon-box { color: #4ade80; box-shadow: 0 0 15px rgba(74, 222, 128, 0.2); }
 
-.hero-days-num {
-    font-size: 2.2rem; /* Much bigger */
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.hero-days-label {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-}
-
-.hero-date-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-/* Adjust the bottom grid to be just 2 columns */
-.stats-grid {
-    grid-template-columns: 1fr 1fr; /* Force 2 columns */
-}
-
-/* MOBILE ADJUSTMENTS */
-@media (max-width: 768px) {
-    /* Keep Hero Card full width */
-    .hero-section { width: 100%; }
-
-    /* Keep the 2 bottom cards side-by-side even on mobile? */
-    /* Or stack them? Let's stack them for safety, or keep 2-col for compactness */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        overflow-x: visible; /* Disable swipe, just show them */
-    }
-
-    /* If you prefer them stacked on very small phones: */
-    @media (max-width: 480px) {
-        .stats-grid { grid-template-columns: 1fr; }
-    }
-}
+.stat-info .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.money-text { font-size: 1.3rem; font-weight: 700; color: var(--text-main); }
 
 /* ==========================================================================
-   6. ACTION BUTTONS (Upload & Pay)
+   6. ACTIONS & HISTORY
    ========================================================================== */
 .panel-header {
     display: flex; justify-content: space-between; align-items: center; padding: 20px;
@@ -244,6 +278,7 @@ body::after {
     color: white; text-decoration: none; padding: 8px 18px; border-radius: 30px;
     font-size: 0.85rem; font-weight: 700; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
     display: flex; align-items: center; gap: 8px; animation: pulse-green 2s infinite; transition: 0.2s;
+    border: 1px solid rgba(255,255,255,0.2);
 }
 @keyframes pulse-green {
     0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
@@ -251,15 +286,17 @@ body::after {
     100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
 }
 
-.action-btn-upload {
-    background: var(--icon-bg); border: 1px solid rgba(255, 255, 255, 0.2);
+.action-btn-upload, .action-btn-request {
+    background: var(--icon-bg); border: 1px solid rgba(255, 255, 255, 0.15);
     color: var(--text-main); padding: 8px 18px; border-radius: 30px; cursor: pointer;
     font-size: 0.85rem; font-weight: 600; transition: 0.3s;
 }
-.action-btn-upload:hover { border-color: var(--primary); color: var(--primary); }
+.action-btn-upload:hover, .action-btn-request:hover {
+    border-color: var(--primary); color: var(--primary); background: rgba(59, 130, 246, 0.1);
+}
 
 /* ==========================================================================
-   7. TABLE STYLES
+   7. TABLE & STATUS
    ========================================================================== */
 .table-responsive { overflow-x: auto; }
 .portal-table { width: 100%; border-collapse: collapse; min-width: 500px; }
@@ -267,244 +304,139 @@ body::after {
     text-align: left; padding: 15px 20px; font-size: 0.8rem; color: var(--text-muted);
     text-transform: uppercase; font-weight: 600; background: rgba(0,0,0,0.1);
 }
-/* FIXED: Changed from '#e2e8f0' to variable */
 .portal-table td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; color: var(--text-main); }
 
 .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
-
-/* Status Colors - Darkened for Day Mode visibility */
 .status-paid { background: rgba(34, 197, 94, 0.15); color: #16a34a; border: 1px solid rgba(34, 197, 94, 0.3); }
 .status-active { background: rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); }
 .status-overdue { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
 
 /* ==========================================================================
-   8. MODAL STYLES
+   8. MODALS & FORMS
    ========================================================================== */
 .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none;
-    align-items: center; justify-content: center; z-index: 1000;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); /* Blurs the whole screen */
+    display: none; align-items: center; justify-content: center; z-index: 1000;
 }
 .modal-glass {
-    background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
-    width: 90%; max-width: 350px; padding: 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    /* For Day Mode Modals */
-    color: white; /* Modals look better remaining dark in this theme, or you can use var(--text-main) */
+    width: 90%; max-width: 350px; padding: 25px; text-align: center;
+    /* Styles inherited from shared glass class, specific overrides here */
 }
+.modal-large { max-width: 450px; }
 .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+.close-btn { background: none; border: none; color: var(--text-main); font-size: 1.5rem; cursor: pointer; }
 
-/* FIXED: Changed from 'white' to variable */
-.close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+.form-group { margin-bottom: 15px; text-align: left; }
+.form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
+
+.input-field {
+    width: 100%; padding: 12px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px; color: var(--text-main); font-size: 1rem; outline: none;
+    transition: 0.3s;
+}
+.input-field:focus { border-color: var(--primary); background: rgba(0,0,0,0.3); }
+
+/* Upload Boxes */
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.upload-box, .upload-zone {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 10px; padding: 15px; text-align: center; cursor: pointer;
+    transition: 0.2s; font-size: 0.8rem; color: var(--text-muted);
+}
+.upload-box:hover, .upload-zone:hover { border-color: var(--primary); color: var(--primary); background: rgba(59, 130, 246, 0.05); }
 
 .big-avatar {
     width: 70px; height: 70px; background: rgba(255,255,255,0.05); border-radius: 50%;
     margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
 }
-.btn-full { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
-
-/* Upload Zone */
-.upload-zone {
-    border: 2px dashed rgba(255, 255, 255, 0.2); border-radius: 15px; padding: 30px;
-    text-align: center; cursor: pointer; margin-bottom: 15px; transition: 0.3s; color: var(--text-muted);
+.btn-full {
+    width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 15px var(--primary-glow);
 }
-.upload-zone:hover { border-color: var(--primary); color: var(--primary); background: rgba(74, 222, 128, 0.05); }
-.file-name-display { font-size: 0.8rem; color: var(--primary); margin-bottom: 15px; min-height: 20px; }
 
 /* ==========================================================================
-   9. COUNTDOWN TIMER STYLES
+   9. COUNTDOWN RING
    ========================================================================== */
 .countdown-card { position: relative; overflow: hidden; justify-content: center; }
-.ring-container { position: relative; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
+.ring-container { position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
 .progress-ring__circle {
     transition: stroke-dashoffset 0.5s ease-in-out, stroke 0.3s; transform: rotate(-90deg); transform-origin: 50% 50%;
-    stroke-linecap: round; filter: drop-shadow(0 0 2px currentColor);
+    stroke-linecap: round; filter: drop-shadow(0 0 4px currentColor);
 }
-.ring-text-box { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; }
-
-/* FIXED: Changed from 'white' to variable */
-.days-num { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
-.days-label { font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); }
-
 .ring-safe { stroke: #22c55e; color: #22c55e; }
 .ring-warning { stroke: #f59e0b; color: #f59e0b; }
 .ring-danger { stroke: #ef4444; color: #ef4444; animation: pulse-red 2s infinite; }
 @keyframes pulse-red { 0%, 100% { filter: drop-shadow(0 0 2px #ef4444); } 50% { filter: drop-shadow(0 0 10px #ef4444); } }
 
 /* ==========================================================================
-   10. MOBILE BLOCK LAYOUT (PHONE OPTIMIZED & THEME COMPATIBLE)
+   10. MOBILE BLOCK LAYOUT
    ========================================================================== */
 @media (max-width: 768px) {
+    .portal-shell { padding: 10px; max-width: 100%; display: flex; flex-direction: column; gap: 20px; }
 
-    .portal-shell {
-        padding: 10px;
-        max-width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    /* BLOCK 1: HEADER */
-    .glass-header {
-        flex-direction: row;
-        padding: 15px;
-        gap: 15px;
-        margin-bottom: 0;
-    }
-    .client-name-title { font-size: 1.4rem; }
+    .glass-header { flex-direction: row; padding: 15px; gap: 15px; margin-bottom: 0; }
     .header-right { position: static; }
-
-    /* BLOCK 2: STATS CAROUSEL */
-    .stats-grid {
-        display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        gap: 15px;
-        padding-bottom: 10px;
-        margin-right: -10px;
-        padding-right: 10px;
-        margin-bottom: 0;
-    }
-
-    .stat-card {
-        min-width: 85%;
-        scroll-snap-align: center;
-        margin: 0;
-        /* UPDATED: Uses variable so it changes color in Day/Night mode */
-        background: var(--glass-bg);
-        border: var(--glass-border-side);
-        backdrop-filter: blur(40px);
-    }
+    .client-name-title { font-size: 1.4rem; }
 
     .mobile-swipe-hint { display: block; margin-bottom: -15px; z-index: 10; }
 
-    /* BLOCK 3: ACTION BUTTONS */
-    .panel-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-        padding-bottom: 20px;
+    .stats-grid {
+        display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 15px;
+        padding-bottom: 15px; margin-right: -10px; padding-right: 10px;
     }
-    .action-group {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-    .action-btn-pay, .action-btn-upload {
-        width: 100%;
-        justify-content: center;
-        padding: 14px;
-        font-size: 1rem;
+    .stat-card {
+        min-width: 85%; scroll-snap-align: center; margin: 0;
+        /* Inherits glass style from shared class, specific mobile padding */
     }
 
-    /* BLOCK 4: HISTORY CARDS */
+    .panel-header { flex-direction: column; align-items: flex-start; gap: 15px; padding-bottom: 20px; }
+    .action-group { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+    .action-btn-pay, .action-btn-upload, .action-btn-request { width: 100%; justify-content: center; padding: 14px; font-size: 1rem; }
+
     .portal-table thead { display: none; }
-
     .portal-table tr {
         display: block;
-        /* UPDATED: Uses variable for Day/Night support */
+        /* Mobile blocks get the glass treatment too */
         background: var(--glass-bg);
-        margin-bottom: 15px;
-        border-radius: 16px;
-        border: var(--glass-border-side);
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    }
+        backdrop-filter: var(--glass-blur);
+        border: var(--glass-border);
+        box-shadow: var(--card-shadow);
 
+        margin-bottom: 15px; border-radius: 16px; padding: 20px;
+    }
     .portal-table td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle separator */
-        text-align: right;
-        /* UPDATED: Ensure text is visible in Day Mode */
-        color: var(--text-main);
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); text-align: right; color: var(--text-main);
     }
-
     .portal-table td:last-child { border-bottom: none; padding-bottom: 0; }
-
     .portal-table td::before {
-        content: attr(data-label);
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        color: var(--primary);
-        font-weight: 700;
+        content: attr(data-label); font-size: 0.75rem; text-transform: uppercase; color: var(--primary); font-weight: 700;
     }
 }
 
 /* ==========================================================================
-   11. REQUEST LOAN FORM STYLES
+   HEADER MOBILE ADJUSTMENTS (Paste at very bottom of file)
    ========================================================================== */
-
-/* The Blue Request Button */
-.action-btn-request {
-    background: rgba(59, 130, 246, 0.15);
-    border: 1px solid var(--primary);
-    color: var(--primary); /* Blue text */
-    padding: 8px 18px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 700;
-    transition: 0.3s;
-    display: flex; align-items: center; gap: 8px;
-}
-.action-btn-request:hover {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 0 15px var(--primary-glow);
+@media (max-width: 900px) {
+    /* Hide Rates on Tablets/Phones to prevent breaking layout */
+    .rates-ticker { display: none; }
 }
 
-/* Modal Form Elements */
-.modal-large { max-width: 450px; } /* Slightly wider */
-.scrollable-body { max-height: 70vh; overflow-y: auto; padding-right: 5px; }
-
-/* Custom Scrollbar for Modal */
-.scrollable-body::-webkit-scrollbar { width: 5px; }
-.scrollable-body::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 10px; }
-
-.form-group { margin-bottom: 15px; text-align: left; }
-.form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
-
-.input-field {
-    width: 100%;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    color: var(--text-main);
-    font-size: 1rem;
-    outline: none;
-}
-.input-field:focus { border-color: var(--primary); }
-
-/* NRC Section */
-.section-label { font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-align: left; }
-.checkbox-wrapper { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 0.85rem; color: var(--text-muted); }
-
-.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-.upload-box {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px dashed rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.2s;
-    font-size: 0.8rem; color: var(--text-muted);
-}
-.upload-box:hover { border-color: var(--primary); color: var(--primary); }
-.upload-box i { display: block; font-size: 1.5rem; margin-bottom: 5px; }
-
-.small-zone { padding: 20px; border-width: 1px; }
-
-/* Mobile Adjustments for the new button */
 @media (max-width: 768px) {
-    .action-btn-request {
-        width: 100%;
-        justify-content: center;
-        padding: 14px;
-        font-size: 1rem;
+    /* Override general header settings for the new 3-column layout */
+    .glass-header {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 15px;
     }
+
+    .brand-title { font-size: 1rem; }
+    .user-greeting-box { display: none; } /* Hide name on mobile header */
+
+    .header-left .logo-box { width: 35px; height: 35px; }
+    .portal-logo { width: 20px; }
 }
