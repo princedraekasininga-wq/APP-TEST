@@ -431,15 +431,18 @@
     </div>
   </div>
 
-  <div id="receiptModal" class="modal-overlay modal-hidden" style="z-index: 9999;">
-    <div class="modal" style="max-width: 500px; padding: 0; background: transparent; box-shadow: none; border: none;">
+  <div id="receiptModal" class="modal-overlay modal-hidden" style="z-index: 9999; padding: 15px;">
 
-      <div id="receiptContent" style="background: white; border-radius: 0; overflow: hidden; margin-bottom: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-        </div>
+    <div class="modal" style="width: 100%; max-width: 450px; background: transparent; box-shadow: none; border: none; display: flex; flex-direction: column; height: auto;">
 
-      <div style="display: flex; gap: 10px; justify-content: center;">
-        <button type="button" class="btn-secondary" onclick="document.getElementById('receiptModal').classList.add('modal-hidden')">Close</button>
-        <button type="button" id="downloadPdfBtn" class="btn">⬇ Save PDF</button>
+      <div style="display: flex; gap: 10px; margin-bottom: 15px; justify-content: center;">
+        <button type="button" class="btn-secondary" style="background:rgba(0,0,0,0.6); border:none; color:white; backdrop-filter:blur(4px);" onclick="document.getElementById('receiptModal').classList.add('modal-hidden')">Close</button>
+        <button type="button" id="downloadPdfBtn" class="btn" style="box-shadow: 0 4px 15px rgba(0,0,0,0.3);">⬇ Save PDF</button>
+      </div>
+
+      <div style="border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+          <div id="receiptContent" style="background: white; padding: 20px;">
+            </div>
       </div>
 
     </div>

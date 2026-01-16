@@ -520,91 +520,90 @@ window.openReceipt = function(loanId) {
   if (loan.balance <= 0) { statusColor = "#16a34a"; statusText = "PAID IN FULL"; }
   else if (loan.status === "OVERDUE") { statusColor = "#dc2626"; }
 
-  // 1. Build Receipt HTML (USING DIVS INSTEAD OF TABLES TO FIX MOBILE LAYOUT)
+  // 1. Build Receipt HTML (COMPACT MODE - No Scroll Needed)
   const receiptHTML = `
-    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; display: flex; flex-direction: column; min-height: 400px;">
+    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; display: flex; flex-direction: column; padding: 15px; background: white;">
 
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="my-logo.png" style="height: 40px; width: auto; display:block;" onerror="this.style.display='none'">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="my-logo.png" style="height: 32px; width: auto; display:block;" onerror="this.style.display='none'">
             <div>
-              <h1 style="margin: 0; font-size: 18px; color: #1e293b; text-transform: uppercase; font-weight:800; letter-spacing: 1px;">Stallz Loans</h1>
-              <p style="margin: 2px 0 0; font-size: 10px; color: #64748b; font-weight:600;">Quick, Easy, Reliable</p>
+              <h1 style="margin: 0; font-size: 15px; color: #1e293b; text-transform: uppercase; font-weight:800; letter-spacing: 0.5px;">Stallz Loans</h1>
+              <p style="margin: 1px 0 0; font-size: 9px; color: #64748b; font-weight:600;">Quick, Easy, Reliable</p>
             </div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 10px; color: #64748b;">Receipt #: <strong style="color: #0f172a;">${loan.id}</strong></div>
-            <div style="font-size: 10px; color: #64748b;">Date: <strong style="color: #0f172a;">${new Date().toLocaleDateString()}</strong></div>
-            <div style="font-size: 9px; margin-top:4px; font-weight:700; color:${statusColor}; border:1px solid ${statusColor}; padding:2px 6px; border-radius:4px; display:inline-block;">${statusText}</div>
+            <div style="font-size: 9px; color: #64748b;">Receipt #: <strong style="color: #0f172a;">${loan.id}</strong></div>
+            <div style="font-size: 9px; color: #64748b;">Date: <strong style="color: #0f172a;">${new Date().toLocaleDateString()}</strong></div>
+            <div style="font-size: 8px; margin-top:3px; font-weight:700; color:${statusColor}; border:1px solid ${statusColor}; padding:1px 5px; border-radius:3px; display:inline-block;">${statusText}</div>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #f1f5f9;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #f1f5f9;">
           <div>
-            <div style="font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 2px;">Client</div>
-            <div style="font-size: 13px; font-weight: 700; color: #334155;">${loan.clientName}</div>
-            <div style="font-size: 11px; color: #64748b;">${loan.clientPhone || ''}</div>
+            <div style="font-size: 8px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 2px;">Client</div>
+            <div style="font-size: 11px; font-weight: 700; color: #334155;">${loan.clientName}</div>
+            <div style="font-size: 9px; color: #64748b;">${loan.clientPhone || ''}</div>
           </div>
           <div style="text-align: right;">
-             <div style="font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 2px;">Due Date</div>
-             <div style="font-size: 12px; font-weight: 700; color: ${statusColor};">${formatDate(loan.dueDate)}</div>
-             <div style="font-size: 9px; color: #94a3b8; margin-top:4px;">Item: ${loan.collateralItem}</div>
+             <div style="font-size: 8px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 2px;">Due Date</div>
+             <div style="font-size: 11px; font-weight: 700; color: ${statusColor};">${formatDate(loan.dueDate)}</div>
+             <div style="font-size: 8px; color: #94a3b8; margin-top:2px;">Item: ${loan.collateralItem}</div>
           </div>
         </div>
 
-        <div style="width: 100%; margin-bottom: 15px;">
-
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
-                <span style="font-size: 11px;">Principal</span>
-                <span style="font-size: 11px; text-align: right;">${formatMoney(loan.amount)}</span>
+        <div style="width: 100%; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="font-size: 10px;">Principal</span>
+                <span style="font-size: 10px; text-align: right;">${formatMoney(loan.amount)}</span>
             </div>
-
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
-                <span style="font-size: 11px;">Interest/Fees</span>
-                <span style="font-size: 11px; text-align: right;">${formatMoney(loan.totalDue - loan.amount)}</span>
+            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="font-size: 10px;">Interest/Fees</span>
+                <span style="font-size: 10px; text-align: right;">${formatMoney(loan.totalDue - loan.amount)}</span>
             </div>
-
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
-                <span style="font-size: 11px; font-weight: 700; color: #0f172a;">Total Due</span>
-                <span style="font-size: 11px; font-weight: 700; color: #0f172a; text-align: right;">${formatMoney(loan.totalDue)}</span>
+            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="font-size: 10px; font-weight: 700; color: #0f172a;">Total Due</span>
+                <span style="font-size: 10px; font-weight: 700; color: #0f172a; text-align: right;">${formatMoney(loan.totalDue)}</span>
             </div>
-
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
-                <span style="font-size: 11px; color: #16a34a;">Less: Paid</span>
-                <span style="font-size: 11px; color: #16a34a; text-align: right;">- ${formatMoney(loan.paid)}</span>
+            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="font-size: 10px; color: #16a34a;">Less: Paid</span>
+                <span style="font-size: 10px; color: #16a34a; text-align: right;">- ${formatMoney(loan.paid)}</span>
             </div>
-
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 2px solid #0f172a; margin-top: 4px;">
-                <span style="font-size: 12px; font-weight: 800;">BALANCE</span>
-                <span style="font-size: 15px; font-weight: 800; color: ${statusColor}; text-align: right;">${formatMoney(loan.balance)}</span>
+            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-top: 2px solid #0f172a; margin-top: 2px;">
+                <span style="font-size: 11px; font-weight: 800;">BALANCE</span>
+                <span style="font-size: 13px; font-weight: 800; color: ${statusColor}; text-align: right;">${formatMoney(loan.balance)}</span>
             </div>
-
         </div>
 
-        <div style="margin-top: auto; padding-top:10px;">
-            <div style="font-size: 7px; color: #94a3b8; text-align: justify; line-height: 1.4; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+        <div style="margin-top: 5px; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+            <div style="font-size: 7px; color: #94a3b8; text-align: justify; line-height: 1.35;">
             <strong>Terms & Conditions:</strong> By accepting this loan, you agree that failure to repay by the due date may result in the forfeiture and sale of the collateral item listed above to recover the loan amount.
             </div>
-            <div style="text-align: center; margin-top: 15px; font-size: 10px; font-weight: 600; color: #1e293b;">Thank you for your business!</div>
-            <div style="margin-top: 4px; text-align: center; font-size: 8px; color: #cbd5e1;">Generated by Stallz Loans Admin</div>
+            <div style="text-align: center; margin-top: 12px; font-size: 9px; font-weight: 600; color: #1e293b;">Thank you for your business!</div>
+            <div style="margin-top: 3px; text-align: center; font-size: 7px; color: #cbd5e1;">Generated by Stallz Loans Admin</div>
         </div>
     </div>
   `;
 
-  // 2. Show Preview (It will fit naturally)
+  // 2. Show Preview
   const contentBox = document.getElementById("receiptContent");
   contentBox.innerHTML = receiptHTML;
   document.getElementById("receiptModal").classList.remove("modal-hidden");
 
-  // 3. Download Logic (The Magic Trick)
+  // 3. Download Logic (Handles the PDF creation)
   document.getElementById("downloadPdfBtn").onclick = function() {
       showToast("Generating PDF...", "success");
 
       const clone = contentBox.cloneNode(true);
+
+      // When saving, we scale it UP so the PDF text is sharp and clear
+      // (The phone preview stays small and compact)
       clone.style.width = '148mm';
-      clone.style.padding = '20px';
+      clone.style.padding = '30px';
+      clone.style.fontSize = '12px';
       clone.style.background = 'white';
 
+      // Hide the clone while generating
       clone.style.position = 'fixed';
       clone.style.top = '-9999px';
       clone.style.left = '-9999px';
