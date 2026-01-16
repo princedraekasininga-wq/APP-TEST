@@ -249,6 +249,7 @@ function showWelcomeScreen() {
   const loader = el("loadingOverlay");
 
   if (loginBtn) {
+    // Clone button to remove old event listeners
     const newBtn = loginBtn.cloneNode(true);
     loginBtn.parentNode.replaceChild(newBtn, loginBtn);
 
@@ -279,10 +280,15 @@ function showWelcomeScreen() {
 
       try {
         if (typeof firebase === "undefined") throw new Error("Firebase not loaded");
+
+        // Explicitly set persistence to LOCAL before signing in
+        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         await firebase.auth().signInWithEmailAndPassword(email, password);
+
         updateSessionActivity();
         updateWelcomeUI();
         showToast(`Login Successful`, "success");
+        // Screen hiding is handled by onAuthStateChanged below
       } catch (error) {
         if (loader) loader.style.display = "none";
         errorMsg.textContent = "Login failed: " + error.message;
@@ -291,19 +297,7 @@ function showWelcomeScreen() {
     };
   }
 
-  const lastActive = localStorage.getItem("stallz_last_active");
-  const now = Date.now();
-  const THIRTY_MINUTES = 30 * 60 * 1000;
-
-  if (lastActive && (now - lastActive > THIRTY_MINUTES)) {
-    console.log("Session expired. Logging out.");
-    if (typeof firebase !== "undefined" && firebase.auth) firebase.auth().signOut();
-    localStorage.removeItem("stallz_last_active");
-    localStorage.removeItem("stallz_test_session");
-    if (loader) loader.style.display = "none";
-    screen.style.display = "flex";
-    return;
-  }
+  // --- CHANGED: REMOVED THE 30-MINUTE TIMEOUT CHECK HERE ---
 
   const testSession = localStorage.getItem("stallz_test_session");
 
@@ -321,6 +315,7 @@ function showWelcomeScreen() {
     }
   }
   else if (typeof firebase !== "undefined" && firebase.auth) {
+      // This listener fires automatically if a user is already logged in from a previous session
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
           updateSessionActivity();
@@ -330,6 +325,7 @@ function showWelcomeScreen() {
           if (loader) { loader.style.display = "flex"; loader.style.opacity = "1"; }
           loadFromFirebase();
         } else {
+          // Only show login screen if strictly no user is found
           if (loader) loader.style.display = "none";
           screen.style.display = "flex";
         }
