@@ -520,22 +520,22 @@ window.openReceipt = function(loanId) {
   if (loan.balance <= 0) { statusColor = "#16a34a"; statusText = "PAID IN FULL"; }
   else if (loan.status === "OVERDUE") { statusColor = "#dc2626"; }
 
-  // 1. Build Receipt HTML (COMPACT MODE - No Scroll Needed)
+  // 1. Build COMPACT Receipt HTML
   const receiptHTML = `
-    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; display: flex; flex-direction: column; padding: 15px; background: white;">
+    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; padding: 20px; font-size: 10px; background: white;">
 
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 12px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <img src="my-logo.png" style="height: 32px; width: auto; display:block;" onerror="this.style.display='none'">
             <div>
-              <h1 style="margin: 0; font-size: 15px; color: #1e293b; text-transform: uppercase; font-weight:800; letter-spacing: 0.5px;">Stallz Loans</h1>
-              <p style="margin: 1px 0 0; font-size: 9px; color: #64748b; font-weight:600;">Quick, Easy, Reliable</p>
+              <h1 style="margin: 0; font-size: 14px; color: #1e293b; text-transform: uppercase; font-weight:800; letter-spacing: 0.5px;">Stallz Loans</h1>
+              <p style="margin: 1px 0 0; font-size: 8px; color: #64748b; font-weight:600;">Quick, Easy, Reliable</p>
             </div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 9px; color: #64748b;">Receipt #: <strong style="color: #0f172a;">${loan.id}</strong></div>
-            <div style="font-size: 9px; color: #64748b;">Date: <strong style="color: #0f172a;">${new Date().toLocaleDateString()}</strong></div>
-            <div style="font-size: 8px; margin-top:3px; font-weight:700; color:${statusColor}; border:1px solid ${statusColor}; padding:1px 5px; border-radius:3px; display:inline-block;">${statusText}</div>
+            <div style="color: #64748b;">Receipt #: <strong style="color: #0f172a;">${loan.id}</strong></div>
+            <div style="color: #64748b;">Date: <strong style="color: #0f172a;">${new Date().toLocaleDateString()}</strong></div>
+            <div style="margin-top:2px; font-size: 8px; font-weight:700; color:${statusColor}; border:1px solid ${statusColor}; padding:1px 4px; border-radius:3px; display:inline-block;">${statusText}</div>
           </div>
         </div>
 
@@ -552,26 +552,26 @@ window.openReceipt = function(loanId) {
           </div>
         </div>
 
-        <div style="width: 100%; margin-bottom: 10px;">
-            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
-                <span style="font-size: 10px;">Principal</span>
-                <span style="font-size: 10px; text-align: right;">${formatMoney(loan.amount)}</span>
+        <div style="width: 100%; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                <span>Principal</span>
+                <span style="font-weight:600;">${formatMoney(loan.amount)}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
-                <span style="font-size: 10px;">Interest/Fees</span>
-                <span style="font-size: 10px; text-align: right;">${formatMoney(loan.totalDue - loan.amount)}</span>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                <span>Interest/Fees</span>
+                <span style="font-weight:600;">${formatMoney(loan.totalDue - loan.amount)}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
-                <span style="font-size: 10px; font-weight: 700; color: #0f172a;">Total Due</span>
-                <span style="font-size: 10px; font-weight: 700; color: #0f172a; text-align: right;">${formatMoney(loan.totalDue)}</span>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="font-weight: 700; color: #0f172a;">Total Due</span>
+                <span style="font-weight: 700; color: #0f172a;">${formatMoney(loan.totalDue)}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
-                <span style="font-size: 10px; color: #16a34a;">Less: Paid</span>
-                <span style="font-size: 10px; color: #16a34a; text-align: right;">- ${formatMoney(loan.paid)}</span>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9; color: #16a34a;">
+                <span>Less: Paid</span>
+                <span>- ${formatMoney(loan.paid)}</span>
             </div>
-            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-top: 2px solid #0f172a; margin-top: 2px;">
-                <span style="font-size: 11px; font-weight: 800;">BALANCE</span>
-                <span style="font-size: 13px; font-weight: 800; color: ${statusColor}; text-align: right;">${formatMoney(loan.balance)}</span>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid #0f172a; margin-top: 2px;">
+                <span style="font-weight: 800; font-size:12px;">BALANCE</span>
+                <span style="font-weight: 800; font-size:14px; color: ${statusColor};">${formatMoney(loan.balance)}</span>
             </div>
         </div>
 
@@ -579,8 +579,8 @@ window.openReceipt = function(loanId) {
             <div style="font-size: 7px; color: #94a3b8; text-align: justify; line-height: 1.35;">
             <strong>Terms & Conditions:</strong> By accepting this loan, you agree that failure to repay by the due date may result in the forfeiture and sale of the collateral item listed above to recover the loan amount.
             </div>
-            <div style="text-align: center; margin-top: 12px; font-size: 9px; font-weight: 600; color: #1e293b;">Thank you for your business!</div>
-            <div style="margin-top: 3px; text-align: center; font-size: 7px; color: #cbd5e1;">Generated by Stallz Loans Admin</div>
+            <div style="text-align: center; margin-top: 10px; font-size: 9px; font-weight: 600; color: #1e293b;">Thank you for your business!</div>
+            <div style="margin-top: 2px; text-align: center; font-size: 6px; color: #cbd5e1;">Generated by Stallz Loans Admin</div>
         </div>
     </div>
   `;
@@ -590,35 +590,24 @@ window.openReceipt = function(loanId) {
   contentBox.innerHTML = receiptHTML;
   document.getElementById("receiptModal").classList.remove("modal-hidden");
 
-  // 3. Download Logic (Handles the PDF creation)
-  document.getElementById("downloadPdfBtn").onclick = function() {
-      showToast("Generating PDF...", "success");
+  // 3. IMAGE GENERATION LOGIC (NO PDF)
+  document.getElementById("downloadImageBtn").onclick = function() {
+      showToast("Generating Image...", "success");
 
-      const clone = contentBox.cloneNode(true);
-
-      // When saving, we scale it UP so the PDF text is sharp and clear
-      // (The phone preview stays small and compact)
-      clone.style.width = '148mm';
-      clone.style.padding = '30px';
-      clone.style.fontSize = '12px';
-      clone.style.background = 'white';
-
-      // Hide the clone while generating
-      clone.style.position = 'fixed';
-      clone.style.top = '-9999px';
-      clone.style.left = '-9999px';
-      document.body.appendChild(clone);
-
-      const opt = {
-        margin: 0,
-        filename: `Receipt_${loan.clientName.replace(/\s/g,'_')}_${loan.id}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
-      };
-
-      html2pdf().from(clone).set(opt).save().then(() => {
-          document.body.removeChild(clone);
+      // Use html2canvas directly to create a high-quality image
+      html2canvas(contentBox, {
+          scale: 3, // High resolution (3x)
+          backgroundColor: "#ffffff", // Force white background to fix "Black Screen" issue
+          useCORS: true // Allows loading cross-origin images (like the logo)
+      }).then(canvas => {
+          // Create a fake link to trigger the download
+          const link = document.createElement('a');
+          link.download = `Receipt_${loan.clientName.replace(/\s/g,'_')}_${loan.id}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+      }).catch(err => {
+          console.error(err);
+          showToast("Error generating image", "error");
       });
   };
 };
