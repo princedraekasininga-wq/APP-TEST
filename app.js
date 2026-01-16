@@ -511,8 +511,6 @@ window.openReceipt = function(loanId) {
   const loan = state.loans.find(l => l.id == loanId);
   if (!loan) return;
 
-  showToast("Generating Receipt...", "success");
-
   // 1. Get Payment History
   const history = state.repayments
       .filter(r => r.loanId === loan.id)
@@ -523,30 +521,9 @@ window.openReceipt = function(loanId) {
   if (loan.balance <= 0) { statusColor = "#16a34a"; statusText = "PAID IN FULL"; }
   else if (loan.status === "OVERDUE") { statusColor = "#dc2626"; }
 
-  // 2. Create Overlay Container (Visible on top)
-  // We place it ON TOP (z-index 99999) so the camera can see it.
-  const overlay = document.createElement('div');
-  overlay.style.position = 'fixed';
-  overlay.style.inset = '0';
-  overlay.style.zIndex = '99999';
-  overlay.style.background = 'rgba(0,0,0,0.8)'; // Dark backdrop
-  overlay.style.display = 'flex';
-  overlay.style.justifyContent = 'center';
-  overlay.style.alignItems = 'center';
-
-  // 3. Create the A5 Paper
-  const paper = document.createElement('div');
-  paper.style.width = '148mm';
-  paper.style.background = 'white';
-  paper.style.padding = '0'; // Padding handled inside inner HTML
-  paper.style.boxShadow = '0 0 30px rgba(0,0,0,0.5)';
-
-  overlay.appendChild(paper);
-  document.body.appendChild(overlay);
-
-  // 4. Fill HTML
-  paper.innerHTML = `
-    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; padding: 30px; width: 100%; box-sizing: border-box; background: white;">
+  // 2. Build the Receipt HTML
+  const receiptHTML = `
+    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; padding: 30px; width: 100%; background: white; position: relative;">
 
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;">
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -559,83 +536,78 @@ window.openReceipt = function(loanId) {
           <div style="text-align: right;">
             <div style="font-size: 11px; color: #64748b;">Receipt #: <strong style="color: #0f172a;">${loan.id}</strong></div>
             <div style="font-size: 11px; color: #64748b;">Date: <strong style="color: #0f172a;">${new Date().toLocaleDateString()}</strong></div>
-            <div style="font-size: 11px; margin-top:4px;"><strong style="color:${statusColor}; border:1px solid ${statusColor}; padding: 2px 6px; border-radius: 4px; font-size:10px;">${statusText}</strong></div>
+            <div style="font-size: 10px; margin-top:4px; font-weight:700; color:${statusColor}; border:1px solid ${statusColor}; padding:2px 6px; border-radius:4px; display:inline-block;">${statusText}</div>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #f1f5f9;">
           <div>
-            <div style="font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 4px;">Client Details</div>
+            <div style="font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 2px;">Client</div>
             <div style="font-size: 14px; font-weight: 700; color: #334155;">${loan.clientName}</div>
-            <div style="font-size: 12px; color: #64748b;">${loan.clientPhone || ''}</div>
-
-            <div style="margin-top: 12px; font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 4px;">Collateral</div>
-            <div style="font-size: 14px; font-weight: 600; color: #334155;">${loan.collateralItem}</div>
+            <div style="font-size: 11px; color: #64748b;">${loan.clientPhone || ''}</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 4px;">Loan Terms</div>
-            <div style="font-size: 11px; color: #64748b; margin-bottom:4px;">Date Taken: <span style="font-weight:600; color:#334155;">${formatDate(loan.startDate)}</span></div>
-            <div style="font-size: 11px; color: #64748b;">Due Date: <span style="font-weight:600; color:${statusColor};">${formatDate(loan.dueDate)}</span></div>
+             <div style="font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 2px;">Due Date</div>
+             <div style="font-size: 13px; font-weight: 700; color: ${statusColor};">${formatDate(loan.dueDate)}</div>
+             <div style="font-size: 9px; color: #94a3b8; margin-top:4px;">Item: ${loan.collateralItem}</div>
           </div>
         </div>
 
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-          <thead>
-            <tr>
-              <th style="text-align: left; font-size: 9px; text-transform: uppercase; color: #64748b; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;">Description</th>
-              <th style="text-align: right; font-size: 9px; text-transform: uppercase; color: #64748b; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;">Amount</th>
-            </tr>
-          </thead>
           <tbody>
-            <tr><td style="padding: 10px 0; font-size: 13px; border-bottom: 1px solid #f1f5f9;">Principal Loan</td><td style="text-align: right; padding: 10px 0; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${formatMoney(loan.amount)}</td></tr>
-            <tr><td style="padding: 10px 0; font-size: 13px; border-bottom: 1px solid #f1f5f9;">Interest & Fees</td><td style="text-align: right; padding: 10px 0; font-size: 13px; border-bottom: 1px solid #f1f5f9;">${formatMoney(loan.totalDue - loan.amount)}</td></tr>
-            <tr><td style="padding: 10px 0; font-size: 13px; font-weight:700; color:#0f172a;">Total Due</td><td style="text-align: right; padding: 10px 0; font-size: 13px; font-weight:700; color:#0f172a;">${formatMoney(loan.totalDue)}</td></tr>
-            <tr><td style="padding: 10px 0; font-size: 13px; color:#16a34a;">Less: Total Paid</td><td style="text-align: right; padding: 10px 0; font-size: 13px; color:#16a34a;">- ${formatMoney(loan.paid)}</td></tr>
+            <tr><td style="padding: 8px 0; font-size: 12px; border-bottom: 1px solid #f1f5f9;">Principal</td><td style="text-align: right; padding: 8px 0; font-size: 12px; border-bottom: 1px solid #f1f5f9;">${formatMoney(loan.amount)}</td></tr>
+            <tr><td style="padding: 8px 0; font-size: 12px; border-bottom: 1px solid #f1f5f9;">Interest/Fees</td><td style="text-align: right; padding: 8px 0; font-size: 12px; border-bottom: 1px solid #f1f5f9;">${formatMoney(loan.totalDue - loan.amount)}</td></tr>
+            <tr><td style="padding: 8px 0; font-size: 12px; font-weight:700; color:#0f172a;">Total Due</td><td style="text-align: right; padding: 8px 0; font-size: 12px; font-weight:700; color:#0f172a;">${formatMoney(loan.totalDue)}</td></tr>
+            <tr><td style="padding: 8px 0; font-size: 12px; color:#16a34a;">Less: Paid</td><td style="text-align: right; padding: 8px 0; font-size: 12px; color:#16a34a;">- ${formatMoney(loan.paid)}</td></tr>
             <tr>
-              <td style="padding-top: 15px; font-size: 14px; font-weight: 800; border-top: 2px solid #0f172a;">REMAINING BALANCE</td>
-              <td style="text-align: right; padding-top: 15px; font-size: 18px; font-weight: 800; color: ${statusColor}; border-top: 2px solid #0f172a;">${formatMoney(loan.balance)}</td>
+              <td style="padding-top: 12px; font-size: 13px; font-weight: 800; border-top: 2px solid #0f172a;">BALANCE</td>
+              <td style="text-align: right; padding-top: 12px; font-size: 16px; font-weight: 800; color: ${statusColor}; border-top: 2px solid #0f172a;">${formatMoney(loan.balance)}</td>
             </tr>
           </tbody>
         </table>
 
-        <div style="margin-top: 25px; font-size: 9px; color: #94a3b8; text-align: justify; line-height: 1.4; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+        <div style="margin-top: 20px; font-size: 8px; color: #94a3b8; text-align: justify; line-height: 1.4; border-top: 1px solid #f1f5f9; padding-top: 10px;">
            <strong>Terms & Conditions:</strong> By accepting this loan, you agree that failure to repay by the due date may result in the forfeiture and sale of the collateral item listed above to recover the loan amount.
         </div>
 
         ${history.length > 0 ? `
-          <div style="margin-top: 25px;">
-            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #94a3b8; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px;">Recent Payments</div>
+          <div style="margin-top: 20px;">
+            <div style="font-size: 9px; font-weight: 700; text-transform: uppercase; color: #94a3b8; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 8px;">Recent Payments</div>
             ${history.map(h => `
-              <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; padding: 4px 0; border-bottom: 1px dashed #f1f5f9;">
-                <span>${formatDate(h.date)} &nbsp;&mdash;&nbsp; Payment Received</span><span>${formatMoney(h.amount)}</span>
+              <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b; padding: 3px 0; border-bottom: 1px dashed #f1f5f9;">
+                <span>${formatDate(h.date)} &mdash; Paid</span><span>${formatMoney(h.amount)}</span>
               </div>
             `).join('')}
           </div>
         ` : ''}
 
-        <div style="text-align: center; margin-top: 35px; font-size: 12px; font-weight: 600; color: #1e293b;">Thank you for your business!</div>
-        <div style="margin-top: 5px; text-align: center; font-size: 10px; color: #cbd5e1;">Generated by Stallz Loans Admin</div>
+        <div style="text-align: center; margin-top: 30px; font-size: 11px; font-weight: 600; color: #1e293b;">Thank you for your business!</div>
+        <div style="margin-top: 4px; text-align: center; font-size: 9px; color: #cbd5e1;">Generated by Stallz Loans Admin</div>
     </div>
   `;
 
-  // 5. Generate PDF
-  const opt = {
-    margin:       0,
-    filename:     `Receipt_${loan.clientName.replace(/\s/g,'_')}_${loan.id}.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true },
-    jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
-  };
+  // 3. Insert into Modal and Show
+  const contentBox = document.getElementById("receiptContent");
+  contentBox.innerHTML = receiptHTML;
 
-  // 6. Save & Cleanup
-  // We remove the overlay ONLY after the download begins
-  html2pdf().from(paper).set(opt).save().then(() => {
-    setTimeout(() => document.body.removeChild(overlay), 500);
-  }).catch(err => {
-    console.error(err);
-    document.body.removeChild(overlay);
-    showToast("Error generating receipt", "error");
-  });
+  const modal = document.getElementById("receiptModal");
+  modal.classList.remove("modal-hidden");
+
+  // 4. Attach Download Handler
+  document.getElementById("downloadPdfBtn").onclick = function() {
+      showToast("Downloading PDF...", "success");
+
+      const opt = {
+        margin: 0,
+        filename: `Receipt_${loan.clientName.replace(/\s/g,'_')}_${loan.id}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
+      };
+
+      // Capture the element currently VISIBLE in the modal
+      html2pdf().from(contentBox).set(opt).save();
+  };
 };
 
 // ==========================================

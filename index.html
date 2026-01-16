@@ -373,13 +373,13 @@
         </div>
 
         <button id="logoutBtn" class="btn-secondary" style="width:100%; margin-top:20px; border-color:#ef4444; color:#ef4444; display:flex; align-items:center; justify-content:center; gap:8px;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-        <polyline points="16 17 21 12 16 7"></polyline>
-        <line x1="21" y1="12" x2="9" y2="12"></line>
-    </svg>
-    Log Out
-</button>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Log Out
+        </button>
 
       </div>
     </div>
@@ -428,6 +428,20 @@
         <button type="button" id="actionModalCancelBtn" class="btn-secondary btn-sm">Cancel</button>
         <button type="button" id="actionModalConfirmBtn" class="btn btn-sm">Confirm</button>
       </div>
+    </div>
+  </div>
+
+  <div id="receiptModal" class="modal-overlay modal-hidden" style="z-index: 9999;">
+    <div class="modal" style="max-width: 500px; padding: 0; background: transparent; box-shadow: none; border: none;">
+
+      <div id="receiptContent" style="background: white; border-radius: 0; overflow: hidden; margin-bottom: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+        </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('receiptModal').classList.add('modal-hidden')">Close</button>
+        <button type="button" id="downloadPdfBtn" class="btn">⬇ Save PDF</button>
+      </div>
+
     </div>
   </div>
 
