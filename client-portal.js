@@ -22,15 +22,32 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 
 // ==========================================
-// 2. GREETING LOGIC
+// 2. GREETING & DAY/NIGHT THEME LOGIC
 // ==========================================
 function setDynamicGreeting() {
     const hour = new Date().getHours();
     const greetingEl = document.getElementById('greetingText');
+    const body = document.body;
 
-    if (hour < 12) greetingEl.innerText = "Good Morning,";
-    else if (hour < 18) greetingEl.innerText = "Good Afternoon,";
-    else greetingEl.innerText = "Good Evening,";
+    // --- Time Logic ---
+    // Day Mode: 6 AM (6) to 5:59 PM (17)
+    // Night Mode: 6 PM (18) to 5:59 AM (5)
+
+    if (hour >= 6 && hour < 18) {
+        // DAYTIME
+        greetingEl.innerText = "Good Morning/Afternoon,";
+        body.classList.add('day-mode');
+
+        // Optional: Change header icon color or text if needed
+        console.log("☀️ Setting Day Theme");
+    } else {
+        // NIGHTTIME
+        if (hour < 12) greetingEl.innerText = "Good Morning,"; // Early AM
+        else greetingEl.innerText = "Good Evening,";
+
+        body.classList.remove('day-mode');
+        console.log("🌙 Setting Night Theme");
+    }
 }
 
 // ==========================================
@@ -129,7 +146,9 @@ function loadLoansData(id) {
     });
 }
 
-// --- 4.3 Shared Rendering Logic (Used by both Real & Test) ---
+// ==========================================
+// 4.3 SHARED RENDERING LOGIC (Fixed Contrast)
+// ==========================================
 function renderLoansTable(loansData) {
     const tableBody = document.getElementById('portalLoansTable');
     let totalDebt = 0;
@@ -138,7 +157,7 @@ function renderLoansTable(loansData) {
     let activeLoansFound = false;
 
     if (loansData.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No history found.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">No history found.</td></tr>';
         updateCountdown(null);
         return;
     }
@@ -166,7 +185,7 @@ function renderLoansTable(loansData) {
             }
         }
 
-        // Status
+        // Status Logic
         let statusClass = 'status-active';
         let statusText = 'Active';
         if (balance <= 1) {
@@ -175,6 +194,10 @@ function renderLoansTable(loansData) {
             statusClass = 'status-overdue'; statusText = 'Overdue';
         }
 
+        // Color Logic: If paid, use Green (#22c55e). If debt, use Theme Text (White/Black).
+        const balanceColor = balance <= 1 ? '#22c55e' : 'var(--text-main)';
+        const balanceWeight = balance <= 1 ? '600' : '700';
+
         // Render Row
         const row = `
             <tr>
@@ -182,7 +205,7 @@ function renderLoansTable(loansData) {
                 <td data-label="Amount">K${principal.toFixed(2)}</td>
                 <td data-label="Total Due">K${totalDue.toFixed(2)}</td>
                 <td data-label="Paid">K${paid.toFixed(2)}</td>
-                <td data-label="Balance" style="font-weight:bold; color: ${balance <= 1 ? '#4ade80' : 'white'}">K${balance.toFixed(2)}</td>
+                <td data-label="Balance" style="font-weight:${balanceWeight}; color: ${balanceColor}">K${balance.toFixed(2)}</td>
                 <td data-label="Status"><span class="status-pill ${statusClass}">${statusText}</span></td>
             </tr>
         `;
@@ -198,46 +221,61 @@ function renderLoansTable(loansData) {
 }
 
 // ==========================================
-// 5. COUNTDOWN & UI LOGIC
+// 5. COUNTDOWN & UI LOGIC (Updated for Big Hero Ring)
 // ==========================================
 function updateCountdown(dueDate) {
     const circle = document.getElementById('progressCircle');
     const daysText = document.getElementById('daysRemaining');
     const labelText = document.getElementById('nextDueDisplay');
-    const circumference = 188.5; // 2 * PI * 30
+
+    // NEW MATH: Radius is now 60px
+    // Circumference = 2 * PI * r
+    // 2 * 3.14159 * 60 ≈ 377
+    const circumference = 377;
 
     circle.style.strokeDasharray = `${circumference} ${circumference}`;
 
     if (!dueDate) {
+        // No Active Loans
         daysText.innerText = "-";
         labelText.innerText = "No Dues";
         circle.style.strokeDashoffset = circumference;
         circle.className = "progress-ring__circle";
+        labelText.style.color = "var(--text-muted)";
         return;
     }
 
+    // Calculate Days
     const now = new Date();
     const diffTime = dueDate - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     daysText.innerText = diffDays > 0 ? diffDays : "!";
-    labelText.innerText = dueDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
+    // Format Date (e.g., "Oct 24, 2025")
+    labelText.innerText = dueDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+    // Ring Progress Logic (Scale based on 30 days)
     let percent = Math.max(0, Math.min(diffDays, 30)) / 30;
     const offset = circumference - (percent * circumference);
     circle.style.strokeDashoffset = offset;
 
-    circle.className = "progress-ring__circle";
+    // Color Logic
+    circle.className = "progress-ring__circle"; // Reset class
+
     if (diffDays <= 0) {
+        // Overdue (Red)
         circle.classList.add('ring-danger');
         labelText.innerText = "Overdue!";
-        labelText.style.color = "#f87171";
+        labelText.style.color = "#ef4444";
     } else if (diffDays <= 5) {
+        // Warning (Orange)
         circle.classList.add('ring-warning');
-        labelText.style.color = "#fbbf24";
+        labelText.style.color = "#f59e0b";
     } else {
+        // Safe (Green)
         circle.classList.add('ring-safe');
-        labelText.style.color = "white";
+        labelText.style.color = "var(--text-main)";
     }
 }
 
@@ -291,4 +329,74 @@ function submitPaymentProof() {
 window.onclick = function(event) {
     if (event.target == document.getElementById('profileModal')) closeProfileModal();
     if (event.target == document.getElementById('uploadModal')) closeUploadModal();
+}
+
+// ==========================================
+// 7. LOAN REQUEST LOGIC (NEW)
+// ==========================================
+
+function openRequestModal() { document.getElementById('requestModal').style.display = 'flex'; }
+function closeRequestModal() { document.getElementById('requestModal').style.display = 'none'; }
+
+// Toggle NRC Uploads based on Checkbox
+function toggleNRCUploads() {
+    const isChecked = document.getElementById('nrcExists').checked;
+    const container = document.getElementById('nrcUploadContainer');
+
+    // Hide upload boxes if "Already Submitted" is checked
+    container.style.display = isChecked ? 'none' : 'grid';
+}
+
+function submitLoanRequest() {
+    // 1. Gather Data
+    const amount = document.getElementById('reqAmount').value;
+    const collateral = document.getElementById('reqCollateral').value;
+    const value = document.getElementById('reqValue').value;
+    const nrcExists = document.getElementById('nrcExists').checked;
+
+    // 2. Validation
+    if (!amount || !collateral || !value) {
+        alert("Please fill in Amount, Collateral, and Value.");
+        return;
+    }
+
+    const btn = document.getElementById('requestBtn');
+    btn.innerText = "Generating Request...";
+
+    setTimeout(() => {
+        const clientName = document.getElementById('portalClientName').innerText;
+
+        // 3. Construct Message
+        let msg = `*NEW LOAN APPLICATION*\n`;
+        msg += `Client: ${clientName}\n`;
+        msg += `Amount: K${amount}\n`;
+        msg += `Item: ${collateral}\n`;
+        msg += `Value: K${value}\n\n`;
+
+        if (nrcExists) {
+            msg += `[NRC Already on File]`;
+        } else {
+            msg += `[Sending NRC Photos Now...]`;
+        }
+
+        msg += `\n[Sending Collateral Photos Now...]`;
+
+        // 4. Redirect to WhatsApp
+        const waLink = `https://wa.me/260970000000?text=${encodeURIComponent(msg)}`;
+        window.open(waLink, '_blank');
+
+        // 5. Reset
+        btn.innerText = "Continue in WhatsApp";
+        setTimeout(() => {
+            closeRequestModal();
+            btn.innerText = "Submit Application";
+        }, 2000);
+    }, 1000);
+}
+
+// Update Global Click Listener to include new modal
+window.onclick = function(event) {
+    if (event.target == document.getElementById('profileModal')) closeProfileModal();
+    if (event.target == document.getElementById('uploadModal')) closeUploadModal();
+    if (event.target == document.getElementById('requestModal')) closeRequestModal(); // New
 }

@@ -35,6 +35,26 @@
 
         <p class="mobile-swipe-hint"><i class="fas fa-arrow-right"></i> Swipe for details</p>
 
+        <div class="hero-section">
+            <div class="stat-card hero-card">
+                <div class="hero-ring-container">
+                    <svg class="progress-ring" width="140" height="140">
+                        <circle class="progress-ring__bg" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="transparent" r="60" cx="70" cy="70"/>
+                        <circle id="progressCircle" class="progress-ring__circle" stroke="#4ade80" stroke-width="8" fill="transparent" r="60" cx="70" cy="70"/>
+                    </svg>
+                    <div class="hero-ring-text">
+                        <span id="daysRemaining" class="hero-days-num">--</span>
+                        <span class="hero-days-label">Days Left</span>
+                    </div>
+                </div>
+
+                <div class="hero-info">
+                    <p class="label">Next Due Date</p>
+                    <h2 class="hero-date-text" id="nextDueDisplay">--</h2>
+                </div>
+            </div>
+        </div>
+
         <div class="stats-grid">
             <div class="stat-card blue-glow">
                 <div class="icon-box"><i class="fas fa-wallet"></i></div>
@@ -51,24 +71,6 @@
                     <h3 class="money-text" id="portalTotalPaid">K0.00</h3>
                 </div>
             </div>
-
-            <div class="stat-card countdown-card">
-                <div class="ring-container">
-                    <svg class="progress-ring" width="70" height="70">
-                        <circle class="progress-ring__bg" stroke="rgba(255,255,255,0.1)" stroke-width="6" fill="transparent" r="30" cx="35" cy="35"/>
-                        <circle id="progressCircle" class="progress-ring__circle" stroke="#4ade80" stroke-width="6" fill="transparent" r="30" cx="35" cy="35"/>
-                    </svg>
-                    <div class="ring-text-box">
-                        <span id="daysRemaining" class="days-num">--</span>
-                        <span class="days-label">Days</span>
-                    </div>
-                </div>
-
-                <div class="stat-info">
-                    <p class="label">Next Due Date</p>
-                    <h3 class="money-text" id="nextDueDisplay">--</h3>
-                </div>
-            </div>
         </div>
 
         <section class="glass-panel">
@@ -76,6 +78,10 @@
                 <h2><i class="fas fa-history"></i> Loan History</h2>
 
                 <div class="action-group">
+                    <button onclick="openRequestModal()" class="action-btn-request">
+                        <i class="fas fa-hand-holding-usd"></i> Request Loan
+                    </button>
+
                     <button onclick="openUploadModal()" class="action-btn-upload">
                         <i class="fas fa-file-upload"></i> Sent Payment?
                     </button>
@@ -144,6 +150,63 @@
                 <p id="fileName" class="file-name-display"></p>
                 <button onclick="submitPaymentProof()" class="btn-full" id="uploadBtn">
                     Submit Proof
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="requestModal" class="modal-overlay">
+        <div class="modal-glass modal-large"> <div class="modal-header">
+                <h3>Apply for Loan</h3>
+                <button onclick="closeRequestModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body scrollable-body">
+
+                <div class="form-group">
+                    <label>Amount Needed (K)</label>
+                    <input type="number" id="reqAmount" placeholder="e.g. 500" class="input-field">
+                </div>
+
+                <div class="form-group">
+                    <label>Collateral Item</label>
+                    <input type="text" id="reqCollateral" placeholder="e.g. Samsung 55' TV" class="input-field">
+                </div>
+
+                <div class="form-group">
+                    <label>Estimated Value (K)</label>
+                    <input type="number" id="reqValue" placeholder="e.g. 2500" class="input-field">
+                </div>
+
+                <hr class="divider">
+
+                <div class="nrc-section">
+                    <p class="section-label">Identity (One Time)</p>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="nrcExists" onchange="toggleNRCUploads()">
+                        <label for="nrcExists">I have already submitted my NRC</label>
+                    </div>
+
+                    <div id="nrcUploadContainer" class="upload-grid">
+                        <div class="upload-box" onclick="document.getElementById('nrcFrontFile').click()">
+                            <i class="fas fa-id-card"></i> <span>NRC Front</span>
+                            <input type="file" id="nrcFrontFile" hidden accept="image/*">
+                        </div>
+                        <div class="upload-box" onclick="document.getElementById('nrcBackFile').click()">
+                            <i class="fas fa-id-card"></i> <span>NRC Back</span>
+                            <input type="file" id="nrcBackFile" hidden accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <p class="section-label" style="margin-top:15px">Collateral Photos</p>
+                <div class="upload-zone small-zone" onclick="document.getElementById('collateralFile').click()">
+                    <i class="fas fa-camera"></i>
+                    <p>Add Photo of Item</p>
+                    <input type="file" id="collateralFile" hidden accept="image/*">
+                </div>
+
+                <button onclick="submitLoanRequest()" class="btn-full" id="requestBtn">
+                    Submit Application
                 </button>
             </div>
         </div>
