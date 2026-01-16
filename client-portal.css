@@ -4,31 +4,29 @@
 :root {
     /* --- NIGHT MODE (Default) --- */
     --bg-color: #020617;
-    /* Richer gradient for depth */
     --bg-gradient: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #020617 60%);
 
     --primary: #3b82f6;
     --primary-glow: rgba(59, 130, 246, 0.6);
 
-    /* FROSTED GLASS SETTINGS (Night) */
-    /* More transparent to let the blur show */
+    /* FROSTED GLASS SETTINGS */
     --glass-bg: rgba(15, 23, 42, 0.6);
     --glass-blur: blur(20px);
 
-    /* 3D LIGHTING BORDERS (The "Pop" Secret) */
+    /* 3D LIGHTING BORDERS */
     --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-    --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.1); /* Inner light */
+    --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
 
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
 
     --icon-bg: rgba(255, 255, 255, 0.05);
 
-    /* DEEP DROP SHADOWS */
+    /* SHADOWS */
     --card-shadow:
         0 4px 6px -1px rgba(0, 0, 0, 0.3),
         0 10px 15px -3px rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.05); /* Subtle outline ring */
+        0 0 0 1px rgba(255, 255, 255, 0.05);
 
     --card-hover-shadow:
         0 20px 25px -5px rgba(0, 0, 0, 0.4),
@@ -36,7 +34,7 @@
         0 0 15px var(--primary-glow);
 }
 
-/* --- DAY MODE (High Contrast Glass) --- */
+/* --- DAY MODE (High Contrast) --- */
 body.day-mode {
     --bg-color: #f0f4f8;
     --bg-gradient: linear-gradient(135deg, #e2e8f0 0%, #f1f5f9 100%);
@@ -44,11 +42,9 @@ body.day-mode {
     --primary: #2563eb;
     --primary-glow: rgba(37, 99, 235, 0.3);
 
-    /* FROSTED GLASS SETTINGS (Day) */
-    --glass-bg: rgba(255, 255, 255, 0.7); /* Milky white glass */
+    --glass-bg: rgba(255, 255, 255, 0.75);
     --glass-blur: blur(25px);
 
-    /* 3D LIGHTING BORDERS (Day) */
     --glass-border: 1px solid rgba(255, 255, 255, 0.8);
     --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
 
@@ -57,19 +53,17 @@ body.day-mode {
 
     --icon-bg: rgba(0, 0, 0, 0.05);
 
-    /* CRISP DROP SHADOWS */
     --card-shadow:
         0 4px 6px -1px rgba(0, 0, 0, 0.05),
         0 10px 15px -3px rgba(0, 0, 0, 0.05),
         0 0 0 1px rgba(255, 255, 255, 0.6);
 
     --card-hover-shadow:
-        0 20px 25px -5px rgba(0, 0, 0, 0.1),
-        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 /* ==========================================================================
-   2. GLOBAL RESETS & ANIMATED BACKGROUND
+   2. GLOBAL RESETS
    ========================================================================== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -85,7 +79,7 @@ body {
     transition: background 0.5s ease;
 }
 
-/* Moving Orbs - INCREASED OPACITY FOR FROST EFFECT */
+/* Background Animation */
 body::before {
     content: ''; position: fixed; top: -10%; left: -10%; width: 500px; height: 500px;
     background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
@@ -94,7 +88,7 @@ body::before {
 }
 body::after {
     content: ''; position: fixed; bottom: -10%; right: -10%; width: 400px; height: 400px;
-    background: radial-gradient(circle, #38bdf8 0%, transparent 70%); /* Cyan accent */
+    background: radial-gradient(circle, #38bdf8 0%, transparent 70%);
     opacity: 0.2; z-index: -1; filter: blur(60px);
     animation: floatLight 20s ease-in-out infinite alternate-reverse;
 }
@@ -106,14 +100,13 @@ body::after {
 .portal-shell { max-width: 800px; margin: 0 auto; padding: 20px; }
 
 /* ==========================================================================
-   3. THE "POP" GLASS STYLES (Cards, Headers, Panels)
+   3. SHARED GLASS COMPONENTS
    ========================================================================== */
 .glass-header, .stat-card, .glass-panel, .hero-card, .modal-glass {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
 
-    /* 3D Edges */
     border: var(--glass-border);
     box-shadow: var(--glass-highlight), var(--card-shadow);
 
@@ -121,15 +114,14 @@ body::after {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
 }
 
-/* Hover Effect: Lift up */
 .stat-card:hover, .hero-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--glass-highlight), var(--card-hover-shadow);
-    border-color: var(--primary); /* Highlight border on hover */
+    border-color: var(--primary);
 }
 
 /* ==========================================================================
-   4. HEADER SECTION (UPDATED)
+   4. HEADER SECTION (Logo + Brand + Rates + Profile)
    ========================================================================== */
 .glass-header {
     padding: 15px 25px;
@@ -137,95 +129,46 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px; /* Space between the 3 main sections */
+    gap: 20px;
 }
 
-/* --- LEFT: Logo & Brand --- */
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
+/* Left: Logo & Brand */
+.header-left { display: flex; align-items: center; gap: 12px; }
 .header-left .logo-box {
-    width: 45px; height: 45px;
-    background: var(--icon-bg);
-    border-radius: 12px;
+    width: 45px; height: 45px; background: var(--icon-bg); border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     border: 1px solid rgba(255,255,255,0.1);
 }
 .portal-logo { width: 28px; height: auto; }
 
 .brand-title {
-    font-family: 'Inter', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 800; /* Extra Bold */
-    text-transform: uppercase;
-    color: var(--text-main);
-    letter-spacing: 1px;
-    white-space: nowrap;
+    font-family: 'Inter', sans-serif; font-size: 1.2rem; font-weight: 800;
+    text-transform: uppercase; color: var(--text-main); letter-spacing: 1px; white-space: nowrap;
 }
 
-/* --- CENTER: Rates Ticker --- */
+/* Center: Rates Ticker */
 .rates-ticker {
-    display: flex;
-    gap: 20px;
-    background: var(--icon-bg);
-    padding: 8px 20px;
-    border-radius: 15px;
-    border: 1px solid rgba(255,255,255,0.05);
+    display: flex; gap: 20px; background: var(--icon-bg); padding: 8px 20px;
+    border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);
 }
+.rate-item { display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+.rate-percent { font-size: 1rem; font-weight: 700; color: var(--primary); }
+.rate-duration { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
 
-.rate-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    line-height: 1.1;
-}
-
-.rate-percent {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.rate-duration {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-/* --- RIGHT: User Info --- */
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.user-greeting-box {
-    text-align: right;
-}
-
+/* Right: User Info */
+.header-right { display: flex; align-items: center; gap: 15px; }
+.user-greeting-box { text-align: right; }
 .greeting-sub { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px; }
-
 .client-name-tiny {
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-main);
-    white-space: nowrap;
+    font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--text-main); white-space: nowrap;
 }
 
 .profile-btn {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: var(--glass-bg);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: var(--text-muted); font-size: 1rem; cursor: pointer; transition: 0.3s;
-    display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 50%; background: var(--glass-bg);
+    border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 1rem;
+    cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center;
 }
 .profile-btn:hover { color: white; border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
-
 
 /* ==========================================================================
    5. HERO & STATS SECTION
@@ -237,9 +180,7 @@ body::after {
 @keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
 
 .hero-section { margin-bottom: 20px; }
-.hero-card {
-    flex-direction: column; justify-content: center; text-align: center; padding: 30px;
-}
+.hero-card { flex-direction: column; justify-content: center; text-align: center; padding: 30px; }
 .hero-ring-container {
     position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;
 }
@@ -315,13 +256,10 @@ body::after {
    8. MODALS & FORMS
    ========================================================================== */
 .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); /* Blurs the whole screen */
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
     display: none; align-items: center; justify-content: center; z-index: 1000;
 }
-.modal-glass {
-    width: 90%; max-width: 350px; padding: 25px; text-align: center;
-    /* Styles inherited from shared glass class, specific overrides here */
-}
+.modal-glass { width: 90%; max-width: 350px; padding: 25px; text-align: center; }
 .modal-large { max-width: 450px; }
 .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
 .close-btn { background: none; border: none; color: var(--text-main); font-size: 1.5rem; cursor: pointer; }
@@ -330,19 +268,14 @@ body::after {
 .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
 
 .input-field {
-    width: 100%; padding: 12px;
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px; color: var(--text-main); font-size: 1rem; outline: none;
-    transition: 0.3s;
+    width: 100%; padding: 12px; background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: var(--text-main); font-size: 1rem; outline: none; transition: 0.3s;
 }
 .input-field:focus { border-color: var(--primary); background: rgba(0,0,0,0.3); }
 
-/* Upload Boxes */
 .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .upload-box, .upload-zone {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px dashed rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.2);
     border-radius: 10px; padding: 15px; text-align: center; cursor: pointer;
     transition: 0.2s; font-size: 0.8rem; color: var(--text-muted);
 }
@@ -373,39 +306,49 @@ body::after {
 @keyframes pulse-red { 0%, 100% { filter: drop-shadow(0 0 2px #ef4444); } 50% { filter: drop-shadow(0 0 10px #ef4444); } }
 
 /* ==========================================================================
-   10. MOBILE BLOCK LAYOUT
+   10. MOBILE BLOCK LAYOUT (PHONE OPTIMIZED)
    ========================================================================== */
+@media (max-width: 900px) {
+    /* Hide Rates on Tablets/Phones so header doesn't break */
+    .rates-ticker { display: none; }
+}
+
 @media (max-width: 768px) {
     .portal-shell { padding: 10px; max-width: 100%; display: flex; flex-direction: column; gap: 20px; }
 
-    .glass-header { flex-direction: row; padding: 15px; gap: 15px; margin-bottom: 0; }
-    .header-right { position: static; }
-    .client-name-title { font-size: 1.4rem; }
+    /* Optimized Mobile Header */
+    .glass-header { flex-direction: row; justify-content: space-between; padding: 15px; margin-bottom: 0; }
+    .header-left { gap: 8px; }
+    .header-left .logo-box { width: 35px; height: 35px; }
+    .portal-logo { width: 20px; }
+    .brand-title { font-size: 1rem; } /* Smaller text for phone */
 
+    /* Hide specific desktop elements */
+    .header-center, .user-greeting-box { display: none; }
+
+    /* Profile Button Specifics */
+    .header-right { position: static; gap: 0; }
+    .profile-btn { width: 35px; height: 35px; }
+
+    /* Swipe Hint */
     .mobile-swipe-hint { display: block; margin-bottom: -15px; z-index: 10; }
 
+    /* Carousel Stats */
     .stats-grid {
         display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 15px;
         padding-bottom: 15px; margin-right: -10px; padding-right: 10px;
     }
-    .stat-card {
-        min-width: 85%; scroll-snap-align: center; margin: 0;
-        /* Inherits glass style from shared class, specific mobile padding */
-    }
+    .stat-card { min-width: 85%; scroll-snap-align: center; margin: 0; }
 
+    /* Actions & Tables */
     .panel-header { flex-direction: column; align-items: flex-start; gap: 15px; padding-bottom: 20px; }
     .action-group { width: 100%; display: flex; flex-direction: column; gap: 12px; }
     .action-btn-pay, .action-btn-upload, .action-btn-request { width: 100%; justify-content: center; padding: 14px; font-size: 1rem; }
 
     .portal-table thead { display: none; }
     .portal-table tr {
-        display: block;
-        /* Mobile blocks get the glass treatment too */
-        background: var(--glass-bg);
-        backdrop-filter: var(--glass-blur);
-        border: var(--glass-border);
-        box-shadow: var(--card-shadow);
-
+        display: block; background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+        border: var(--glass-border); box-shadow: var(--card-shadow);
         margin-bottom: 15px; border-radius: 16px; padding: 20px;
     }
     .portal-table td {
@@ -416,27 +359,4 @@ body::after {
     .portal-table td::before {
         content: attr(data-label); font-size: 0.75rem; text-transform: uppercase; color: var(--primary); font-weight: 700;
     }
-}
-
-/* ==========================================================================
-   HEADER MOBILE ADJUSTMENTS (Paste at very bottom of file)
-   ========================================================================== */
-@media (max-width: 900px) {
-    /* Hide Rates on Tablets/Phones to prevent breaking layout */
-    .rates-ticker { display: none; }
-}
-
-@media (max-width: 768px) {
-    /* Override general header settings for the new 3-column layout */
-    .glass-header {
-        flex-direction: row;
-        justify-content: space-between;
-        padding: 15px;
-    }
-
-    .brand-title { font-size: 1rem; }
-    .user-greeting-box { display: none; } /* Hide name on mobile header */
-
-    .header-left .logo-box { width: 35px; height: 35px; }
-    .portal-logo { width: 20px; }
 }
