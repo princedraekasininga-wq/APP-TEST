@@ -1,0 +1,204 @@
+/* =========================================
+   STALLZ CLIENT PORTAL - CYBER BLUE THEME
+   ========================================= */
+:root {
+    --bg-color: #020617;
+    --bg-gradient: radial-gradient(circle at 50% -20%, #0f172a 0%, #020617 80%);
+    --glass-bg: rgba(15, 23, 42, 0.65);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+    --glass-blur: blur(20px);
+    --primary: #3b82f6;
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-color);
+    background-image: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text-main);
+    min-height: 100vh;
+    padding-bottom: 50px;
+}
+
+.portal-shell {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* --- HEADER DESIGN --- */
+.glass-header {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    border-radius: 24px;
+    padding: 15px 25px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--card-shadow);
+}
+
+/* Left: Logo Box */
+.header-left .logo-box {
+    width: 50px;
+    height: 50px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.portal-logo { width: 32px; height: auto; }
+
+/* Center: Greeting & Name */
+.header-center { text-align: center; }
+.greeting-sub {
+    font-size: 0.85rem;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+.client-name-title {
+    font-family: 'Playfair Display', serif; /* Elegant Font */
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    line-height: 1.1;
+}
+
+/* Right: Profile Icon */
+.profile-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex; align-items: center; justify-content: center;
+}
+.profile-btn:hover {
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+/* --- STATS GRID --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: var(--glass-border);
+    padding: 20px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: 0.3s;
+}
+.stat-card:hover { transform: translateY(-3px); }
+
+.icon-box {
+    width: 45px; height: 45px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    background: rgba(255,255,255,0.05);
+}
+
+.blue-glow .icon-box { color: #60a5fa; box-shadow: 0 0 15px rgba(59, 130, 246, 0.15); }
+.green-glow .icon-box { color: #4ade80; box-shadow: 0 0 15px rgba(74, 222, 128, 0.15); }
+.purple-glow .icon-box { color: #c084fc; box-shadow: 0 0 15px rgba(192, 132, 252, 0.15); }
+
+.stat-info .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.money-text { font-size: 1.3rem; font-weight: 700; color: white; }
+
+/* --- GLASS PANEL (Table) --- */
+.glass-panel {
+    background: var(--glass-bg);
+    border: var(--glass-border);
+    border-radius: 24px;
+    overflow: hidden;
+    backdrop-filter: var(--glass-blur);
+}
+.panel-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.panel-header h2 { font-size: 1.1rem; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+
+.table-responsive { overflow-x: auto; }
+.portal-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+.portal-table th {
+    text-align: left; padding: 15px 20px;
+    font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;
+    font-weight: 600; background: rgba(0,0,0,0.2);
+}
+.portal-table td {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.9rem;
+    color: #e2e8f0;
+}
+.status-pill {
+    padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+    display: inline-block;
+}
+.status-paid { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.2); }
+.status-active { background: rgba(96, 165, 250, 0.1); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.2); }
+.status-overdue { background: rgba(248, 113, 113, 0.1); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); }
+
+/* --- MODAL --- */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-glass {
+    background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px; width: 90%; max-width: 350px; padding: 25px;
+    text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+.modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+.close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+.big-avatar {
+    width: 70px; height: 70px; background: rgba(255,255,255,0.05);
+    border-radius: 50%; margin: 0 auto 15px auto;
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary);
+}
+.profile-details p { margin: 8px 0; font-size: 0.9rem; color: #cbd5e1; }
+.divider { border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0; }
+.info-text { font-size: 0.8rem; color: #64748b; margin-bottom: 20px; }
+.btn-full {
+    width: 100%; background: var(--primary); color: white; border: none;
+    padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer;
+}
+
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 600px) {
+    .glass-header { flex-direction: column; gap: 15px; padding: 20px; }
+    .header-center { order: 2; }
+    .header-left { order: 1; margin-bottom: -10px; } /* Logo on top */
+    .header-right { position: absolute; top: 15px; right: 15px; } /* Profile fixed top right */
+
+    .client-name-title { font-size: 1.5rem; }
+    .stats-grid { grid-template-columns: 1fr; } /* Stack cards on mobile */
+}
