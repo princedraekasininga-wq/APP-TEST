@@ -511,159 +511,114 @@ window.openReceipt = function(loanId) {
   const loan = state.loans.find(l => l.id == loanId);
   if (!loan) return;
 
-  // 1. Get Payment History
+  // 1. Show Loading Toast
+  showToast("Generating Receipt...", "success");
+
+  // 2. Get Payment History
   const history = state.repayments
       .filter(r => r.loanId === loan.id)
       .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  // 2. Define Colors & Status
   let statusColor = "#333";
   let statusText = loan.status;
+  if (loan.balance <= 0) { statusColor = "#16a34a"; statusText = "PAID IN FULL"; }
+  else if (loan.status === "OVERDUE") { statusColor = "#dc2626"; }
 
-  if (loan.balance <= 0) {
-      statusColor = "#16a34a";
-      statusText = "PAID IN FULL";
-  } else if (loan.status === "OVERDUE") {
-      statusColor = "#dc2626";
-  }
+  // 3. Create a temporary invisible container to render the receipt
+  const receiptContainer = document.createElement('div');
+  receiptContainer.style.position = 'fixed';
+  receiptContainer.style.left = '-9999px';
+  receiptContainer.style.width = '148mm'; // Exact A5 Width
+  receiptContainer.style.background = 'white';
+  document.body.appendChild(receiptContainer);
 
-  // 3. Create the Receipt Window
-  const printWindow = window.open('', '', 'width=600,height=850');
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Receipt #${loan.id}</title>
-        <style>
-          @page { size: A5 portrait; margin: 0; }
+  // 4. Fill it with the HTML (Using A5 Styling)
+  receiptContainer.innerHTML = `
+    <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; padding: 20px; width: 100%; box-sizing: border-box;">
 
-          body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #1e293b; background: white; padding: 30px; margin: 0 auto;
-            -webkit-print-color-adjust: exact;
-          }
-
-          /* HEADER & BRANDING */
-          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 25px; }
-          .brand { display: flex; align-items: center; gap: 12px; }
-          .brand img { height: 45px; width: auto; }
-          .brand-text h1 { margin: 0; font-size: 20px; color: #1e293b; text-transform: uppercase; letter-spacing: 1px; }
-          .brand-text p { margin: 2px 0 0; font-size: 11px; color: #64748b; }
-
-          .meta { text-align: right; }
-          .meta-item { font-size: 12px; color: #64748b; margin-bottom: 3px; }
-          .meta-item strong { color: #0f172a; }
-
-          /* INFO BOXES */
-          .details-box { display: flex; justify-content: space-between; margin-bottom: 25px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9; }
-          .col h3 { font-size: 10px; text-transform: uppercase; color: #94a3b8; margin: 0 0 10px 0; letter-spacing: 0.5px; font-weight: 700; }
-          .info-group { margin-bottom: 8px; }
-          .info-label { font-size: 10px; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
-          .info-val { font-size: 14px; font-weight: 600; color: #334155; }
-
-          /* TABLE */
-          table { width: 100%; border-collapse: collapse; margin-bottom: 10px; margin-top: 10px; }
-          th { text-align: left; font-size: 10px; text-transform: uppercase; color: #64748b; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
-          td { padding: 10px 0; font-size: 14px; border-bottom: 1px solid #f1f5f9; color: #334155; }
-          .text-right { text-align: right; }
-          .total-row td { border-top: 2px solid #0f172a; border-bottom: none; font-weight: 700; font-size: 16px; color: #0f172a; padding-top: 15px; }
-          .balance-row td { color: ${statusColor}; font-size: 18px; }
-
-          /* TERMS (Kept as requested) */
-          .terms { margin-top: 25px; font-size: 9px; color: #94a3b8; text-align: justify; line-height: 1.4; border-top: 1px solid #f1f5f9; padding-top: 10px; }
-
-          /* HISTORY */
-          .history-section { margin-top: 25px; }
-          .history-header { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 10px; }
-          .history-row { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; padding: 5px 0; border-bottom: 1px dashed #f1f5f9; }
-
-          .thank-you { text-align: center; margin-top: 30px; font-size: 13px; font-weight: 600; color: #1e293b; }
-          .footer { margin-top: 10px; text-align: center; font-size: 10px; color: #cbd5e1; }
-
-          .no-print { margin-top: 30px; text-align: center; }
-          .btn { background: #0f172a; color: white; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-size: 14px; font-weight: 600; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-          @media print { .no-print { display: none; } body { padding: 0; margin: 20px; } }
-        </style>
-      </head>
-      <body>
-
-        <div class="header">
-          <div class="brand">
-            <img src="my-logo.png" alt="Logo" onerror="this.style.display='none'">
-            <div class="brand-text">
-              <h1>Stallz Loans</h1>
-              <p>Quick, Easy, Reliable</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="my-logo.png" style="height: 40px; width: auto;" onerror="this.style.display='none'">
+            <div>
+              <h1 style="margin: 0; font-size: 18px; color: #1e293b; text-transform: uppercase;">Stallz Loans</h1>
+              <p style="margin: 2px 0 0; font-size: 10px; color: #64748b;">Quick, Easy, Reliable</p>
             </div>
           </div>
-          <div class="meta">
-            <div class="meta-item">Receipt #: <strong>${loan.id}</strong></div>
-            <div class="meta-item">Date: <strong>${new Date().toLocaleDateString()}</strong></div>
-            <div class="meta-item">Status: <strong style="color:${statusColor}">${statusText}</strong></div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; color: #64748b;">Receipt #: <strong style="color: #0f172a;">${loan.id}</strong></div>
+            <div style="font-size: 11px; color: #64748b;">Date: <strong style="color: #0f172a;">${new Date().toLocaleDateString()}</strong></div>
+            <div style="font-size: 11px; color: #64748b; margin-top:2px;"><strong style="color:${statusColor}">${statusText}</strong></div>
           </div>
         </div>
 
-        <div class="details-box">
-          <div class="col">
-            <h3>Client Details</h3>
-            <div class="info-group">
-                <div class="info-val" style="font-size:15px;">${loan.clientName}</div>
-                <div class="info-label">${loan.clientPhone || ''}</div>
-            </div>
-            <div class="info-group" style="margin-top:10px;">
-                <div class="info-label">Item</div>
-                <div class="info-val">${loan.collateralItem}</div>
-            </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #f1f5f9;">
+          <div>
+            <div style="font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 4px;">Client Details</div>
+            <div style="font-size: 13px; font-weight: 600; color: #334155;">${loan.clientName}</div>
+            <div style="font-size: 11px; color: #64748b;">${loan.clientPhone || ''}</div>
+            <div style="margin-top: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Item</div>
+            <div style="font-size: 13px; font-weight: 600; color: #334155;">${loan.collateralItem}</div>
           </div>
-          <div class="col" style="text-align:right;">
-            <h3>Loan Terms</h3>
-            <div class="info-group">
-                <div class="info-label">Date Taken</div>
-                <div class="info-val">${formatDate(loan.startDate)}</div>
-            </div>
-            <div class="info-group">
-                <div class="info-label">Due Date</div>
-                <div class="info-val" style="color:${statusColor}">${formatDate(loan.dueDate)}</div>
-            </div>
+          <div style="text-align: right;">
+            <div style="font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 4px;">Loan Terms</div>
+            <div style="font-size: 11px; color: #64748b;">Taken: <span style="font-weight:600; color:#334155;">${formatDate(loan.startDate)}</span></div>
+            <div style="font-size: 11px; color: #64748b; margin-top:4px;">Due: <span style="font-weight:600; color:${statusColor};">${formatDate(loan.dueDate)}</span></div>
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr><th>Description</th><th class="text-right">Amount</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Principal Loan Amount</td><td class="text-right">${formatMoney(loan.amount)}</td></tr>
-            <tr><td>Interest & Fees (${loan.plan})</td><td class="text-right">${formatMoney(loan.totalDue - loan.amount)}</td></tr>
-            <tr><td><strong>Total Repayment Due</strong></td><td class="text-right"><strong>${formatMoney(loan.totalDue)}</strong></td></tr>
-            <tr><td style="color:#16a34a;">Less: Total Amount Paid</td><td class="text-right" style="color:#16a34a;">- ${formatMoney(loan.paid)}</td></tr>
-            <tr class="total-row balance-row"><td>Remaining Balance</td><td class="text-right">${formatMoney(loan.balance)}</td></tr>
-          </tbody>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <th style="text-align: left; font-size: 9px; text-transform: uppercase; color: #64748b; padding-bottom: 8px;">Description</th>
+            <th style="text-align: right; font-size: 9px; text-transform: uppercase; color: #64748b; padding-bottom: 8px;">Amount</th>
+          </tr>
+          <tr><td style="padding: 8px 0; font-size: 12px; border-bottom: 1px solid #f1f5f9;">Principal</td><td style="text-align: right; padding: 8px 0; font-size: 12px; border-bottom: 1px solid #f1f5f9;">${formatMoney(loan.amount)}</td></tr>
+          <tr><td style="padding: 8px 0; font-size: 12px; border-bottom: 1px solid #f1f5f9;">Interest & Fees</td><td style="text-align: right; padding: 8px 0; font-size: 12px; border-bottom: 1px solid #f1f5f9;">${formatMoney(loan.totalDue - loan.amount)}</td></tr>
+          <tr><td style="padding: 8px 0; font-size: 12px; font-weight:700;">Total Due</td><td style="text-align: right; padding: 8px 0; font-size: 12px; font-weight:700;">${formatMoney(loan.totalDue)}</td></tr>
+          <tr><td style="padding: 8px 0; font-size: 12px; color:#16a34a;">Less: Paid</td><td style="text-align: right; padding: 8px 0; font-size: 12px; color:#16a34a;">- ${formatMoney(loan.paid)}</td></tr>
+          <tr>
+            <td style="padding-top: 15px; font-size: 14px; font-weight: 700; border-top: 2px solid #0f172a;">Remaining Balance</td>
+            <td style="text-align: right; padding-top: 15px; font-size: 16px; font-weight: 700; color: ${statusColor}; border-top: 2px solid #0f172a;">${formatMoney(loan.balance)}</td>
+          </tr>
         </table>
 
-        <div class="terms">
-           <strong>Terms & Conditions:</strong> By accepting this loan, you agree that failure to repay by the due date may result in the forfeiture and sale of the collateral item listed above to recover the loan amount. Late payments may attract additional penalties.
+        <div style="margin-top: 20px; font-size: 8px; color: #94a3b8; text-align: justify; line-height: 1.4; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+           <strong>Terms:</strong> Failure to repay by the due date may result in the forfeiture and sale of collateral.
         </div>
 
         ${history.length > 0 ? `
-          <div class="history-section">
-            <div class="history-header">Payment History</div>
+          <div style="margin-top: 20px;">
+            <div style="font-size: 9px; font-weight: 700; text-transform: uppercase; color: #94a3b8; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 8px;">Payment History</div>
             ${history.map(h => `
-              <div class="history-row"><span>${formatDate(h.date)} &nbsp; &mdash; &nbsp; Payment Received</span><span>${formatMoney(h.amount)}</span></div>
+              <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b; padding: 3px 0; border-bottom: 1px dashed #f1f5f9;">
+                <span>${formatDate(h.date)} &mdash; Payment</span><span>${formatMoney(h.amount)}</span>
+              </div>
             `).join('')}
           </div>
         ` : ''}
 
-        <div class="thank-you">Thank you for your business!</div>
-        <div class="footer">Generated by Stallz Loans Administrator</div>
+        <div style="text-align: center; margin-top: 25px; font-size: 11px; font-weight: 600; color: #1e293b;">Thank you for your business!</div>
+        <div style="margin-top: 8px; text-align: center; font-size: 9px; color: #cbd5e1;">Generated by Stallz Loans Admin</div>
+    </div>
+  `;
 
-        <div class="no-print">
-            <button class="btn" onclick="window.print()">Print / Save as PDF</button>
-        </div>
+  // 5. Configure PDF Options
+  const opt = {
+    margin:       0,
+    filename:     `Receipt_${loan.clientName.replace(/\s/g,'_')}_${loan.id}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true }, // Higher scale = sharper text
+    jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
+  };
 
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
+  // 6. Generate and Save
+  html2pdf().from(receiptContainer).set(opt).save().then(() => {
+    // Cleanup after download starts
+    document.body.removeChild(receiptContainer);
+  }).catch(err => {
+    console.error(err);
+    showToast("Error generating PDF", "error");
+    document.body.removeChild(receiptContainer);
+  });
 };
 
 // ==========================================
@@ -1165,6 +1120,30 @@ function init() {
   // ------------------------------------------------
 
   // 2. EVENT LISTENERS
+
+  // --- NEW: LOGOUT BUTTON LISTENER ---
+  el("logoutBtn")?.addEventListener("click", () => {
+    if (confirm("Are you sure you want to log out?")) {
+      if (typeof vibrate === "function") vibrate([50]);
+
+      // 1. Sign out of Firebase
+      if (typeof firebase !== "undefined" && firebase.auth) {
+          firebase.auth().signOut();
+      }
+
+      // 2. Clear Session Data
+      localStorage.removeItem("stallz_last_active");
+      localStorage.removeItem("stallz_test_session");
+
+      // 3. Reload to Force Login Screen
+      showToast("Logging out...", "success");
+      setTimeout(() => {
+          window.location.reload();
+      }, 500);
+    }
+  });
+
+  // --- EXISTING LISTENERS ---
   el("openLoanModalBtn")?.addEventListener("click", () => {
     if (typeof vibrate === "function") vibrate([10]);
     wizardStep=0;
