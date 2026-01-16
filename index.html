@@ -33,6 +33,8 @@
             </div>
         </header>
 
+        <p class="mobile-swipe-hint"><i class="fas fa-arrow-right"></i> Swipe for details</p>
+
         <div class="stats-grid">
             <div class="stat-card blue-glow">
                 <div class="icon-box"><i class="fas fa-wallet"></i></div>
@@ -50,11 +52,21 @@
                 </div>
             </div>
 
-            <div class="stat-card purple-glow">
-                <div class="icon-box"><i class="fas fa-file-contract"></i></div>
+            <div class="stat-card countdown-card">
+                <div class="ring-container">
+                    <svg class="progress-ring" width="70" height="70">
+                        <circle class="progress-ring__bg" stroke="rgba(255,255,255,0.1)" stroke-width="6" fill="transparent" r="30" cx="35" cy="35"/>
+                        <circle id="progressCircle" class="progress-ring__circle" stroke="#4ade80" stroke-width="6" fill="transparent" r="30" cx="35" cy="35"/>
+                    </svg>
+                    <div class="ring-text-box">
+                        <span id="daysRemaining" class="days-num">--</span>
+                        <span class="days-label">Days</span>
+                    </div>
+                </div>
+
                 <div class="stat-info">
-                    <p class="label">Active Loans</p>
-                    <h3 class="money-text" id="portalActiveCount">0</h3>
+                    <p class="label">Next Due Date</p>
+                    <h3 class="money-text" id="nextDueDisplay">--</h3>
                 </div>
             </div>
         </div>
@@ -87,14 +99,7 @@
                         </tr>
                     </thead>
                     <tbody id="portalLoansTable">
-                        <tr>
-                            <td data-label="Date">Oct 24, 2025</td>
-                            <td data-label="Amount">K500.00</td>
-                            <td data-label="Total Due">K600.00</td>
-                            <td data-label="Paid">K200.00</td>
-                            <td data-label="Balance" style="font-weight:bold; color: white">K400.00</td>
-                            <td data-label="Status"><span class="status-pill status-active">Active</span></td>
-                        </tr>
+                        <tr><td colspan="6" style="text-align:center; padding: 20px;">Loading history...</td></tr>
                     </tbody>
                 </table>
             </div>

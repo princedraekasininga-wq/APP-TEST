@@ -4,12 +4,10 @@
 :root {
     /* Backgrounds */
     --bg-color: #050b14;
-    /* Green-tinted gradient to match the logo */
     --bg-gradient: radial-gradient(circle at 50% 0%, #112a1e 0%, #020617 80%);
 
     /* Brand Colors */
     --primary: #4ade80;  /* Bright Stallz Green */
-    --primary-dark: #22c55e;
     --primary-glow: rgba(74, 222, 128, 0.4);
 
     /* WhatsApp Green */
@@ -36,11 +34,7 @@
 /* ==========================================================================
    2. GLOBAL RESETS & BODY ANIMATIONS
    ========================================================================== */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: 'Inter', sans-serif;
@@ -50,63 +44,38 @@ body {
     color: var(--text-main);
     min-height: 100vh;
     padding-bottom: 50px;
-    overflow-x: hidden; /* Prevent scroll from background effects */
+    overflow-x: hidden;
 }
 
-/* Ambient Light Orb (Top Left) */
+/* Ambient Light Orbs */
 body::before {
-    content: '';
-    position: fixed;
-    top: -20%;
-    left: -10%;
-    width: 600px;
-    height: 600px;
+    content: ''; position: fixed; top: -20%; left: -10%; width: 600px; height: 600px;
     background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
-    opacity: 0.4;
-    z-index: -1;
-    animation: floatLight 15s ease-in-out infinite alternate;
+    opacity: 0.4; z-index: -1; animation: floatLight 15s ease-in-out infinite alternate;
 }
-
-/* Ambient Light Orb (Bottom Right - Subtle Blue Contrast) */
 body::after {
-    content: '';
-    position: fixed;
-    bottom: -10%;
-    right: -10%;
-    width: 500px;
-    height: 500px;
+    content: ''; position: fixed; bottom: -10%; right: -10%; width: 500px; height: 500px;
     background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
-    opacity: 0.3;
-    z-index: -1;
-    animation: floatLight 20s ease-in-out infinite alternate-reverse;
+    opacity: 0.3; z-index: -1; animation: floatLight 20s ease-in-out infinite alternate-reverse;
 }
-
 @keyframes floatLight {
     0% { transform: translate(0, 0) scale(1); }
     100% { transform: translate(50px, 50px) scale(1.1); }
 }
 
-.portal-shell {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-}
+.portal-shell { max-width: 800px; margin: 0 auto; padding: 20px; }
 
 /* ==========================================================================
    3. SHARED GLASS COMPONENT STYLES
    ========================================================================== */
-/* This class is applied to Header, Stat Cards, and Panels */
 .glass-header, .stat-card, .glass-panel {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-
-    /* Premium Sharp Edges */
     border-top: var(--glass-border-top);
     border-left: var(--glass-border-side);
     border-right: var(--glass-border-side);
     border-bottom: var(--glass-border-bottom);
-
     box-shadow: var(--card-shadow);
     border-radius: 24px;
 }
@@ -115,171 +84,89 @@ body::after {
    4. HEADER SECTION
    ========================================================================== */
 .glass-header {
-    padding: 15px 25px;
-    margin-bottom: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    padding: 15px 25px; margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between;
 }
-
-/* Logo Box */
 .header-left .logo-box {
-    width: 50px;
-    height: 50px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(255,255,255,0.1);
+    width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);
 }
 .portal-logo { width: 32px; height: auto; }
-
-/* Center Text */
 .header-center { text-align: center; }
-.greeting-sub {
-    font-size: 0.85rem;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-    margin-bottom: 2px;
-}
-.client-name-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: white;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    line-height: 1.1;
-}
-
-/* Profile Button */
+.greeting-sub { font-size: 0.85rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 2px; }
+.client-name-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: white; line-height: 1.1; }
 .profile-btn {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: 0.3s;
+    width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 1.1rem; cursor: pointer; transition: 0.3s;
     display: flex; align-items: center; justify-content: center;
 }
-.profile-btn:hover {
-    color: white;
-    border-color: var(--primary);
-    box-shadow: 0 0 15px var(--primary-glow);
-}
+.profile-btn:hover { color: white; border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
 
 /* ==========================================================================
-   5. STATS GRID
+   5. STATS GRID & SWIPE HINT
    ========================================================================== */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 30px;
-}
-
-.stat-card {
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    transition: transform 0.3s;
-    border-radius: 20px; /* Override specific to stats */
-}
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+.stat-card { padding: 20px; display: flex; align-items: center; gap: 15px; transition: transform 0.3s; }
 .stat-card:hover { transform: translateY(-5px); }
 
 .icon-box {
-    width: 45px; height: 45px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem;
-    background: rgba(255,255,255,0.05);
+    width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; background: rgba(255,255,255,0.05);
 }
-
-/* Stat Glow Colors */
 .blue-glow .icon-box { color: #60a5fa; box-shadow: 0 0 15px rgba(59, 130, 246, 0.15); }
 .green-glow .icon-box { color: #4ade80; box-shadow: 0 0 15px rgba(74, 222, 128, 0.15); }
-.purple-glow .icon-box { color: #c084fc; box-shadow: 0 0 15px rgba(192, 132, 252, 0.15); }
 
 .stat-info .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
 .money-text { font-size: 1.3rem; font-weight: 700; color: white; }
 
+.mobile-swipe-hint {
+    display: none; /* Hidden on Desktop */
+    font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; text-align: right;
+    animation: bounceRight 2s infinite;
+}
+@keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+
 /* ==========================================================================
-   6. LOAN HISTORY PANEL & ACTION BUTTONS
+   6. ACTION BUTTONS (Upload & Pay)
    ========================================================================== */
 .panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
+    display: flex; justify-content: space-between; align-items: center; padding: 20px;
     border-bottom: 1px solid rgba(255,255,255,0.05);
 }
+.panel-header h2 { font-size: 1.1rem; color: var(--text-main); }
 
-.panel-header h2 {
-    font-size: 1.1rem;
-    color: var(--text-main);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+.action-group { display: flex; gap: 10px; }
 
-/* Pay Button Styles */
 .action-btn-pay {
     background: linear-gradient(135deg, var(--whatsapp-green), var(--whatsapp-teal));
-    color: white;
-    text-decoration: none;
-    padding: 8px 18px;
-    border-radius: 30px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    animation: pulse-green 2s infinite;
+    color: white; text-decoration: none; padding: 8px 18px; border-radius: 30px;
+    font-size: 0.85rem; font-weight: 700; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    display: flex; align-items: center; gap: 8px; animation: pulse-green 2s infinite; transition: 0.2s;
 }
-
-.action-btn-pay:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
-}
-
 @keyframes pulse-green {
     0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
     70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
     100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
 }
 
+.action-btn-upload {
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-main); padding: 8px 18px; border-radius: 30px; cursor: pointer;
+    font-size: 0.85rem; font-weight: 600; transition: 0.3s;
+}
+.action-btn-upload:hover { border-color: var(--primary); color: var(--primary); }
+
 /* ==========================================================================
    7. TABLE STYLES
    ========================================================================== */
 .table-responsive { overflow-x: auto; }
 .portal-table { width: 100%; border-collapse: collapse; min-width: 500px; }
-
 .portal-table th {
-    text-align: left; padding: 15px 20px;
-    font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;
-    font-weight: 600; background: rgba(0,0,0,0.2);
+    text-align: left; padding: 15px 20px; font-size: 0.8rem; color: var(--text-muted);
+    text-transform: uppercase; font-weight: 600; background: rgba(0,0,0,0.2);
 }
+.portal-table td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; color: #e2e8f0; }
 
-.portal-table td {
-    padding: 15px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 0.9rem;
-    color: #e2e8f0;
-}
-
-/* Status Pills */
-.status-pill {
-    padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
-    display: inline-block;
-}
+.status-pill { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
 .status-paid { background: rgba(74, 222, 128, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.2); }
 .status-active { background: rgba(96, 165, 250, 0.1); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.2); }
 .status-overdue { background: rgba(248, 113, 113, 0.1); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); }
@@ -288,120 +175,94 @@ body::after {
    8. MODAL STYLES
    ========================================================================== */
 .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-    display: none; align-items: center; justify-content: center; z-index: 1000;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none;
+    align-items: center; justify-content: center; z-index: 1000;
 }
 .modal-glass {
-    background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 24px; width: 90%; max-width: 350px; padding: 25px;
-    text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+    width: 90%; max-width: 350px; padding: 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
 .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
 .close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
 .big-avatar {
-    width: 70px; height: 70px; background: rgba(255,255,255,0.05);
-    border-radius: 50%; margin: 0 auto 15px auto;
-    display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary);
+    width: 70px; height: 70px; background: rgba(255,255,255,0.05); border-radius: 50%;
+    margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary);
 }
-.profile-details p { margin: 8px 0; font-size: 0.9rem; color: #cbd5e1; }
-.divider { border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0; }
-.info-text { font-size: 0.8rem; color: #64748b; margin-bottom: 20px; }
-.btn-full {
-    width: 100%; background: var(--primary); color: white; border: none;
-    padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer;
+.btn-full { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+
+/* Upload Zone */
+.upload-zone {
+    border: 2px dashed rgba(255, 255, 255, 0.2); border-radius: 15px; padding: 30px;
+    text-align: center; cursor: pointer; margin-bottom: 15px; transition: 0.3s; color: var(--text-muted);
 }
+.upload-zone:hover { border-color: var(--primary); color: var(--primary); background: rgba(74, 222, 128, 0.05); }
+.file-name-display { font-size: 0.8rem; color: var(--primary); margin-bottom: 15px; min-height: 20px; }
 
 /* ==========================================================================
-   9. MOBILE RESPONSIVENESS
+   9. COUNTDOWN TIMER STYLES
+   ========================================================================== */
+.countdown-card { position: relative; overflow: hidden; justify-content: center; }
+.ring-container { position: relative; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
+.progress-ring__circle {
+    transition: stroke-dashoffset 0.5s ease-in-out, stroke 0.3s; transform: rotate(-90deg); transform-origin: 50% 50%;
+    stroke-linecap: round; filter: drop-shadow(0 0 4px currentColor);
+}
+.ring-text-box { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.days-num { font-size: 1.2rem; font-weight: 700; color: white; }
+.days-label { font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); }
+
+/* Urgency Colors */
+.ring-safe { stroke: #4ade80; color: #4ade80; }
+.ring-warning { stroke: #fbbf24; color: #fbbf24; }
+.ring-danger { stroke: #f87171; color: #f87171; animation: pulse-red 2s infinite; }
+@keyframes pulse-red { 0%, 100% { filter: drop-shadow(0 0 2px #f87171); } 50% { filter: drop-shadow(0 0 10px #f87171); } }
+
+/* ==========================================================================
+   10. MOBILE APP MODE (Focus Layouts)
    ========================================================================== */
 @media (max-width: 768px) {
-    /* Header Stacking */
-    .glass-header { flex-direction: column; gap: 15px; padding: 20px; position: relative; }
-    .header-center { order: 2; }
-    .header-left { order: 1; margin-bottom: -10px; }
-    .header-right { position: absolute; top: 15px; right: 15px; } /* Fixed profile button */
+    .portal-shell { padding: 15px; max-width: 100%; }
+    .mobile-swipe-hint { display: block; }
 
-    .client-name-title { font-size: 1.5rem; }
-    .stats-grid { grid-template-columns: 1fr; } /* Stack stats cards */
+    /* Compact Header */
+    .glass-header { flex-direction: row; padding: 15px; gap: 10px; margin-bottom: 20px; }
+    .header-left .logo-box { width: 40px; height: 40px; }
+    .portal-logo { width: 24px; }
+    .header-center { text-align: left; flex-grow: 1; padding-left: 5px; }
+    .greeting-sub { font-size: 0.7rem; margin-bottom: 0; }
+    .client-name-title { font-size: 1.2rem; }
+    .header-right { position: static; }
 
-    /* --- MOBILE CARD VIEW FOR TABLE --- */
-    /* 1. Hide standard headers */
+    /* Swipeable Stats Carousel */
+    .stats-grid {
+        display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 15px;
+        padding-bottom: 10px; margin-right: -15px; padding-right: 15px;
+        -ms-overflow-style: none; scrollbar-width: none;
+    }
+    .stats-grid::-webkit-scrollbar { display: none; }
+    .stat-card { min-width: 85%; scroll-snap-align: center; flex-direction: column; align-items: flex-start; margin: 0; }
+    .stat-card .icon-box { margin-bottom: 10px; }
+    .countdown-card { align-items: center; text-align: center; }
+
+    /* Thumb-Friendly Buttons */
+    .panel-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+    .action-group { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+    .action-btn-pay, .action-btn-upload { width: 100%; justify-content: center; padding: 12px; font-size: 1rem; }
+
+    /* Card View Tables */
     .portal-table thead { display: none; }
-
-    /* 2. Turn rows into cards */
     .portal-table tr {
-        display: block;
-        background: rgba(255, 255, 255, 0.03);
-        margin-bottom: 15px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        padding: 15px;
+        display: block; background: rgba(255, 255, 255, 0.03); margin-bottom: 15px;
+        border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-
-    /* 3. Cells behave as flex rows */
     .portal-table td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        text-align: right;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); text-align: right;
     }
-    .portal-table td:last-child { border-bottom: none; padding-bottom: 0; }
-
-    /* 4. Inject labels via data-label */
+    .portal-table td:last-child { border-bottom: none; }
     .portal-table td::before {
-        content: attr(data-label);
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        font-weight: 700;
+        content: attr(data-label); font-size: 0.75rem; text-transform: uppercase;
+        color: var(--text-muted); font-weight: 700;
     }
-}
-
-/* Action Group to hold both buttons */
-.action-group {
-    display: flex;
-    gap: 10px;
-}
-
-/* New Upload Button (Ghost Style) */
-.action-btn-upload {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-main);
-    padding: 8px 18px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: 0.3s;
-}
-.action-btn-upload:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-/* Upload Drop Zone */
-.upload-zone {
-    border: 2px dashed rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    padding: 30px;
-    text-align: center;
-    cursor: pointer;
-    margin-bottom: 15px;
-    transition: 0.3s;
-    color: var(--text-muted);
-}
-.upload-zone:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: rgba(74, 222, 128, 0.05);
-}
-.file-name-display {
-    font-size: 0.8rem;
-    color: var(--primary);
-    margin-bottom: 15px;
-    min-height: 20px;
 }
