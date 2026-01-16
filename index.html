@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portal - Stallz Loans</title>
     <link rel="icon" type="image/png" href="myfavicon.png">
+
     <link rel="stylesheet" href="client-portal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
@@ -61,9 +62,16 @@
         <section class="glass-panel">
             <div class="panel-header">
                 <h2><i class="fas fa-history"></i> Loan History</h2>
-                <a href="https://wa.me/260970000000?text=Hello,%20I%20would%20like%20to%20make%20a%20payment%20on%20my%20loan." target="_blank" class="action-btn-pay">
-                    <i class="fab fa-whatsapp"></i> Pay Now
-                </a>
+
+                <div class="action-group">
+                    <button onclick="openUploadModal()" class="action-btn-upload">
+                        <i class="fas fa-file-upload"></i> Sent Payment?
+                    </button>
+
+                    <a href="https://wa.me/260970000000?text=Hello,%20I%20would%20like%20to%20make%20a%20payment%20on%20my%20loan." target="_blank" class="action-btn-pay">
+                        <i class="fab fa-whatsapp"></i> Pay Now
+                    </a>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -116,8 +124,29 @@
         </div>
     </div>
 
+    <div id="uploadModal" class="modal-overlay">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3>Upload Proof</h3>
+                <button onclick="closeUploadModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-zone" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt fa-3x"></i>
+                    <p style="margin-top:10px;">Tap to select screenshot</p>
+                    <input type="file" id="paymentFile" accept="image/*" style="display:none">
+                </div>
+                <p id="fileName" class="file-name-display"></p>
+                <button onclick="submitPaymentProof()" class="btn-full" id="uploadBtn">
+                    Submit Proof
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <script src="client-portal.js"></script>
 </body>
 </html>
