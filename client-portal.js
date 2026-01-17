@@ -18,26 +18,33 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 
 // ==========================================================================
-// 2. THEME & GREETING LOGIC
+// 2. THEME & GREETING LOGIC (FIXED)
 // ==========================================================================
 function setDynamicGreeting() {
     const hour = new Date().getHours();
     const greetingEl = document.getElementById('greetingText');
     const body = document.body;
 
-    // Day Mode: 6 AM to 6 PM
+    // 1. Set the Text (Morning vs Afternoon vs Evening)
+    if (hour < 12) {
+        greetingEl.innerText = "Good Morning,";
+    } else if (hour < 18) {
+        greetingEl.innerText = "Good Afternoon,";
+    } else {
+        greetingEl.innerText = "Good Evening,";
+    }
+
+    // 2. Set the Theme (Day vs Night)
+    // Day Mode active between 6 AM (6) and 6 PM (18)
     if (hour >= 6 && hour < 18) {
-        greetingEl.innerText = "Good Morning/Afternoon,";
         body.classList.add('day-mode');
         console.log("☀️ Setting Day Theme");
     } else {
-        if (hour < 12) greetingEl.innerText = "Good Morning,";
-        else greetingEl.innerText = "Good Evening,";
-
         body.classList.remove('day-mode');
         console.log("🌙 Setting Night Theme");
     }
 }
+
 
 // ==========================================================================
 // 3. MAIN INITIALIZATION

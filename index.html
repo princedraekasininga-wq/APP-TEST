@@ -114,16 +114,17 @@
     <nav class="mobile-bottom-nav">
         <a href="#" class="nav-item" onclick="openRequestModal()">
             <div class="nav-icon"><i class="fas fa-hand-holding-usd"></i></div>
-            <span class="nav-label">Request</span>
+            <span class="nav-label">Request for loan</span>
         </a>
 
         <a href="#" class="nav-item center-item" onclick="openCalcModal()">
             <div class="nav-icon big-nav-icon"><i class="fas fa-calculator"></i></div>
+            <span class="nav-label">Estimator</span>
         </a>
 
         <a href="#" class="nav-item" onclick="openUploadModal()">
             <div class="nav-icon"><i class="fas fa-camera"></i></div>
-            <span class="nav-label">Proof</span>
+            <span class="nav-label">Proof of payment</span>
         </a>
     </nav>
 
@@ -149,45 +150,26 @@
     </div>
 
     <div id="calcModal" class="modal-overlay">
-        <div class="modal-glass">
-            <div class="modal-header">
-                <h3>Loan Estimator</h3>
-                <button onclick="closeCalcModal()" class="close-btn">&times;</button>
+    <div class="modal-glass">
+        <div class="modal-body">
+
+            <div class="calc-group">
+                </div>
+
+            <div class="calc-group">
+                <label style="display:block; margin-bottom:10px; font-size:0.8rem; color:var(--text-muted)">Duration</label>
+
+                <div class="duration-toggles" id="durationSelector">
+                    <button class="dur-btn active" data-rate="0.20">1 Wk</button>
+                    <button class="dur-btn" data-rate="0.30">2 Wk</button>
+                    <button class="dur-btn" data-rate="0.35">3 Wk</button>
+                    <button class="dur-btn" data-rate="0.40">1 Mo</button>
+                </div>
+                </div>
+
             </div>
-            <div class="modal-body">
-                <div class="calc-group">
-                    <div class="calc-label-row">
-                        <label>I want to borrow</label>
-                        <span class="calc-value-display" id="calcAmountDisplay">K500</span>
-                    </div>
-                    <input type="range" min="100" max="5000" step="50" value="500" class="calc-slider" id="calcRange">
-                </div>
-
-                <div class="calc-group">
-                    <label style="display:block; margin-bottom:10px; font-size:0.8rem; color:var(--text-muted)">Duration</label>
-                    <div class="duration-toggles" id="durationSelector">
-                        <button class="dur-btn active" data-rate="0.20">1 Wk</button>
-                        <button class="dur-btn" data-rate="0.30">2 Wk</button>
-                        <button class="dur-btn" data-rate="0.35">3 Wk</button>
-                        <button class="dur-btn" data-rate="0.40">1 Mo</button>
-                    </div>
-                </div>
-
-                <div class="calc-result-box">
-                    <div class="result-row">
-                        <span>Interest</span>
-                        <span id="calcInterestDisplay" style="color:var(--primary)">20%</span>
-                    </div>
-                    <div class="result-row total-row">
-                        <span>Repay</span>
-                        <span id="calcTotalDisplay">K600.00</span>
-                    </div>
-                </div>
-
-                <button onclick="applyFromCalc()" class="btn-full">Apply Now</button>
-            </div>
-        </div>
     </div>
+</div>
 
     <div id="uploadModal" class="modal-overlay">
         <div class="modal-glass">

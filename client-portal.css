@@ -371,29 +371,83 @@ body {
 }
 
 /* ==========================================================================
-   11. COMPONENTS: BOTTOM NAVIGATION (Mobile)
+   11. COMPONENTS: BOTTOM NAVIGATION (Static Position)
    ========================================================================== */
 .mobile-bottom-nav {
-    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-    width: 90%; max-width: 400px; height: 70px;
-    background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-    border: var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    border-radius: 40px; display: flex; justify-content: space-around; align-items: center; z-index: 999;
+    position: fixed; bottom: 20px; left: 50%;
+    width: 100%; max-width: 400px; height: 75px;
+
+    /* Glass Styles */
+    background: rgba(15, 23, 42, -0.1);
+    backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border-radius: 50px;
+
+    display: flex; justify-content: space-around; align-items: center;
+    z-index: 999; padding-bottom: 5px;
+
+    /* POSITIONING (No Animation) */
+    transform: translateX(-50%); /* Centered horizontally only */
 }
 
 .nav-item {
-    display: flex; flex-direction: column; align-items: center;
-    color: var(--text-muted); text-decoration: none; font-size: 0.7rem; transition: 0.3s;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--text-muted); text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 60px; position: relative;
 }
-.nav-item i { font-size: 1.2rem; margin-bottom: 3px; }
-.nav-item:hover, .nav-item:active { color: var(--primary); transform: translateY(-3px); }
+
+.nav-item i {
+    font-size: 1.2rem; margin-bottom: 4px;
+    transition: transform 0.3s ease;
+}
+
+.nav-label {
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.5px;
+    text-transform: uppercase; transition: color 0.3s ease;
+}
+
+/* Hover/Active Effects */
+.nav-item:hover i { transform: translateY(-3px) scale(1.1); color: var(--primary); }
+.nav-item:hover .nav-label { color: var(--text-main); }
+.nav-item:active { transform: scale(0.95); }
+
+/* --- The Floating Center Button (Estimator) --- */
+.center-item { position: relative; top: -5px; }
 
 .big-nav-icon {
-    width: 50px; height: 50px; background: var(--primary); color: white;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 15px var(--primary-glow); transform: translateY(-15px); border: 3px solid var(--bg-color);
+    width: 54px; height: 54px;
+    background: linear-gradient(135deg, var(--primary), #60a5fa);
+    color: white; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+
+    /* Glow & Float */
+    box-shadow: 0 8px 20px var(--primary-glow);
+    border: 4px solid var(--bg-color);
+
+    /* Initial Positioning */
+    transform: translateY(-20px);
+    margin-bottom: -15px;
+
+    /* Continuous Float Animation (Kept this as it looks good) */
+    animation: floatBtn 3s ease-in-out infinite;
 }
-.big-nav-icon i { font-size: 1.4rem; margin: 0; }
+
+@keyframes floatBtn {
+    0%, 100% { transform: translateY(-20px); box-shadow: 0 8px 20px var(--primary-glow); }
+    50% { transform: translateY(-26px); box-shadow: 0 15px 30px var(--primary-glow); }
+}
+
+/* Hovering the center button stops the float */
+.center-item:hover .big-nav-icon {
+    animation-play-state: paused;
+    transform: translateY(-28px) scale(1.1);
+    cursor: pointer;
+}
+
+.big-nav-icon i { font-size: 1.5rem; margin: 0; }
+.center-item .nav-label { margin-top: 5px; color: var(--primary); font-weight: 700; }
 
 /* ==========================================================================
    12. RESPONSIVE DESIGN (Mobile Overrides)
@@ -481,4 +535,35 @@ body.day-mode .text-gradient {
     background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
     background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;
     color: transparent !important; cursor: wait;
+}
+
+/* ==========================================================================
+   14. 3D ANIMATIONS & CALCULATOR EFFECTS
+   ========================================================================== */
+
+/* Target the glass box inside the Calculator Modal specifically */
+#calcModal .modal-glass {
+    /* 1. The 3D Shadow (Deep and Soft) */
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.5), /* Deep shadow underneath */
+        0 0 0 1px rgba(255, 255, 255, 0.1),   /* Crisp border */
+        inset 0 0 20px rgba(255, 255, 255, 0.05); /* Inner light */
+
+    /* 2. The "Drop Down" Animation */
+    animation: dropIn3D 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    /* Ensure it starts invisible before animation */
+    transform-origin: top center;
+}
+
+/* The Animation Keyframes */
+@keyframes dropIn3D {
+    0% {
+        opacity: 0;
+        transform: translateY(-100px) scale(0.9) rotateX(10deg); /* Starts high, small, and tilted */
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotateX(0deg); /* Lands flat */
+    }
 }
