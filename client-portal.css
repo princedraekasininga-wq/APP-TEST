@@ -1,27 +1,28 @@
 /* ==========================================================================
-   1. VARIABLES & THEME CONFIGURATION
+   1. VARIABLES & THEME CONFIGURATION (DEEP GLASS & POP)
    ========================================================================== */
 :root {
-    /* --- DEFAULT: NIGHT MODE --- */
+    /* --- NIGHT MODE (Default) --- */
     --bg-color: #020617;
     --bg-gradient: radial-gradient(circle at 50% -20%, #1e3a8a 0%, #020617 60%);
 
-    /* Brand Colors */
     --primary: #3b82f6;      /* Bright Blue */
     --primary-glow: rgba(59, 130, 246, 0.6);
 
-    /* Glass Effect (Dark) */
+    /* FROSTED GLASS SETTINGS */
     --glass-bg: rgba(15, 23, 42, 0.6);
     --glass-blur: blur(20px);
+
+    /* 3D LIGHTING BORDERS */
     --glass-border: 1px solid rgba(255, 255, 255, 0.1);
     --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
 
-    /* Text & UI */
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
+
     --icon-bg: rgba(255, 255, 255, 0.05);
 
-    /* Depth & Shadows */
+    /* SHADOWS */
     --card-shadow:
         0 4px 6px -1px rgba(0, 0, 0, 0.3),
         0 10px 15px -3px rgba(0, 0, 0, 0.3),
@@ -33,7 +34,7 @@
         0 0 15px var(--primary-glow);
 }
 
-/* --- DAY MODE OVERRIDES --- */
+/* --- DAY MODE (High Contrast) --- */
 body.day-mode {
     --bg-color: #f0f4f8;
     --bg-gradient: linear-gradient(135deg, #e2e8f0 0%, #f1f5f9 100%);
@@ -43,11 +44,13 @@ body.day-mode {
 
     --glass-bg: rgba(255, 255, 255, 0.75);
     --glass-blur: blur(25px);
+
     --glass-border: 1px solid rgba(255, 255, 255, 0.8);
     --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
 
     --text-main: #0f172a;
     --text-muted: #64748b;
+
     --icon-bg: rgba(0, 0, 0, 0.05);
 
     --card-shadow:
@@ -60,7 +63,7 @@ body.day-mode {
 }
 
 /* ==========================================================================
-   2. GLOBAL BASE & BACKGROUND ANIMATION
+   2. GLOBAL RESETS & MESH BACKGROUND
    ========================================================================== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -71,29 +74,45 @@ body {
     background-attachment: fixed;
     color: var(--text-main);
     min-height: 100vh;
-    padding-bottom: 90px; /* Space for Bottom Nav */
+    padding-bottom: 100px;
     overflow-x: hidden;
     transition: background 0.5s ease;
 }
 
-/* Floating Light Orbs */
-body::before, body::after {
-    content: ''; position: fixed; width: 500px; height: 500px;
-    opacity: 0.25; z-index: -1; filter: blur(60px);
+/* NEW: MESH BACKGROUND ANIMATION */
+.mesh-background {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: -1; overflow: hidden; pointer-events: none;
 }
-body::before {
-    top: -10%; left: -10%;
-    background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
-    animation: floatLight 15s ease-in-out infinite alternate;
+
+.mesh-blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); opacity: 0.4;
+    animation: moveMesh 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
 }
-body::after {
-    bottom: -10%; right: -10%;
-    background: radial-gradient(circle, #38bdf8 0%, transparent 70%);
-    animation: floatLight 20s ease-in-out infinite alternate-reverse;
+
+.blob-1 {
+    top: -10%; left: -10%; width: 500px; height: 500px;
+    background: var(--primary);
+    animation-delay: 0s;
 }
-@keyframes floatLight {
+.blob-2 {
+    bottom: -10%; right: -10%; width: 400px; height: 400px;
+    background: #38bdf8; /* Cyan */
+    animation-delay: -5s;
+}
+.blob-3 {
+    top: 40%; left: 40%; width: 300px; height: 300px;
+    background: #818cf8; /* Indigo */
+    animation-delay: -10s;
+    opacity: 0.2;
+}
+
+@keyframes moveMesh {
     0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(50px, 50px) scale(1.1); }
+    33% { transform: translate(30px, 50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(50px, -50px) scale(1.05); }
 }
 
 .portal-shell { max-width: 800px; margin: 0 auto; padding: 20px; }
@@ -101,7 +120,6 @@ body::after {
 /* ==========================================================================
    3. SHARED GLASS COMPONENTS
    ========================================================================== */
-/* All cards, panels, and modals share this glass DNA */
 .glass-header, .stat-card, .glass-panel, .hero-card, .modal-glass {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
@@ -114,7 +132,6 @@ body::after {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
 }
 
-/* Hover Lift Effect */
 .stat-card:hover, .hero-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--glass-highlight), var(--card-hover-shadow);
@@ -122,7 +139,7 @@ body::after {
 }
 
 /* ==========================================================================
-   4. LAYOUT: HEADER (Logo & Rates)
+   4. LAYOUT: HEADER (Brand + Rates + Settings)
    ========================================================================== */
 .glass-header {
     padding: 15px 25px;
@@ -131,14 +148,15 @@ body::after {
     gap: 20px;
 }
 
-/* Left: Brand */
+/* Left: Logo & Brand */
 .header-left { display: flex; align-items: center; gap: 12px; }
 .header-left .logo-box {
-    width: 45px; height: 45px; background: var(--icon-bg);
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    width: 45px; height: 45px; background: var(--icon-bg); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
     border: 1px solid rgba(255,255,255,0.1);
 }
 .portal-logo { width: 28px; height: auto; }
+
 .brand-title {
     font-family: 'Inter', sans-serif; font-size: 1.2rem; font-weight: 800;
     text-transform: uppercase; color: var(--text-main); letter-spacing: 1px; white-space: nowrap;
@@ -153,8 +171,9 @@ body::after {
 .rate-percent { font-size: 1rem; font-weight: 700; color: var(--primary); }
 .rate-duration { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
 
-/* Right: Profile */
-.header-right { display: flex; align-items: center; }
+/* Right: Profile Button */
+.header-right { display: flex; align-items: center; gap: 0; }
+
 .profile-btn {
     width: 40px; height: 40px; border-radius: 50%; background: var(--glass-bg);
     border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 1rem;
@@ -170,23 +189,24 @@ body::after {
     padding: 0 10px;
     text-align: left;
 }
+
 .greeting-sub {
     font-size: 0.9rem; color: var(--primary); text-transform: uppercase;
     letter-spacing: 1.5px; font-weight: 600; margin-bottom: 5px; display: block;
 }
+
 .client-name-main {
-    font-family: 'Playfair Display', serif; font-size: 2.2rem;
-    font-weight: 700; color: var(--text-main); line-height: 1.1;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem; font-weight: 700; color: var(--text-main); line-height: 1.1;
 }
 
 /* ==========================================================================
-   6. LAYOUT: HERO COUNTDOWN (Cleaned Up)
+   6. LAYOUT: HERO COUNTDOWN (Clean & Vibrant)
    ========================================================================== */
 .hero-section { margin-bottom: 20px; }
 
 .hero-card {
     flex-direction: column; justify-content: center; text-align: center; padding: 30px;
-    /* Subtle Gradient that works on both dark/light */
     background: linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, rgba(74, 222, 128, 0.05) 100%);
     border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative; overflow: hidden;
@@ -203,28 +223,18 @@ body::after {
     align-items: center; line-height: 1;
 }
 
-.hero-days-num {
-    font-size: 2.5rem; font-weight: 800; color: var(--text-main);
-    /* Glow only applied in Night Mode via body class logic if needed, removed here for cleanness */
-}
-
-.hero-days-label {
-    font-size: 0.75rem; text-transform: uppercase; color: var(--primary);
-    letter-spacing: 2px; font-weight: 700; margin-top: 5px;
-}
-
-.hero-date-text {
-    font-size: 1.5rem; font-weight: 700; color: var(--text-main); z-index: 2;
-}
+.hero-days-num { font-size: 2.5rem; font-weight: 800; color: var(--text-main); }
+.hero-days-label { font-size: 0.7rem; text-transform: uppercase; color: var(--primary); letter-spacing: 2px; font-weight: 700; margin-top: 5px; }
+.hero-date-text { font-size: 1.5rem; font-weight: 700; color: var(--text-main); z-index: 2; }
 
 /* SVG Progress Ring */
-.progress-ring__bg { stroke: rgba(128, 128, 128, 0.1); } /* Grey track for better visibility */
+.progress-ring__bg { stroke: rgba(128, 128, 128, 0.15); }
 
 .progress-ring__circle {
     transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s;
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
-    transform-box: fill-box; /* FIX: Prevents wobble in some browsers */
+    transform-box: fill-box; /* Prevents wobble */
     stroke-linecap: round;
 }
 
@@ -238,6 +248,7 @@ body::after {
     50% { filter: drop-shadow(0 0 8px #f87171); }
     100% { filter: drop-shadow(0 0 2px #f87171); }
 }
+
 /* ==========================================================================
    7. LAYOUT: STATS GRID
    ========================================================================== */
@@ -251,7 +262,7 @@ body::after {
 .blue-glow .icon-box { color: #60a5fa; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
 .green-glow .icon-box { color: #4ade80; box-shadow: 0 0 15px rgba(74, 222, 128, 0.2); }
 
-.stat-info .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+.stat-info .label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
 .money-text { font-size: 1.3rem; font-weight: 700; color: var(--text-main); }
 
 /* ==========================================================================
@@ -275,6 +286,11 @@ body::after {
     box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); border: 1px solid rgba(255,255,255,0.2);
     animation: pulse-green 2s infinite; text-decoration: none;
 }
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
 /* Generic Action Buttons */
 .action-btn-upload, .action-btn-request {
     background: var(--icon-bg); border: 1px solid rgba(255, 255, 255, 0.15); color: var(--text-main);
@@ -283,13 +299,7 @@ body::after {
     border-color: var(--primary); color: var(--primary); background: rgba(59, 130, 246, 0.1);
 }
 
-@keyframes pulse-green {
-    0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
-}
-
-/* Table Styles */
+/* Tables */
 .table-responsive { overflow-x: auto; }
 .portal-table { width: 100%; border-collapse: collapse; min-width: 500px; }
 .portal-table th {
@@ -316,7 +326,6 @@ body::after {
 .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; color: var(--text-main); }
 .close-btn { background: none; border: none; color: var(--text-main); font-size: 1.5rem; cursor: pointer; }
 
-/* Profile Elements */
 .big-avatar {
     width: 70px; height: 70px; background: rgba(255,255,255,0.05); border-radius: 50%;
     margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary);
@@ -342,7 +351,7 @@ body::after {
     box-shadow: 0 4px 15px var(--primary-glow);
 }
 
-/* Calculator & Upload Specifics */
+/* Calculator & Upload */
 .calc-slider { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 5px; background: rgba(255,255,255,0.1); margin-bottom: 20px; }
 .calc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--primary); cursor: pointer; }
 
@@ -379,7 +388,6 @@ body::after {
 .nav-item i { font-size: 1.2rem; margin-bottom: 3px; }
 .nav-item:hover, .nav-item:active { color: var(--primary); transform: translateY(-3px); }
 
-/* The Center Action Button (Calculator) */
 .big-nav-icon {
     width: 50px; height: 50px; background: var(--primary); color: white;
     border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -388,7 +396,7 @@ body::after {
 .big-nav-icon i { font-size: 1.4rem; margin: 0; }
 
 /* ==========================================================================
-   12. RESPONSIVE DESIGN (Mobile Overrides - FIXED)
+   12. RESPONSIVE DESIGN (Mobile Overrides)
    ========================================================================== */
 @media (max-width: 900px) {
     .rates-ticker { display: none; }
@@ -408,22 +416,13 @@ body::after {
     .greeting-section { text-align: left; margin-bottom: 20px; padding: 0 5px; }
     .client-name-main { font-size: 1.8rem; }
 
-    /* COMPACT STATS (The Fix: Vertical Layout) */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
+    /* COMPACT STATS (Icon Top, Text Bottom) */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .stat-card.compact-card {
-        padding: 15px;
-        gap: 8px;
-        flex-direction: column; /* Icon on top */
-        align-items: flex-start; /* Left align */
-        text-align: left;
+        padding: 15px; gap: 8px;
+        flex-direction: column; align-items: flex-start; text-align: left;
     }
-    .small-icon {
-        width: 35px; height: 35px; font-size: 1rem; margin-bottom: 5px;
-    }
+    .small-icon { width: 35px; height: 35px; font-size: 1rem; margin-bottom: 5px; }
     .small-label { font-size: 0.75rem; margin-bottom: 0; opacity: 0.8; }
     .small-money { font-size: 1.2rem; }
 
@@ -448,4 +447,38 @@ body::after {
     }
 
     .mobile-swipe-hint { display: none; }
+}
+
+/* ==========================================================================
+   13. NEW VISUAL UTILITIES (Animations, Gradients, Skeleton)
+   ========================================================================== */
+
+/* 13.1 Text Gradient (Apply class .text-gradient to h1 or h3) */
+.text-gradient {
+    background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    text-shadow: 0 2px 10px rgba(74, 222, 128, 0.1);
+}
+body.day-mode .text-gradient {
+    background: linear-gradient(135deg, var(--text-main) 0%, var(--primary) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-shadow: none; /* Clean look for day mode */
+}
+
+/* 13.2 Entrance Animations (Apply .fade-in to sections) */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeInUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+
+/* 13.3 Skeleton Loading (Apply .skeleton to loading elements) */
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;
+    color: transparent !important; cursor: wait;
 }

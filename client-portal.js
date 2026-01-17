@@ -95,7 +95,11 @@ function loadClientData(id) {
     db.collection('clients').doc(id).get().then((doc) => {
         if (doc.exists) {
             const data = doc.data();
+            // Note: The 'text-gradient' class in HTML handles the styling.
+            // innerText just updates the content safely.
             document.getElementById('portalClientName').innerText = data.name;
+
+            // Profile Modal Data
             document.getElementById('modalPhone').innerText = data.phone || "--";
             document.getElementById('modalID').innerText = data.idNumber || "--";
             document.getElementById('modalAddress').innerText = data.address || "--";
