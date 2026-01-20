@@ -470,3 +470,73 @@ body {
     color: var(--text-muted); font-size: 1.2rem; transition: 0.2s;
 }
 .social-link:hover { color: var(--primary); }
+
+/* ==========================================================================
+   DAY MODE OVERRIDES (Fixes for specific Dark Elements)
+   ========================================================================== */
+
+/* 1. Hero Section: Switch from dark gradient to light */
+body.day-mode .hero-split-layout {
+    background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix Hero Text Colors for Light Background */
+body.day-mode .big-percent-display {
+    /* Darker gradient for visibility on white */
+    background: linear-gradient(to right, #166534, #16a34a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+body.day-mode .due-date-row #nextDueDisplay {
+    color: #15803d !important; /* Dark Green text */
+}
+body.day-mode .days-left-number {
+    color: #0f172a; /* Dark Navy text */
+}
+
+/* 2. Mobile Navigation: White background */
+body.day-mode .mobile-bottom-nav {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+body.day-mode .big-nav-icon {
+    border-color: #f8fafc; /* Match body bg */
+}
+
+/* 3. Slide-in Drawer: White background */
+body.day-mode .drawer-glass {
+    background: rgba(255, 255, 255, 0.98);
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+}
+body.day-mode .drawer-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+body.day-mode .contact-row,
+body.day-mode h4 {
+    color: #0f172a !important;
+}
+
+/* 4. Modals & Notifications */
+body.day-mode .notification-dropdown,
+body.day-mode .modal-glass {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+body.day-mode .dropdown-header,
+body.day-mode .notify-item,
+body.day-mode .modal-header,
+body.day-mode .profile-details p {
+    border-color: rgba(0,0,0,0.05);
+}
+body.day-mode .modal-header h3,
+body.day-mode .modal-input {
+    color: #0f172a;
+}
+body.day-mode .modal-input {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}

@@ -11,14 +11,15 @@ const firebaseConfig = {
     appId: "YOUR_APP_ID"
 };
 
+// Initialize Firebase only if it hasn't been already
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.firestore();
 
 // Global Variables
-let isTestMode = true; // FORCED TRUE
-let selectedRate = 0.20;
+let isTestMode = true; // FORCED TRUE for development
+let selectedRate = 0.20; // Default interest rate (20% for 1 week)
 
 // ==========================================================================
 // 2. MAIN INITIALIZATION (ON LOAD)
@@ -30,19 +31,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if(rangeInput) {
         rangeInput.addEventListener('input', updateCalculator);
         setupDurationButtons();
-        updateCalculator();
+        updateCalculator(); // Run once on load
     }
 
-    // 2.2 FORCE TEST DATA LOADING
+    // 2.2 AUTO DAY/NIGHT MODE LOGIC
+    // Checks device time. If between 6 AM (06:00) and 6 PM (18:00), enable Day Mode.
+    const currentHour = new Date().getHours();
+    if (currentHour >= 6 && currentHour < 18) {
+        document.body.classList.add('day-mode');
+        console.log("☀️ Day Mode Active");
+    } else {
+        document.body.classList.remove('day-mode');
+        console.log("🌙 Night Mode Active");
+    }
+
+    // 2.3 FORCE TEST DATA LOADING
     // We strictly bypass looking for URL parameters or Database IDs
     console.log("⚠️ APP IS IN TEST MODE: Using dummy data only.");
     loadTestData();
 
-    // 2.3 Close modals if user clicks outside
+    // 2.4 Close modals if user clicks outside of them
     window.onclick = function(event) {
-        if (event.target.className === 'modal-overlay') {
+        if (event.target.className === 'modal-overlay' || event.target.className === 'drawer-overlay') {
             event.target.style.display = 'none';
         }
+        // Also close notification dropdown if clicking elsewhere
         if (!event.target.closest('.notification-wrapper')) {
             const dropdown = document.getElementById('notificationDropdown');
             if (dropdown) dropdown.style.display = 'none';
@@ -57,6 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleNotifications() {
     const dropdown = document.getElementById('notificationDropdown');
     if (!dropdown) return;
+
+    // Toggle between flex and none
     const isVisible = dropdown.style.display === 'flex';
     dropdown.style.display = isVisible ? 'none' : 'flex';
 }
@@ -64,11 +79,16 @@ function toggleNotifications() {
 function updateHeaderGreeting(name) {
     const hour = new Date().getHours();
     let timeGreeting = "Hello";
+
+    // Set greeting based on time of day
     if (hour < 12) timeGreeting = "Good Morning";
     else if (hour < 18) timeGreeting = "Good Afternoon";
     else timeGreeting = "Good Evening";
 
+    // Format First Name Only (e.g., "John" from "John Doe")
     const firstName = name ? name.split(' ')[0] : "User";
+
+    // Inject into Header preserving the span for color
     const headerTitle = document.getElementById('headerGreeting');
     if (headerTitle) {
         headerTitle.innerHTML = `${timeGreeting}, <span id="headerUserName">${firstName}</span>`;
@@ -103,8 +123,6 @@ function loadTestData() {
 
     renderLoansTable(fakeLoans);
 }
-
-// (The real data functions loadClientData/loadLoansData are removed/unused to prevent accidents)
 
 // ==========================================================================
 // 5. DASHBOARD RENDERING (TABLE & RINGS)
@@ -150,7 +168,7 @@ function renderLoansTable(loansData) {
     if(document.getElementById('portalTotalDebt')) document.getElementById('portalTotalDebt').innerText = 'K' + totalDebt.toLocaleString();
     if(document.getElementById('portalTotalPaid')) document.getElementById('portalTotalPaid').innerText = 'K' + totalPaid.toLocaleString();
 
-    // FORCE 67% DISPLAY (Overriding calculation for safety)
+    // FORCE 67% DISPLAY (Overriding calculation for testing)
     if(document.getElementById('paymentProgressDisplay')) {
         document.getElementById('paymentProgressDisplay').innerText = "67%";
     }
@@ -201,14 +219,18 @@ function updateCountdownRing(dueDate) {
 }
 
 // ==========================================================================
-// 7. CALCULATOR & MODALS
+// 7. CALCULATOR LOGIC
 // ==========================================================================
 
 function updateCalculator() {
     const amount = parseFloat(document.getElementById('calcRange').value);
     document.getElementById('calcAmountDisplay').innerText = `K${amount}`;
+
+    // Calculate Repayment
     const interestAmt = amount * selectedRate;
     const total = amount + interestAmt;
+
+    // Update Display
     document.getElementById('calcTotalDisplay').innerText = `K${total.toLocaleString()}`;
     document.getElementById('calcInterestDisplay').innerText = `${(selectedRate * 100).toFixed(0)}%`;
 }
@@ -225,18 +247,19 @@ function setupDurationButtons() {
     });
 }
 
+// ==========================================================================
+// 8. MODAL & DRAWER UTILITIES
+// ==========================================================================
+
+// Profile Drawer
 function openProfileModal() { document.getElementById('profileModal').style.display = 'flex'; }
 function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+
+// Calculator Modal
 function openCalcModal() { document.getElementById('calcModal').style.display = 'flex'; }
 function closeCalcModal() { document.getElementById('calcModal').style.display = 'none'; }
-function openRequestModal() { const m = document.getElementById('requestModal'); if(m) m.style.display='flex'; }
-function openUploadModal() { const m = document.getElementById('uploadModal'); if(m) m.style.display='flex'; }
 
-// ==========================================================================
-// 8. NEW MODAL UTILITIES
-// ==========================================================================
-
-// Request Loan
+// Request Loan Modal
 function openRequestModal() {
     const m = document.getElementById('requestModal');
     if(m) m.style.display = 'flex';
@@ -246,7 +269,7 @@ function closeRequestModal() {
     if(m) m.style.display = 'none';
 }
 
-// Upload Proof
+// Upload Proof Modal
 function openUploadModal() {
     const m = document.getElementById('uploadModal');
     if(m) m.style.display = 'flex';
@@ -256,7 +279,7 @@ function closeUploadModal() {
     if(m) m.style.display = 'none';
 }
 
-// Pay Now
+// Pay Now Modal
 function openPayModal() {
     const m = document.getElementById('payModal');
     if(m) m.style.display = 'flex';
