@@ -103,15 +103,69 @@ body {
 
 @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
+/* ==========================================================================
+   UPDATED NOTIFICATION DROPDOWN
+   ========================================================================== */
 .notification-dropdown {
-    position: absolute; top: 50px; right: 0; width: 250px;
-    background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(25px);
-    border: var(--glass-border); border-radius: 16px; display: none;
-    flex-direction: column; z-index: 1001; box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-}
-.dropdown-header { padding: 10px 15px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted); }
-.notify-item { padding: 10px 15px; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-main); }
+    position: absolute;
+    top: 60px; /* Pushed down slightly */
+    right: 0;
+    width: 320px; /* Increased width */
 
+    /* Glassmorphism Logic */
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+
+    border-radius: 20px;
+    display: none;
+    flex-direction: column;
+    z-index: 1001;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4); /* Deeper shadow for pop */
+    overflow: hidden;
+}
+
+/* Header inside dropdown */
+.dropdown-header {
+    padding: 15px 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.1); /* Subtle dark header background */
+}
+
+/* List Items */
+.notify-item {
+    padding: 15px 20px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--text-main);
+    transition: background 0.2s;
+}
+
+.notify-item:last-child { border-bottom: none; }
+.notify-item:hover { background: rgba(255,255,255,0.05); }
+
+/* Day Mode Overrides for Notifications (Ensure this is handled by general Day Mode rules or add specifically) */
+body.day-mode .notification-dropdown {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+body.day-mode .dropdown-header {
+    background: rgba(0,0,0,0.03);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+body.day-mode .notify-item {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+body.day-mode .notify-item:hover {
+    background: rgba(0,0,0,0.02);
+}
 /* ==========================================================================
    5. WELCOME BANNER
    ========================================================================== */
@@ -231,7 +285,19 @@ body {
    10. MODALS, INPUTS & NEW ELEMENTS
    ========================================================================== */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 2000; }
-.modal-glass { background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.2); padding: 20px; border-radius: 16px; width: 85%; max-width: 350px; }
+.modal-glass {
+    /* Updated for transparency */
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    border-radius: 16px;
+    width: 85%;
+    max-width: 350px;
+}
+
 .btn-full { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; margin-top: 15px; cursor: pointer; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
 .modal-header h3 { font-size: 1.1rem; color: var(--text-main); }
@@ -259,7 +325,23 @@ body {
    11. DRAWER (PROFILE/SETTINGS)
    ========================================================================== */
 .drawer-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; justify-content: flex-end; z-index: 3000; }
-.drawer-glass { width: 85%; max-width: 320px; height: 100%; background: rgba(15, 23, 42, 0.98); border-left: 1px solid rgba(255, 255, 255, 0.15); display: flex; flex-direction: column; padding: 25px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.drawer-glass {
+    width: 85%;
+    max-width: 320px;
+    height: 100%;
+
+    /* Updated for transparency */
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
 @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .drawer-header h3 { font-size: 1.1rem; color: var(--text-main); }
@@ -302,7 +384,14 @@ body.day-mode .toggle-icon { color: var(--primary); transform: rotate(180deg); }
 /* ==========================================================================
    13. TRACKER & FAB
    ========================================================================== */
-.status-tracker-box { background: var(--glass-bg); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+.status-tracker-box {
+    background: var(--glass-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    margin-top: 30px; /* Space from hero */
+}
 .tracker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .tracker-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; }
 .tracker-status { font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 10px; }
@@ -334,33 +423,89 @@ body.day-mode .toggle-icon { color: var(--primary); transform: rotate(180deg); }
 /* ==========================================================================
    14. DAY MODE OVERRIDES
    ========================================================================== */
-body.day-mode .hero-split-layout { background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%); border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-body.day-mode .big-percent-display { background: linear-gradient(to right, #166534, #15803d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* 1. Hero Section & Backgrounds */
+body.day-mode .hero-split-layout {
+    background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* 2. Text Colors */
+body.day-mode .big-percent-display {
+    background: linear-gradient(to right, #166534, #15803d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 body.day-mode .due-date-row #nextDueDisplay { color: #15803d !important; }
 body.day-mode .days-left-number { color: #0f172a; }
 body.day-mode .advice-text { color: #475569; font-weight: 500; }
 body.day-mode .welcome-text { color: #334155; text-shadow: none; }
+
+/* 3. Gauge Visibility */
 body.day-mode .ring-track { stroke: rgba(0, 0, 0, 0.1); }
-body.day-mode .glass-header, body.day-mode .compact-card, body.day-mode .action-card, body.day-mode .glass-panel, body.day-mode .mobile-bottom-nav { background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); }
+
+/* 4. Cards & Navigation */
+body.day-mode .glass-header,
+body.day-mode .compact-card,
+body.day-mode .action-card,
+body.day-mode .glass-panel,
+body.day-mode .mobile-bottom-nav {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
 body.day-mode .big-nav-icon { border-color: #f8fafc; }
-body.day-mode .logo-box, body.day-mode .icon-btn, body.day-mode .profile-btn, body.day-mode .small-icon { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.1); color: #334155; }
-body.day-mode .drawer-glass, body.day-mode .modal-glass { background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1); }
+
+/* 5. Icons & Buttons */
+body.day-mode .logo-box,
+body.day-mode .icon-btn,
+body.day-mode .profile-btn,
+body.day-mode .small-icon {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #334155;
+}
+
+/* 6. Modals & Drawer (UPDATED WITH TRANSPARENCY) */
+body.day-mode .drawer-glass,
+body.day-mode .modal-glass {
+    background: rgba(255, 255, 255, 0.85); /* Transparent White */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+}
 body.day-mode .drawer-footer { border-top-color: rgba(0, 0, 0, 0.1); }
 body.day-mode .contact-row, body.day-mode h4 { color: #0f172a !important; }
-body.day-mode .modal-input { background: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a; }
-body.day-mode .pay-provider-card { background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+body.day-mode .modal-input {
+    background: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a;
+}
+
+/* 7. Payment & Features */
+body.day-mode .pay-provider-card {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
 body.day-mode .provider-info h4 { color: #0f172a; }
 body.day-mode .provider-name { color: #64748b; }
 body.day-mode .mtn-theme p { color: #d97706; }
 body.day-mode .airtel-theme p { color: #dc2626; }
+
 body.day-mode .referral-ticket { background: #f8fafc; border-color: #cbd5e1; }
-body.day-mode .support-item { background: #ffffff; border-color: #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+body.day-mode .support-item {
+    background: #ffffff; border-color: #e2e8f0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
 body.day-mode .support-item h4 { color: #0f172a; }
+
 body.day-mode .status-tracker-box { background: #ffffff; border-color: rgba(0,0,0,0.1); }
 body.day-mode .tracker-timeline::before { background: rgba(0,0,0,0.1); }
 body.day-mode .step-circle { background: #f1f5f9; border-color: #cbd5e1; }
+
 body.day-mode .fab-icon { background: #ffffff; border-color: #e2e8f0; }
 body.day-mode .fab-main { box-shadow: 0 5px 20px rgba(22, 163, 74, 0.3); }
+
 body.day-mode .drawer-user-card { background: rgba(0,0,0,0.05); }
 body.day-mode .drawer-user-card h4 { color: #0f172a; }
 body.day-mode .drawer-item { border-color: rgba(0,0,0,0.1); color: #0f172a; }
