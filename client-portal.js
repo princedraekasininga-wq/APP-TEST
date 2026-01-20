@@ -231,3 +231,57 @@ function openCalcModal() { document.getElementById('calcModal').style.display = 
 function closeCalcModal() { document.getElementById('calcModal').style.display = 'none'; }
 function openRequestModal() { const m = document.getElementById('requestModal'); if(m) m.style.display='flex'; }
 function openUploadModal() { const m = document.getElementById('uploadModal'); if(m) m.style.display='flex'; }
+
+// ==========================================================================
+// 8. NEW MODAL UTILITIES
+// ==========================================================================
+
+// Request Loan
+function openRequestModal() {
+    const m = document.getElementById('requestModal');
+    if(m) m.style.display = 'flex';
+}
+function closeRequestModal() {
+    const m = document.getElementById('requestModal');
+    if(m) m.style.display = 'none';
+}
+
+// Upload Proof
+function openUploadModal() {
+    const m = document.getElementById('uploadModal');
+    if(m) m.style.display = 'flex';
+}
+function closeUploadModal() {
+    const m = document.getElementById('uploadModal');
+    if(m) m.style.display = 'none';
+}
+
+// Pay Now
+function openPayModal() {
+    const m = document.getElementById('payModal');
+    if(m) m.style.display = 'flex';
+}
+function closePayModal() {
+    const m = document.getElementById('payModal');
+    if(m) m.style.display = 'none';
+}
+
+// Simulation Logic (Makes buttons feel real)
+function simulateSubmit(message) {
+    // 1. Close active modals immediately
+    closeRequestModal();
+    closeUploadModal();
+
+    // 2. Simulate processing
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "Processing...";
+
+    setTimeout(() => {
+        btn.innerText = originalText;
+        alert("✅ " + message);
+        // Ensure closed
+        closeRequestModal();
+        closeUploadModal();
+    }, 800);
+}

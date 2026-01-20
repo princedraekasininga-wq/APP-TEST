@@ -31,7 +31,8 @@
                     <div id="notificationDropdown" class="notification-dropdown">
                         <div class="dropdown-header">Recent Activity</div>
                         <div id="notificationList" class="dropdown-body">
-                            <div class="notify-item">Welcome to Stallz Loans!</div>
+                            <div class="notify-item">Loan #4829 Approved</div>
+                            <div class="notify-item">Payment Received (K500)</div>
                         </div>
                     </div>
                 </div>
@@ -48,22 +49,18 @@
 
         <div class="hero-section fade-in delay-1">
             <div class="stat-card hero-split-layout">
-
                 <div class="hero-top-row">
                     <div class="hero-left-content">
                         <div class="hero-header-row">
                             <div class="static-icon-box"><i class="fas fa-chart-line"></i></div>
                             <span class="hero-section-label">Loan Progress</span>
                         </div>
-
                         <h1 class="big-percent-display" id="paymentProgressDisplay">0%</h1>
-
                         <p class="due-date-row">
                             <i class="far fa-calendar-alt" style="margin-right: 6px; color:var(--primary);"></i>
                             Next Due: <span id="nextDueDisplay" style="font-weight: 700; color: #fff; margin-left: 4px;">--</span>
                         </p>
                     </div>
-
                     <div class="hero-right-visual">
                         <div class="hero-ring-container">
                             <svg class="progress-ring" viewBox="0 0 160 160">
@@ -71,7 +68,6 @@
                                 <circle id="progressCircle" class="ring-progress" cx="80" cy="80" r="70" fill="none" stroke-width="12" stroke-linecap="round" />
                                 <circle id="innerCircle" cx="80" cy="80" r="58" />
                             </svg>
-
                             <div class="ring-center-content">
                                 <span id="daysRemaining" class="days-left-number">--</span>
                                 <span class="days-left-label">Days Left</span>
@@ -79,7 +75,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -98,7 +93,6 @@
                     <h3 class="money-text small-money" id="portalTotalDebt">K0.00</h3>
                 </div>
             </div>
-
             <div class="stat-card green-glow compact-card">
                 <div class="icon-box small-icon"><i class="fas fa-check-double"></i></div>
                 <div class="stat-info">
@@ -108,11 +102,33 @@
             </div>
         </div>
 
-        <section class="glass-panel fade-in delay-3" style="margin-bottom: 100px;">
-            <div class="panel-header">
-                <h2><i class="fas fa-history"></i> Loan History</h2>
+        <div class="quick-actions-scroll fade-in delay-2">
+            <h3 class="section-title-small">Quick Actions</h3>
+            <div class="actions-row">
+                <button class="action-card" onclick="openPayModal()">
+                    <div class="action-icon icon-green"><i class="fas fa-mobile-alt"></i></div>
+                    <span>Pay Now</span>
+                </button>
+                <button class="action-card" onclick="openRequestModal()">
+                    <div class="action-icon icon-blue"><i class="fas fa-plus"></i></div>
+                    <span>New Loan</span>
+                </button>
+                <button class="action-card" onclick="alert('Statements feature coming soon!')">
+                    <div class="action-icon icon-purple"><i class="fas fa-file-invoice"></i></div>
+                    <span>Statement</span>
+                </button>
+                <button class="action-card" onclick="window.open('https://wa.me/260970000000', '_blank')">
+                    <div class="action-icon icon-orange"><i class="fab fa-whatsapp"></i></div>
+                    <span>Support</span>
+                </button>
             </div>
+        </div>
 
+        <section class="glass-panel fade-in delay-3" style="margin-bottom: 100px;">
+            <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h2><i class="fas fa-history"></i> Loan History</h2>
+                <button class="small-text-btn">View All</button>
+            </div>
             <div class="table-responsive">
                 <table class="portal-table">
                     <thead>
@@ -133,41 +149,74 @@
     </div>
 
     <nav class="mobile-bottom-nav">
-        <a href="#" class="nav-item" id="nav-request" onclick="openRequestModal()">
+        <a href="#" class="nav-item" onclick="openRequestModal()">
             <div class="nav-icon"><i class="fas fa-hand-holding-usd"></i></div>
-            <span class="nav-label">Request</span>
+            <span class="nav-label">Request Loan</span>
         </a>
-
-        <a href="#" class="nav-item center-item" id="nav-calc" onclick="openCalcModal()">
+        <a href="#" class="nav-item center-item" onclick="openCalcModal()">
             <div class="nav-icon big-nav-icon"><i class="fas fa-calculator"></i></div>
         </a>
-
-        <a href="#" class="nav-item" id="nav-proof" onclick="openUploadModal()">
+        <a href="#" class="nav-item" onclick="openUploadModal()">
             <div class="nav-icon"><i class="fas fa-camera"></i></div>
-            <span class="nav-label">Proof</span>
+            <span class="nav-label">Proof Of Payment</span>
         </a>
     </nav>
 
-    <div id="profileModal" class="modal-overlay">
-        <div class="modal-glass">
-            <div class="modal-header" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div id="profileModal" class="drawer-overlay">
+        <div class="drawer-glass">
+
+            <div class="drawer-header">
                 <h3>My Profile</h3>
-                <button onclick="closeProfileModal()" class="close-btn" style="background:none; border:none; color:var(--text-main); font-size:1.5rem;">&times;</button>
+                <button onclick="closeProfileModal()" class="close-btn" style="font-size:1.5rem;">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="profile-details" style="display: flex; flex-direction: column; gap: 15px;">
-                    <p style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
-                        <strong style="color:var(--primary)">Phone:</strong> <br> <span id="modalPhone">--</span>
+
+            <div class="drawer-body">
+                <div style="text-align:center; margin-bottom:25px;">
+                    <div style="width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--primary);">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h4 style="color:white; font-size:1.1rem;">Drae</h4>
+                    <p style="color:var(--text-muted); font-size:0.8rem;">Client ID: #88291</p>
+                </div>
+
+                <div class="profile-details">
+                    <p style="margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+                        <span style="color:var(--text-muted); font-size:0.8rem;">Phone</span><br>
+                        <span id="modalPhone" style="color:white;">0977-XXX-XXX</span>
                     </p>
-                    <p style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
-                        <strong style="color:var(--primary)">ID Number:</strong> <br> <span id="modalID">--</span>
+                    <p style="margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+                        <span style="color:var(--text-muted); font-size:0.8rem;">ID Number</span><br>
+                        <span id="modalID" style="color:white;">--</span>
                     </p>
-                    <p>
-                        <strong style="color:var(--primary)">Address:</strong> <br> <span id="modalAddress">--</span>
+                    <p style="margin-bottom:20px;">
+                        <span style="color:var(--text-muted); font-size:0.8rem;">Address</span><br>
+                        <span id="modalAddress" style="color:white;">--</span>
                     </p>
                 </div>
-                <button onclick="closeProfileModal()" class="btn-full">Close Profile</button>
             </div>
+
+            <div class="drawer-footer">
+                <span class="contact-title">Contact Stallz</span>
+
+                <a href="tel:+260970000000" class="contact-row">
+                    <i class="fas fa-phone-alt"></i> +260 97 000 0000
+                </a>
+                <a href="mailto:support@stallz.com" class="contact-row">
+                    <i class="fas fa-envelope"></i> support@stallz.com
+                </a>
+                <div class="contact-row">
+                    <i class="fas fa-map-marker-alt"></i> Lusaka, Zambia
+                </div>
+
+                <div class="social-row">
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                </div>
+
+                <button onclick="closeProfileModal()" class="btn-full" style="margin-top:20px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.1);">Log Out</button>
+            </div>
+
         </div>
     </div>
 
@@ -185,7 +234,6 @@
                     </div>
                     <input type="range" min="100" max="5000" step="50" value="500" class="calc-slider" id="calcRange">
                 </div>
-
                 <div class="calc-group">
                     <label style="display:block; margin-bottom:10px; font-size:0.8rem; color:var(--text-muted)">Duration</label>
                     <div class="duration-toggles" id="durationSelector">
@@ -195,18 +243,68 @@
                         <button class="dur-btn" data-rate="0.40">1 Mo</button>
                     </div>
                 </div>
-
                 <div class="calc-result-box">
-                    <div class="result-row">
-                        <span>Interest</span>
-                        <span id="calcInterestDisplay" style="color:var(--primary)">20%</span>
-                    </div>
-                    <div class="result-row total-row">
-                        <span>Repay</span>
-                        <span id="calcTotalDisplay">K600.00</span>
-                    </div>
+                    <div class="result-row"><span>Interest</span><span id="calcInterestDisplay" style="color:var(--primary)">20%</span></div>
+                    <div class="result-row total-row"><span>Repay</span><span id="calcTotalDisplay">K600.00</span></div>
                 </div>
                 <button class="btn-full" onclick="closeCalcModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="requestModal" class="modal-overlay">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3>Apply for Loan</h3>
+                <button onclick="closeRequestModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Amount (K)</label>
+                    <input type="number" class="modal-input" placeholder="e.g. 500">
+                </div>
+                <div class="input-group">
+                    <label>Purpose</label>
+                    <select class="modal-input">
+                        <option>Business</option>
+                        <option>Personal</option>
+                        <option>Emergency</option>
+                    </select>
+                </div>
+                <button class="btn-full" onclick="simulateSubmit('Application Submitted!')">Submit Application</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="uploadModal" class="modal-overlay">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3>Upload Proof</h3>
+                <button onclick="closeUploadModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Tap to select screenshot</p>
+                </div>
+                <button class="btn-full" onclick="simulateSubmit('Proof Uploaded Successfully!')">Upload Now</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="payModal" class="modal-overlay">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3>Make Payment</h3>
+                <button onclick="closePayModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p style="margin-bottom:15px; font-size:0.9rem; color:var(--text-muted);">Send Mobile Money to:</p>
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px;">
+                    <h2 style="color:var(--primary); margin-bottom:5px;">0977-000-000</h2>
+                    <p style="font-size:0.8rem;">Stallz Loans LTD</p>
+                </div>
+                <button class="btn-full" onclick="closePayModal(); openUploadModal();">I've Made Payment</button>
             </div>
         </div>
     </div>

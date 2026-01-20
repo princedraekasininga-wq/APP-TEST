@@ -318,3 +318,155 @@ body {
     .hero-ring-container { width: 85px; height: 85px; }
     .days-left-number { font-size: 1.1rem; }
 }
+
+
+/* ==========================================================================
+   NEW: QUICK ACTIONS (Horizontal Scroll)
+   ========================================================================== */
+.quick-actions-scroll {
+    margin-bottom: 25px;
+}
+
+.section-title-small {
+    font-size: 0.85rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 10px; margin-left: 5px;
+}
+
+.actions-row {
+    display: flex; gap: 12px;
+    overflow-x: auto; padding-bottom: 5px;
+    /* Hide Scrollbar */
+    -ms-overflow-style: none; scrollbar-width: none;
+}
+.actions-row::-webkit-scrollbar { display: none; }
+
+.action-card {
+    background: var(--glass-bg); border: var(--glass-border);
+    border-radius: 16px; padding: 15px;
+    min-width: 90px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    cursor: pointer; transition: transform 0.2s;
+}
+.action-card:active { transform: scale(0.95); }
+
+.action-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+}
+
+/* Icon Colors */
+.icon-green { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+.icon-blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+.icon-purple { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+.icon-orange { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+
+.action-card span { font-size: 0.75rem; color: var(--text-main); font-weight: 600; }
+
+/* ==========================================================================
+   NEW: FORM ELEMENTS & UPLOAD STYLES
+   ========================================================================== */
+.modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+}
+.modal-header h3 { font-size: 1.1rem; color: var(--text-main); }
+.close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+
+.input-group { margin-bottom: 15px; text-align: left; }
+.input-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
+
+.modal-input {
+    width: 100%; padding: 12px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; color: white; font-size: 1rem;
+    outline: none;
+}
+.modal-input:focus { border-color: var(--primary); }
+
+.upload-area {
+    border: 2px dashed rgba(255,255,255,0.2); border-radius: 15px;
+    padding: 30px; text-align: center; margin-bottom: 20px;
+    color: var(--text-muted); cursor: pointer;
+}
+.upload-area i { font-size: 2rem; margin-bottom: 10px; color: var(--primary); }
+
+.small-text-btn {
+    background: none; border: none; color: var(--primary);
+    font-size: 0.8rem; font-weight: 600; cursor: pointer;
+}
+
+/* ==========================================================================
+   NEW: SLIDE-IN DRAWER (Profile & Settings)
+   ========================================================================== */
+
+/* Overlay aligns content to the right */
+.drawer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: none; /* Hidden by default */
+    justify-content: flex-end; /* Pushes drawer to right side */
+    z-index: 3000;
+}
+
+/* The Drawer Panel */
+.drawer-glass {
+    width: 85%; max-width: 320px; height: 100%;
+    background: rgba(15, 23, 42, 0.98); /* Solid dark background */
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex; flex-direction: column;
+    padding: 25px;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Drawer Structure */
+.drawer-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 25px;
+}
+.drawer-header h3 { font-size: 1.2rem; color: var(--text-main); }
+
+.drawer-body {
+    flex: 1; /* Takes up available space */
+    overflow-y: auto;
+}
+
+/* Drawer Footer (Contact Info) */
+.drawer-footer {
+    margin-top: auto; /* Pushes to the very bottom */
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15); /* The Divider Line */
+}
+
+.contact-title {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-muted); margin-bottom: 15px; display: block;
+}
+
+.contact-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px; color: var(--text-main);
+    font-size: 0.9rem; text-decoration: none;
+}
+
+.contact-row i {
+    width: 20px; text-align: center; color: var(--primary);
+}
+
+.social-row {
+    display: flex; gap: 15px; margin-top: 15px;
+}
+.social-link {
+    color: var(--text-muted); font-size: 1.2rem; transition: 0.2s;
+}
+.social-link:hover { color: var(--primary); }
