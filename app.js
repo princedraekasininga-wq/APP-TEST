@@ -8,7 +8,7 @@ const APP_VERSION = "1.9.2"; // Force Refresh for New UI
 // 1. FIREBASE CONFIGURATION & SETUP
 // ==========================================
 
-const TEST_MODE = true; // ENABLED AS REQUESTED
+const TEST_MODE = false; // ENABLED AS REQUESTED
 
 // SAFETY FLAG: Prevents overwriting DB if app loads in "Offline/Timeout" mode
 let isSafeToSave = true;
