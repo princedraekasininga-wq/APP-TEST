@@ -173,17 +173,51 @@ body {
 
 .due-date-row { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; white-space: nowrap;}
 
-/* Ring */
+/* Ring Visuals */
 .hero-right-visual { flex-shrink: 0; margin-left: 10px; display: flex; justify-content: center; align-items: center; }
-.hero-ring-container { position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
-.progress-ring { transform: rotate(-90deg); width: 100%; height: 100%; }
-.ring-center-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+.hero-ring-container {
+    position: relative;
+    width: 110px; /* Increased from 100px to prevent handle glow clipping */
+    height: 110px;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.progress-ring {
+    transform: rotate(-90deg); /* Starts animation at 12 o'clock */
+    width: 100%;
+    height: 100%;
+    overflow: visible; /* CRITICAL: Allows the knob shadow to spill outside the box */
+}
+
+.ring-center-content {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+
 .days-left-number { font-size: 1.4rem; font-weight: 800; color: var(--bg-color); line-height: 1; }
 .days-left-label { font-size: 0.5rem; text-transform: uppercase; color: #64748b; font-weight: 700; margin-top: 1px; }
-#innerCircle { fill: #ffffff; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2)); }
-.ring-progress { stroke: var(--primary); transition: stroke-dashoffset 1s ease; }
-.ring-track { stroke: rgba(255, 255, 255, 0.1); }
 
+#innerCircle {
+    fill: #ffffff;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2));
+}
+
+/* Gradient Stroke & Animation */
+.ring-progress {
+    stroke: url(#ringGradient); /* Connects to the SVG <defs> gradient */
+    transition: stroke-dashoffset 1.0s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ring-track {
+    stroke: rgba(255, 255, 255, 0.08);
+}
+
+/* Handle (Knob) Rotation Animation */
+#ringHandleGroup {
+    transition: transform 1.0s cubic-bezier(0.4, 0, 0.2, 1);
+}
 /* ==========================================================================
    7. ADVICE MESSAGE
    ========================================================================== */
@@ -529,3 +563,52 @@ body.day-mode .notify-item:hover {
     .hero-ring-container { width: 85px; height: 85px; }
     .days-left-number { font-size: 1.1rem; }
 }
+
+/* ==========================================================================
+   15. MISSING CALCULATOR STYLES (FIX)
+   ========================================================================== */
+.calc-group { margin-bottom: 20px; }
+.calc-label-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; color: var(--text-muted); }
+.calc-value-display { font-weight: 700; color: var(--primary); }
+
+/* Custom Range Slider */
+.calc-slider {
+    -webkit-appearance: none; width: 100%; height: 6px;
+    background: rgba(255,255,255,0.1); border-radius: 5px; outline: none;
+}
+.calc-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--primary); cursor: pointer;
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* Duration Buttons */
+.duration-toggles { display: flex; gap: 8px; justify-content: space-between; }
+.dur-btn {
+    flex: 1; padding: 10px 5px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05); color: var(--text-muted);
+    border-radius: 8px; cursor: pointer; font-size: 0.8rem; transition: 0.2s;
+}
+.dur-btn.active {
+    background: var(--primary); color: #fff; border-color: var(--primary);
+    box-shadow: 0 4px 10px var(--primary-glow);
+}
+.dur-btn:hover:not(.active) { background: rgba(255,255,255,0.1); }
+
+/* Result Box */
+.calc-result-box {
+    background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px;
+    margin-top: 20px; margin-bottom: 15px;
+}
+.result-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-muted); }
+.total-row {
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-main); font-weight: 800; font-size: 1.1rem;
+}
+
+/* Day Mode Overrides for Calculator */
+body.day-mode .calc-slider { background: #cbd5e1; }
+body.day-mode .dur-btn { background: #f1f5f9; border-color: #cbd5e1; color: #64748b; }
+body.day-mode .dur-btn.active { background: var(--primary); color: white; }
+body.day-mode .calc-result-box { background: rgba(0,0,0,0.05); }

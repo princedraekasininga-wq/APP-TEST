@@ -10,10 +10,11 @@ const firebaseConfig = {
     appId: "YOUR_APP_ID"
 };
 
-if (!firebase.apps.length) {
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
-const db = firebase.firestore();
+// Safe check for firestore in case SDK isn't fully loaded in test mode
+const db = (typeof firebase !== 'undefined') ? firebase.firestore() : null;
 
 // Global Variables
 let isTestMode = true;
@@ -110,7 +111,7 @@ function loadTestData() {
             date: "2025-12-20",
             amount: 10000,
             interestRate: 20,
-            amountPaid: 8040,
+            amountPaid: 6500, // Changed for demonstration (6500/12000 = ~54%)
             dueDate: "2026-01-25"
         }
     ];
@@ -133,6 +134,7 @@ function renderLoansTable(loansData) {
     tableBody.innerHTML = '';
 
     loansData.forEach((loan) => {
+        // Calculate financial details
         const principal = parseFloat(loan.amount);
         const interest = principal * ((loan.interestRate || 20) / 100);
         const totalDue = principal + interest;
@@ -140,8 +142,12 @@ function renderLoansTable(loansData) {
         const balance = totalDue - paid;
 
         totalPaid += paid;
+
+        // Add to total debt if there is still a balance
         if (balance > 1) {
             totalDebt += balance;
+
+            // Determine the earliest due date for active loans
             const dDate = new Date(loan.dueDate);
             if (!earliestDueDate || dDate < earliestDueDate) earliestDueDate = dDate;
         }
@@ -158,48 +164,74 @@ function renderLoansTable(loansData) {
         tableBody.innerHTML += row;
     });
 
+    // Update Text Stats
     if(document.getElementById('portalTotalDebt')) document.getElementById('portalTotalDebt').innerText = 'K' + totalDebt.toLocaleString();
     if(document.getElementById('portalTotalPaid')) document.getElementById('portalTotalPaid').innerText = 'K' + totalPaid.toLocaleString();
 
-    if(document.getElementById('paymentProgressDisplay')) {
-        document.getElementById('paymentProgressDisplay').innerText = "67%";
+    // DYNAMIC PROGRESS CALCULATION
+    // Formula: (Total Paid / (Total Paid + Outstanding Debt)) * 100
+    let progressPercent = 0;
+    const totalValue = totalPaid + totalDebt;
+
+    if (totalValue > 0) {
+        progressPercent = Math.round((totalPaid / totalValue) * 100);
     }
 
-    updateCountdownRing(earliestDueDate);
+    if(document.getElementById('paymentProgressDisplay')) {
+        document.getElementById('paymentProgressDisplay').innerText = `${progressPercent}%`;
+    }
+
+    // Pass the decimal fraction (0.0 - 1.0) to the ring function
+    updateCountdownRing(earliestDueDate, progressPercent / 100);
 }
 
 // ==========================================================================
 // 6. GAUGE RING LOGIC (FULL 360 CIRCLE)
 // ==========================================================================
 
-function updateCountdownRing(dueDate) {
+function updateCountdownRing(dueDate, percentFraction = 0) {
     const outerCircle = document.getElementById('progressCircle');
+    const handleGroup = document.getElementById('ringHandleGroup'); // GET THE HANDLE
     const daysText = document.getElementById('daysRemaining');
     const nextDueText = document.getElementById('nextDueDisplay');
 
     if (!outerCircle) return;
 
+    // 1. Setup Circle Dimensions
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
-
     outerCircle.style.strokeDasharray = circumference;
 
     if (!dueDate) {
+        // Empty State
         outerCircle.style.strokeDashoffset = circumference;
+        if(handleGroup) handleGroup.style.transform = `rotate(0deg)`; // Reset Handle
         if(daysText) daysText.innerText = "--";
         if(nextDueText) nextDueText.innerText = "--";
     } else {
+        // Calculate Days
         const diffTime = dueDate - new Date();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
         if(daysText) daysText.innerText = diffDays > 0 ? diffDays : "0";
         if(nextDueText) nextDueText.innerText = dueDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+        // Calculate Fill
+        const safeFraction = Math.min(Math.max(percentFraction, 0), 1);
+        const offset = circumference - (safeFraction * circumference);
+
+        // A. Animate the Line
+        outerCircle.style.strokeDashoffset = offset;
+
+        // B. Animate the Handle (Knob)
+        if(handleGroup) {
+            const degrees = safeFraction * 360;
+            handleGroup.style.transform = `rotate(${degrees}deg)`;
+        }
+
+        // Remove manual stroke color setting so it keeps the Gradient
+        outerCircle.style.stroke = "";
     }
-
-    let percent = 0.67;
-    const offset = circumference - (percent * circumference);
-
-    outerCircle.style.strokeDashoffset = offset;
-    outerCircle.style.stroke = "#4ade80";
 }
 
 // ==========================================================================
@@ -207,10 +239,15 @@ function updateCountdownRing(dueDate) {
 // ==========================================================================
 
 function updateCalculator() {
-    const amount = parseFloat(document.getElementById('calcRange').value);
+    const rangeInput = document.getElementById('calcRange');
+    if (!rangeInput) return;
+
+    const amount = parseFloat(rangeInput.value);
     document.getElementById('calcAmountDisplay').innerText = `K${amount}`;
+
     const interestAmt = amount * selectedRate;
     const total = amount + interestAmt;
+
     document.getElementById('calcTotalDisplay').innerText = `K${total.toLocaleString()}`;
     document.getElementById('calcInterestDisplay').innerText = `${(selectedRate * 100).toFixed(0)}%`;
 }
@@ -219,8 +256,12 @@ function setupDurationButtons() {
     const buttons = document.querySelectorAll('.dur-btn');
     buttons.forEach(btn => {
         btn.addEventListener('click', (e) => {
+            // Remove active class from all buttons
             buttons.forEach(b => b.classList.remove('active'));
+            // Add active class to clicked button
             e.target.classList.add('active');
+
+            // Update rate and recalculate
             selectedRate = parseFloat(e.target.dataset.rate);
             updateCalculator();
         });
@@ -253,19 +294,22 @@ function openSupportModal() { document.getElementById('supportModal').style.disp
 function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
 
 function simulateSubmit(message, ev) {
-    closeRequestModal();
-    closeUploadModal();
-
+    // 1. Get the button that was clicked
     const btn = (ev && ev.target) ? ev.target : null;
     const originalText = btn ? btn.innerText : "";
 
+    // 2. Show loading state
     if(btn) btn.innerText = "Processing...";
 
+    // 3. Simulate network delay
     setTimeout(() => {
         if(btn) btn.innerText = originalText;
         alert("✅ " + message);
+
+        // Close all possible modals
         closeRequestModal();
         closeUploadModal();
+        closePayModal();
     }, 800);
 }
 
@@ -283,6 +327,7 @@ function toggleFabMenu() {
 document.addEventListener('click', (e) => {
     const fabWrap = document.querySelector('.floating-support');
     const menu = document.getElementById('fabMenu');
+    // If menu is active AND click is NOT inside the FAB wrapper
     if (menu && menu.classList.contains('active') && fabWrap && !fabWrap.contains(e.target)) {
         menu.classList.remove('active');
     }

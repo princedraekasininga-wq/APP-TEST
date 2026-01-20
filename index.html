@@ -61,16 +61,35 @@
 
                     <div class="hero-right-visual">
                         <div class="hero-ring-container">
-                            <svg class="progress-ring" viewBox="0 0 160 160">
-                                <circle class="ring-track" cx="80" cy="80" r="70" fill="none" stroke-width="12" stroke-linecap="round" />
-                                <circle id="progressCircle" class="ring-progress" cx="80" cy="80" r="70" fill="none" stroke-width="12" stroke-linecap="round" />
-                                <circle id="innerCircle" cx="80" cy="80" r="58" />
-                            </svg>
-                            <div class="ring-center-content">
-                                <span id="daysRemaining" class="days-left-number">--</span>
-                                <span class="days-left-label">Days Left</span>
-                            </div>
-                        </div>
+    <svg class="progress-ring" viewBox="0 0 160 160">
+        <defs>
+            <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#86efac" /> <stop offset="100%" stop-color="#22c55e" /> </linearGradient>
+            <filter id="glow-shadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+
+        <circle class="ring-track" cx="80" cy="80" r="70" fill="none" stroke-width="10" stroke-linecap="round" />
+
+        <circle id="progressCircle" class="ring-progress" cx="80" cy="80" r="70" fill="none" stroke-width="10" stroke-linecap="round" />
+
+        <g id="ringHandleGroup" style="transform-origin: 80px 80px;">
+            <circle cx="150" cy="80" r="8" fill="#ffffff" filter="url(#glow-shadow)" stroke="#16a34a" stroke-width="2" />
+        </g>
+
+        <circle id="innerCircle" cx="80" cy="80" r="54" />
+    </svg>
+
+    <div class="ring-center-content">
+        <span id="daysRemaining" class="days-left-number">--</span>
+        <span class="days-left-label">Days Left</span>
+    </div>
+</div>
                     </div>
                 </div>
             </div>
