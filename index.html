@@ -3,20 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Portal - Stallz Loans</title>
+    <title>Stallz Loans - Client Portal</title>
     <link rel="icon" type="image/png" href="myfavicon.png">
 
     <link rel="stylesheet" href="client-portal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <div class="mesh-background">
-        <div class="mesh-blob blob-1"></div>
-        <div class="mesh-blob blob-2"></div>
-        <div class="mesh-blob blob-3"></div>
-    </div>
 
     <div class="portal-shell">
 
@@ -25,49 +19,78 @@
                 <div class="logo-box">
                     <img src="my-logo.png" alt="Stallz Logo" class="portal-logo">
                 </div>
-                <h2 class="brand-title">STALLZ LOANS</h2>
-            </div>
-
-            <div class="rates-ticker">
-                <div class="rate-item"><span class="rate-percent">20%</span><span class="rate-duration">1 Wk</span></div>
-                <div class="rate-item"><span class="rate-percent">30%</span><span class="rate-duration">2 Wks</span></div>
-                <div class="rate-item"><span class="rate-percent">35%</span><span class="rate-duration">3 Wks</span></div>
-                <div class="rate-item"><span class="rate-percent">40%</span><span class="rate-duration">1 Mth</span></div>
+                <h2 class="brand-title" id="headerGreeting">Hello, <span id="headerUserName">User</span></h2>
             </div>
 
             <div class="header-right">
+                <div class="notification-wrapper">
+                    <button class="icon-btn notification-btn" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-dot"></span>
+                    </button>
+                    <div id="notificationDropdown" class="notification-dropdown">
+                        <div class="dropdown-header">Recent Activity</div>
+                        <div id="notificationList" class="dropdown-body">
+                            <div class="notify-item">Welcome to Stallz Loans!</div>
+                        </div>
+                    </div>
+                </div>
+
                 <button class="profile-btn" onclick="openProfileModal()">
                     <i class="fas fa-user-cog"></i>
                 </button>
             </div>
         </header>
 
-        <div class="greeting-section fade-in delay-1">
-            <span id="greetingText" class="greeting-sub">Welcome back,</span>
-            <h1 id="portalClientName" class="client-name-main text-gradient">Loading...</h1>
+        <div class="welcome-banner fade-in">
+            <h1 class="welcome-text">WELCOME TO STALLZ LOANS</h1>
         </div>
 
-        <div class="hero-section fade-in delay-2">
-            <div class="stat-card hero-card">
-                <div class="hero-ring-container">
-                    <svg class="progress-ring" width="140" height="140">
-                        <circle class="progress-ring__bg" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="transparent" r="60" cx="70" cy="70"/>
-                        <circle id="progressCircle" class="progress-ring__circle" stroke="#4ade80" stroke-width="8" fill="transparent" r="60" cx="70" cy="70"/>
-                    </svg>
-                    <div class="hero-ring-text">
-                        <span id="daysRemaining" class="hero-days-num text-gradient">--</span>
-                        <span class="hero-days-label">Days Left</span>
-                    </div>
-                </div>
+        <div class="hero-section fade-in delay-1">
+            <div class="stat-card hero-split-layout">
+                <div class="hero-top-row">
+                    <div class="hero-left-content">
+                        <div class="hero-header-row">
+                            <div class="static-icon-box"><i class="fas fa-chart-line"></i></div>
+                            <span class="hero-section-label">Loan Progress</span>
+                        </div>
 
-                <div class="hero-info">
-                    <p class="label">Next Due Date</p>
-                    <h2 class="hero-date-text" id="nextDueDisplay">--</h2>
+                        <h1 class="big-percent-display" id="paymentProgressDisplay">0%</h1>
+
+                        <p class="due-date-row">
+                            <i class="far fa-calendar-alt" style="margin-right: 6px; color:var(--primary);"></i>
+                            Next Due: <span id="nextDueDisplay" style="font-weight: 700; color: #fff;">--</span>
+                        </p>
+                    </div>
+
+                    <div class="hero-right-visual">
+                        <div class="hero-ring-container">
+                            <svg class="progress-ring" width="160" height="160" viewBox="0 0 160 160">
+                                <circle class="ring-track" cx="80" cy="80" r="70" fill="none" stroke-width="12" stroke-linecap="round" />
+
+                                <circle id="progressCircle" class="ring-progress" cx="80" cy="80" r="70" fill="none" stroke-width="12" stroke-linecap="round" />
+
+                                <circle id="innerCircle" cx="80" cy="80" r="58" />
+                            </svg>
+
+                            <div class="ring-center-content">
+                                <span id="daysRemaining" class="days-left-number">--</span>
+                                <span class="days-left-label">Days Left</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="stats-grid fade-in delay-3">
+        <div class="advice-box fade-in delay-2">
+            <p class="advice-text">
+                <span style="color:#ffffff; font-weight:200; margin-right:5px; letter-spacing:0.5px;">STALLZ ADVICE:</span>
+                Consistent partial payments reduce your burden significantly compared to a single lump-sum payment at the deadline.
+            </p>
+        </div>
+
+        <div class="stats-grid fade-in delay-2">
             <div class="stat-card blue-glow compact-card">
                 <div class="icon-box small-icon"><i class="fas fa-wallet"></i></div>
                 <div class="stat-info">
@@ -85,7 +108,7 @@
             </div>
         </div>
 
-        <section class="glass-panel fade-in delay-3" style="margin-bottom: 80px;">
+        <section class="glass-panel fade-in delay-3" style="margin-bottom: 100px;">
             <div class="panel-header">
                 <h2><i class="fas fa-history"></i> Loan History</h2>
             </div>
@@ -99,12 +122,10 @@
                             <th>Total Due</th>
                             <th>Paid</th>
                             <th>Balance</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="portalLoansTable">
-                        <tr><td colspan="6" style="text-align:center; padding: 20px;">Loading history...</td></tr>
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </section>
@@ -112,127 +133,80 @@
     </div>
 
     <nav class="mobile-bottom-nav">
-        <a href="#" class="nav-item" onclick="openRequestModal()">
+        <a href="#" class="nav-item" id="nav-request" onclick="openRequestModal()">
             <div class="nav-icon"><i class="fas fa-hand-holding-usd"></i></div>
-            <span class="nav-label">Request for loan</span>
+            <span class="nav-label">Request</span>
         </a>
 
-        <a href="#" class="nav-item center-item" onclick="openCalcModal()">
+        <a href="#" class="nav-item center-item" id="nav-calc" onclick="openCalcModal()">
             <div class="nav-icon big-nav-icon"><i class="fas fa-calculator"></i></div>
-            <span class="nav-label">Estimator</span>
         </a>
 
-        <a href="#" class="nav-item" onclick="openUploadModal()">
+        <a href="#" class="nav-item" id="nav-proof" onclick="openUploadModal()">
             <div class="nav-icon"><i class="fas fa-camera"></i></div>
-            <span class="nav-label">Proof of payment</span>
+            <span class="nav-label">Proof</span>
         </a>
     </nav>
 
     <div id="profileModal" class="modal-overlay">
         <div class="modal-glass">
-            <div class="modal-header">
+            <div class="modal-header" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3>My Profile</h3>
-                <button onclick="closeProfileModal()" class="close-btn">&times;</button>
+                <button onclick="closeProfileModal()" class="close-btn" style="background:none; border:none; color:var(--text-main); font-size:1.5rem;">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="profile-summary">
-                    <div class="big-avatar"><i class="fas fa-user"></i></div>
-                    <div class="profile-details">
-                        <p><strong>Phone:</strong> <span id="modalPhone">--</span></p>
-                        <p><strong>ID Number:</strong> <span id="modalID">--</span></p>
-                        <p><strong>Address:</strong> <span id="modalAddress">--</span></p>
-                    </div>
+                <div class="profile-details" style="display: flex; flex-direction: column; gap: 15px;">
+                    <p style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        <strong style="color:var(--primary)">Phone:</strong> <br> <span id="modalPhone">--</span>
+                    </p>
+                    <p style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                        <strong style="color:var(--primary)">ID Number:</strong> <br> <span id="modalID">--</span>
+                    </p>
+                    <p>
+                        <strong style="color:var(--primary)">Address:</strong> <br> <span id="modalAddress">--</span>
+                    </p>
                 </div>
-                <hr class="divider">
-                <button onclick="closeProfileModal()" class="btn-full">Close</button>
+                <button onclick="closeProfileModal()" class="btn-full" style="margin-top:25px; width:100%; padding:14px; background:var(--primary); border:none; color:white; border-radius:12px; font-weight:700; cursor:pointer;">Close Profile</button>
             </div>
         </div>
     </div>
 
     <div id="calcModal" class="modal-overlay">
-    <div class="modal-glass">
-        <div class="modal-body">
-
-            <div class="calc-group">
-                </div>
-
-            <div class="calc-group">
-                <label style="display:block; margin-bottom:10px; font-size:0.8rem; color:var(--text-muted)">Duration</label>
-
-                <div class="duration-toggles" id="durationSelector">
-                    <button class="dur-btn active" data-rate="0.20">1 Wk</button>
-                    <button class="dur-btn" data-rate="0.30">2 Wk</button>
-                    <button class="dur-btn" data-rate="0.35">3 Wk</button>
-                    <button class="dur-btn" data-rate="0.40">1 Mo</button>
-                </div>
-                </div>
-
-            </div>
-    </div>
-</div>
-
-    <div id="uploadModal" class="modal-overlay">
         <div class="modal-glass">
             <div class="modal-header">
-                <h3>Upload Proof</h3>
-                <button onclick="closeUploadModal()" class="close-btn">&times;</button>
+                <h3>Loan Estimator</h3>
+                <button onclick="closeCalcModal()" class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="upload-zone" id="dropZone">
-                    <i class="fas fa-cloud-upload-alt fa-3x"></i>
-                    <p style="margin-top:10px;">Tap to select screenshot</p>
-                    <input type="file" id="paymentFile" accept="image/*" style="display:none">
+                <div class="calc-group">
+                    <div class="calc-label-row">
+                        <label>I want to borrow</label>
+                        <span class="calc-value-display" id="calcAmountDisplay">K500</span>
+                    </div>
+                    <input type="range" min="100" max="5000" step="50" value="500" class="calc-slider" id="calcRange">
                 </div>
-                <p id="fileName" class="file-name-display"></p>
-                <button onclick="submitPaymentProof()" class="btn-full" id="uploadBtn">
-                    Submit Proof
-                </button>
-            </div>
-        </div>
-    </div>
 
-    <div id="requestModal" class="modal-overlay">
-        <div class="modal-glass modal-large">
-            <div class="modal-header">
-                <h3>Apply for Loan</h3>
-                <button onclick="closeRequestModal()" class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body scrollable-body">
-                <div class="form-group">
-                    <label>Amount Needed (K)</label>
-                    <input type="number" id="reqAmount" placeholder="e.g. 500" class="input-field">
-                </div>
-                <div class="form-group">
-                    <label>Collateral Item</label>
-                    <input type="text" id="reqCollateral" placeholder="e.g. Samsung TV" class="input-field">
-                </div>
-                <div class="form-group">
-                    <label>Value (K)</label>
-                    <input type="number" id="reqValue" placeholder="e.g. 2500" class="input-field">
-                </div>
-                <hr class="divider">
-                <div class="nrc-section">
-                    <div class="checkbox-wrapper">
-                        <input type="checkbox" id="nrcExists" onchange="toggleNRCUploads()">
-                        <label for="nrcExists">NRC already on file</label>
-                    </div>
-                    <div id="nrcUploadContainer" class="upload-grid">
-                        <div class="upload-box" onclick="document.getElementById('nrcFrontFile').click()">
-                            <i class="fas fa-id-card"></i> <span>Front</span>
-                            <input type="file" id="nrcFrontFile" hidden accept="image/*">
-                        </div>
-                        <div class="upload-box" onclick="document.getElementById('nrcBackFile').click()">
-                            <i class="fas fa-id-card"></i> <span>Back</span>
-                            <input type="file" id="nrcBackFile" hidden accept="image/*">
-                        </div>
+                <div class="calc-group">
+                    <label style="display:block; margin-bottom:10px; font-size:0.8rem; color:var(--text-muted)">Duration</label>
+                    <div class="duration-toggles" id="durationSelector">
+                        <button class="dur-btn active" data-rate="0.20">1 Wk</button>
+                        <button class="dur-btn" data-rate="0.30">2 Wk</button>
+                        <button class="dur-btn" data-rate="0.35">3 Wk</button>
+                        <button class="dur-btn" data-rate="0.40">1 Mo</button>
                     </div>
                 </div>
-                <p class="section-label" style="margin-top:15px">Collateral Photo</p>
-                <div class="upload-zone small-zone" onclick="document.getElementById('collateralFile').click()">
-                    <i class="fas fa-camera"></i> <p>Add Photo</p>
-                    <input type="file" id="collateralFile" hidden accept="image/*">
+
+                <div class="calc-result-box">
+                    <div class="result-row">
+                        <span>Interest</span>
+                        <span id="calcInterestDisplay" style="color:var(--primary)">20%</span>
+                    </div>
+                    <div class="result-row total-row">
+                        <span>Repay</span>
+                        <span id="calcTotalDisplay">K600.00</span>
+                    </div>
                 </div>
-                <button onclick="submitLoanRequest()" class="btn-full" id="requestBtn">Submit</button>
+                <button class="btn-full" onclick="closeCalcModal()">Done</button>
             </div>
         </div>
     </div>
