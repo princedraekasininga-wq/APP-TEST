@@ -48,6 +48,7 @@
 
         <div class="hero-section fade-in delay-1">
             <div class="stat-card hero-split-layout">
+
                 <div class="hero-top-row">
                     <div class="hero-left-content">
                         <div class="hero-header-row">
@@ -59,13 +60,13 @@
 
                         <p class="due-date-row">
                             <i class="far fa-calendar-alt" style="margin-right: 6px; color:var(--primary);"></i>
-                            Next Due: <span id="nextDueDisplay" style="font-weight: 700; color: #fff;">--</span>
+                            Next Due: <span id="nextDueDisplay" style="font-weight: 700; color: #fff; margin-left: 4px;">--</span>
                         </p>
                     </div>
 
                     <div class="hero-right-visual">
                         <div class="hero-ring-container">
-                            <svg class="progress-ring" width="160" height="160" viewBox="0 0 160 160">
+                            <svg class="progress-ring" viewBox="0 0 160 160">
                                 <circle class="ring-track" cx="80" cy="80" r="70" fill="none" stroke-width="12" stroke-linecap="round" />
                                 <circle id="progressCircle" class="ring-progress" cx="80" cy="80" r="70" fill="none" stroke-width="12" stroke-linecap="round" />
                                 <circle id="innerCircle" cx="80" cy="80" r="58" />
@@ -78,12 +79,13 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
         <div class="advice-box fade-in delay-2">
             <p class="advice-text">
-                <span style="color:#ffffff; font-weight:200; margin-right:5px; letter-spacing:0.5px;">STALLZ ADVICE:</span>
+                <span>STALLZ ADVICE:</span>
                 Consistent partial payments reduce your burden significantly compared to a single lump-sum payment at the deadline.
             </p>
         </div>
@@ -164,7 +166,7 @@
                         <strong style="color:var(--primary)">Address:</strong> <br> <span id="modalAddress">--</span>
                     </p>
                 </div>
-                <button onclick="closeProfileModal()" class="btn-full" style="margin-top:25px; width:100%; padding:14px; background:var(--primary); border:none; color:white; border-radius:12px; font-weight:700; cursor:pointer;">Close Profile</button>
+                <button onclick="closeProfileModal()" class="btn-full">Close Profile</button>
             </div>
         </div>
     </div>
