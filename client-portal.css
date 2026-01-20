@@ -53,7 +53,7 @@ body {
 .glass-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 15px;
-    position: sticky; top: 10px; z-index: 100; /* Sticky Fix */
+    position: sticky; top: 10px; z-index: 100;
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
     border: var(--glass-border); border-radius: 20px;
@@ -88,6 +88,7 @@ body {
     color: var(--text-muted); width: 38px; height: 38px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: all 0.2s ease; font-size: 1rem; flex-shrink: 0;
+    position: relative;
 }
 
 .icon-btn:hover, .profile-btn:hover {
@@ -103,69 +104,33 @@ body {
 
 @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-/* ==========================================================================
-   UPDATED NOTIFICATION DROPDOWN
-   ========================================================================== */
+/* UPDATED NOTIFICATION DROPDOWN */
 .notification-dropdown {
-    position: absolute;
-    top: 60px; /* Pushed down slightly */
-    right: 0;
-    width: 320px; /* Increased width */
-
-    /* Glassmorphism Logic */
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: var(--glass-border);
-
-    border-radius: 20px;
-    display: none;
-    flex-direction: column;
-    z-index: 1001;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.4); /* Deeper shadow for pop */
-    overflow: hidden;
+    position: absolute; top: 100%; right: -10px; margin-top: 15px; width: 320px;
+    background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px; display: none; flex-direction: column; z-index: 1001;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden;
+    transform-origin: top right; animation: scaleIn 0.2s ease-out forwards;
 }
 
-/* Header inside dropdown */
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
 .dropdown-header {
-    padding: 15px 20px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    padding: 15px 20px; font-size: 0.75rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
-    color: var(--text-muted);
-    background: rgba(0,0,0,0.1); /* Subtle dark header background */
+    color: var(--text-muted); background: rgba(0,0,0,0.2);
 }
 
-/* List Items */
 .notify-item {
-    padding: 15px 20px;
-    font-size: 0.9rem;
+    padding: 15px 20px; font-size: 0.9rem;
     border-bottom: 1px solid rgba(255,255,255,0.05);
-    color: var(--text-main);
-    transition: background 0.2s;
+    color: var(--text-main); transition: background 0.2s; line-height: 1.5;
 }
-
 .notify-item:last-child { border-bottom: none; }
-.notify-item:hover { background: rgba(255,255,255,0.05); }
+.notify-item:hover { background: rgba(255,255,255,0.08); }
 
-/* Day Mode Overrides for Notifications (Ensure this is handled by general Day Mode rules or add specifically) */
-body.day-mode .notification-dropdown {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-}
-body.day-mode .dropdown-header {
-    background: rgba(0,0,0,0.03);
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-body.day-mode .notify-item {
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-body.day-mode .notify-item:hover {
-    background: rgba(0,0,0,0.02);
-}
 /* ==========================================================================
    5. WELCOME BANNER
    ========================================================================== */
@@ -279,23 +244,42 @@ body.day-mode .notify-item:hover {
 }
 .nav-item { color: var(--text-muted); text-align: center; display: flex; flex-direction: column; align-items: center; font-size: 0.6rem; gap: 2px; text-decoration: none;}
 .nav-icon { font-size: 1rem; }
-.big-nav-icon { width: 45px; height: 45px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transform: translateY(-20px); border: 4px solid var(--bg-color); box-shadow: 0 5px 15px var(--primary-glow); }
 
+/* BIG ESTIMATOR BUTTON (Solid Style) */
+.big-nav-icon {
+    width: 60px; height: 60px;
+    background: var(--primary); color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    transform: translateY(-30px);
+    border: 4.5px solid var(--bg-color);
+
+    /* THE FIX: Solid Hard Shadow instead of Glow */
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.big-nav-icon:active {
+    transform: translateY(-26px); /* Moves down when pressed */
+    box-shadow: 0 -2 0 rgba(0,0,0,1.0); /* Shadow disappears */
+}
+
+.center-item .nav-label {
+    margin-top: -22px; font-weight: 700; color: var(--primary);
+}
 /* ==========================================================================
    10. MODALS, INPUTS & NEW ELEMENTS
    ========================================================================== */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 2000; }
-.modal-glass {
-    /* Updated for transparency */
-    background: rgba(30, 41, 59, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
 
+/* Transparent Glass Modal */
+.modal-glass {
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 20px;
-    border-radius: 16px;
-    width: 85%;
-    max-width: 350px;
+    padding: 20px; border-radius: 16px;
+    width: 85%; max-width: 350px;
 }
 
 .btn-full { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; margin-top: 15px; cursor: pointer; }
@@ -325,23 +309,17 @@ body.day-mode .notify-item:hover {
    11. DRAWER (PROFILE/SETTINGS)
    ========================================================================== */
 .drawer-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; justify-content: flex-end; z-index: 3000; }
+
 .drawer-glass {
-    width: 85%;
-    max-width: 320px;
-    height: 100%;
-
-    /* Updated for transparency */
+    width: 85%; max-width: 320px; height: 100%;
     background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     border-left: 1px solid rgba(255, 255, 255, 0.15);
-    display: flex;
-    flex-direction: column;
-    padding: 25px;
+    display: flex; flex-direction: column; padding: 25px;
     box-shadow: -10px 0 30px rgba(0,0,0,0.5);
     animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .drawer-header h3 { font-size: 1.1rem; color: var(--text-main); }
@@ -390,7 +368,7 @@ body.day-mode .toggle-icon { color: var(--primary); transform: rotate(180deg); }
     border-radius: 16px;
     padding: 20px;
     margin-bottom: 20px;
-    margin-top: 30px; /* Space from hero */
+    margin-top: 30px; /* Space added here */
 }
 .tracker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
 .tracker-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; }
@@ -467,12 +445,12 @@ body.day-mode .small-icon {
     color: #334155;
 }
 
-/* 6. Modals & Drawer (UPDATED WITH TRANSPARENCY) */
+/* 6. Modals, Notifications & Drawer (UPDATED WITH TRANSPARENCY) */
 body.day-mode .drawer-glass,
-body.day-mode .modal-glass {
-    background: rgba(255, 255, 255, 0.85); /* Transparent White */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+body.day-mode .modal-glass,
+body.day-mode .notification-dropdown {
+    background: rgba(255, 255, 255, 0.9); /* Transparent White */
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(0, 0, 0, 0.1);
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
 }
@@ -511,6 +489,20 @@ body.day-mode .drawer-user-card h4 { color: #0f172a; }
 body.day-mode .drawer-item { border-color: rgba(0,0,0,0.1); color: #0f172a; }
 body.day-mode .drawer-item:hover { background: rgba(0,0,0,0.05); }
 body.day-mode .logout-btn { background: rgba(0,0,0,0.05); color: #0f172a; }
+
+/* 8. Notification Specifics */
+body.day-mode .dropdown-header {
+    background: rgba(0,0,0,0.03);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    color: #64748b;
+}
+body.day-mode .notify-item {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    color: #0f172a;
+}
+body.day-mode .notify-item:hover {
+    background: rgba(0,0,0,0.03);
+}
 
 /* Mobile Optimizations */
 @media (max-width: 600px) {
