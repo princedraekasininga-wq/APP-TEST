@@ -1,7 +1,7 @@
 // ==========================================================================
 // 1. FIREBASE CONFIGURATION & SETUP
 // ==========================================================================
-// REPLACE these values with your specific project keys from the Firebase Console
+// (Kept as placeholders so the app doesn't crash, but won't be used for data)
 const firebaseConfig = {
     apiKey: "YOUR_API_KEY_HERE",
     authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -11,15 +11,14 @@ const firebaseConfig = {
     appId: "YOUR_APP_ID"
 };
 
-// Initialize Firebase only if it hasn't been already
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.firestore();
 
 // Global Variables
-let isTestMode = false;
-let selectedRate = 0.20; // Default interest rate (20% for 1 week)
+let isTestMode = true; // FORCED TRUE
+let selectedRate = 0.20;
 
 // ==========================================================================
 // 2. MAIN INITIALIZATION (ON LOAD)
@@ -31,32 +30,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if(rangeInput) {
         rangeInput.addEventListener('input', updateCalculator);
         setupDurationButtons();
-        updateCalculator(); // Run once on load
+        updateCalculator();
     }
 
-    // 2.2 Parse URL Parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const clientId = urlParams.get('id');
-    const mode = urlParams.get('mode');
+    // 2.2 FORCE TEST DATA LOADING
+    // We strictly bypass looking for URL parameters or Database IDs
+    console.log("⚠️ APP IS IN TEST MODE: Using dummy data only.");
+    loadTestData();
 
-    // 2.3 Route to Correct Data Source
-    if (mode === 'test') {
-        isTestMode = true;
-        loadTestData();
-    } else if (clientId) {
-        loadClientData(clientId);
-        loadLoansData(clientId);
-    } else {
-        // Fallback for visitors with no ID
-        updateHeaderGreeting("Guest");
-    }
-
-    // 2.4 Close modals if user clicks outside of them
+    // 2.3 Close modals if user clicks outside
     window.onclick = function(event) {
         if (event.target.className === 'modal-overlay') {
             event.target.style.display = 'none';
         }
-        // Also close notification dropdown if clicking elsewhere
         if (!event.target.closest('.notification-wrapper')) {
             const dropdown = document.getElementById('notificationDropdown');
             if (dropdown) dropdown.style.display = 'none';
@@ -90,49 +76,35 @@ function updateHeaderGreeting(name) {
 }
 
 // ==========================================================================
-// 4. DATA LOADING LAYER (REAL & TEST)
+// 4. DATA LOADING LAYER (TEST DATA ONLY)
 // ==========================================================================
 
-function loadClientData(id) {
-    db.collection('clients').doc(id).get().then((doc) => {
-        if (doc.exists) {
-            const data = doc.data();
-            updateHeaderGreeting(data.name);
-            if(document.getElementById('modalPhone')) document.getElementById('modalPhone').innerText = data.phone || "--";
-            if(document.getElementById('modalID')) document.getElementById('modalID').innerText = data.idNumber || "--";
-            if(document.getElementById('modalAddress')) document.getElementById('modalAddress').innerText = data.address || "--";
-        }
-    }).catch(err => {
-        console.error("Error loading client:", err);
-        updateHeaderGreeting("User");
-    });
-}
-
-function loadLoansData(id) {
-    db.collection('loans').where('clientId', '==', id)
-      .orderBy('date', 'desc').limit(10)
-      .get().then((snapshot) => {
-          const loans = [];
-          snapshot.forEach(doc => loans.push(doc.data()));
-          renderLoansTable(loans);
-      });
-}
-
 function loadTestData() {
-    updateHeaderGreeting("John Doe");
+    // 1. Set Name: Drae
+    updateHeaderGreeting("Drae");
+
+    // Profile Mock Data
+    if(document.getElementById('modalPhone')) document.getElementById('modalPhone').innerText = "0977-XXX-XXX";
+    if(document.getElementById('modalID')) document.getElementById('modalID').innerText = "999999/11/1";
+    if(document.getElementById('modalAddress')) document.getElementById('modalAddress').innerText = "Test Mode Address, Zambia";
+
+    // 2. Mock Loan Data
+    // Logic: 10,000 Principal + 20% Interest (2,000) = 12,000 Total Due.
+    // To get 67% Paid: 12,000 * 0.67 = 8,040.
     const fakeLoans = [
         {
-            date: new Date().toISOString(),
-            amount: 500, interestRate: 20, amountPaid: 0,
-            dueDate: new Date(Date.now() + 86400000 * 5).toISOString()
-        },
-        {
-            date: "2025-10-01", amount: 1000, interestRate: 20, amountPaid: 1200,
-            dueDate: "2025-11-01"
+            date: "2025-12-20",
+            amount: 10000,
+            interestRate: 20,
+            amountPaid: 8040,
+            dueDate: "2026-01-25"
         }
     ];
+
     renderLoansTable(fakeLoans);
 }
+
+// (The real data functions loadClientData/loadLoansData are removed/unused to prevent accidents)
 
 // ==========================================================================
 // 5. DASHBOARD RENDERING (TABLE & RINGS)
@@ -174,21 +146,21 @@ function renderLoansTable(loansData) {
         tableBody.innerHTML += row;
     });
 
-    // 1. Update Stats
+    // Update Stats
     if(document.getElementById('portalTotalDebt')) document.getElementById('portalTotalDebt').innerText = 'K' + totalDebt.toLocaleString();
     if(document.getElementById('portalTotalPaid')) document.getElementById('portalTotalPaid').innerText = 'K' + totalPaid.toLocaleString();
 
-    // 2. HARDCODED 85% TESTING
+    // FORCE 67% DISPLAY (Overriding calculation for safety)
     if(document.getElementById('paymentProgressDisplay')) {
-        document.getElementById('paymentProgressDisplay').innerText = "85%";
+        document.getElementById('paymentProgressDisplay').innerText = "67%";
     }
 
-    // 3. Update Ring
+    // Update Ring
     updateCountdownRing(earliestDueDate);
 }
 
 // ==========================================================================
-// 6. GAUGE RING LOGIC (FULL 360 CIRCLE - 85% TEST)
+// 6. GAUGE RING LOGIC (FULL 360 CIRCLE)
 // ==========================================================================
 
 function updateCountdownRing(dueDate) {
@@ -199,16 +171,14 @@ function updateCountdownRing(dueDate) {
     if (!outerCircle) return;
 
     // 1. Setup Geometry for Full 360 Circle
-    // SVG Radius = 70. Circumference = 2 * PI * 70
     const radius = 70;
     const circumference = 2 * Math.PI * radius; // approx 439.8
 
-    // Set static dasharray (Total Length)
     outerCircle.style.strokeDasharray = circumference;
 
     // 2. Handle Text Data
     if (!dueDate) {
-        outerCircle.style.strokeDashoffset = circumference; // Empty
+        outerCircle.style.strokeDashoffset = circumference;
         if(daysText) daysText.innerText = "--";
         if(nextDueText) nextDueText.innerText = "--";
     } else {
@@ -218,21 +188,20 @@ function updateCountdownRing(dueDate) {
         if(nextDueText) nextDueText.innerText = dueDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     }
 
-    // 3. FORCE 85% PROGRESS FOR TESTING
-    let percent = 0.85;
+    // FORCE 67% RING PROGRESS
+    let percent = 0.67;
 
     // Calculate offset
-    // 0 offset = Full. circumference offset = Empty.
     const offset = circumference - (percent * circumference);
 
     outerCircle.style.strokeDashoffset = offset;
 
-    // 4. Color Logic (Stallz Green)
+    // Color Logic (Stallz Green)
     outerCircle.style.stroke = "#4ade80";
 }
 
 // ==========================================================================
-// 7. CALCULATOR & MODALS (Standard)
+// 7. CALCULATOR & MODALS
 // ==========================================================================
 
 function updateCalculator() {
