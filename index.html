@@ -30,10 +30,7 @@
                     </button>
                     <div id="notificationDropdown" class="notification-dropdown">
                         <div class="dropdown-header">Recent Activity</div>
-                        <div id="notificationList" class="dropdown-body">
-                            <div class="notify-item">Loan #4829 Approved</div>
-                            <div class="notify-item">Payment Received (K500)</div>
-                        </div>
+                        <div id="notificationList" class="dropdown-body"></div>
                     </div>
                 </div>
 
@@ -61,6 +58,7 @@
                             Next Due: <span id="nextDueDisplay" style="font-weight: 700; color: #fff; margin-left: 4px;">--</span>
                         </p>
                     </div>
+
                     <div class="hero-right-visual">
                         <div class="hero-ring-container">
                             <svg class="progress-ring" viewBox="0 0 160 160">
@@ -74,6 +72,27 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-tracker-box fade-in delay-2">
+            <div class="tracker-header">
+                <span class="tracker-title">Application #8829 Status</span>
+                <span class="tracker-status status-pending">Under Review</span>
+            </div>
+            <div class="tracker-timeline">
+                <div class="timeline-step completed">
+                    <div class="step-circle"><i class="fas fa-check"></i></div>
+                    <span class="step-label">Submitted</span>
+                </div>
+                <div class="timeline-step active">
+                    <div class="step-circle"><i class="fas fa-sync-alt fa-spin"></i></div>
+                    <span class="step-label">Review</span>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-circle"><i class="fas fa-wallet"></i></div>
+                    <span class="step-label">Disburse</span>
                 </div>
             </div>
         </div>
@@ -103,22 +122,22 @@
         </div>
 
         <div class="quick-actions-scroll fade-in delay-2">
-    <h3 class="section-title-small">Quick Actions</h3>
-    <div class="actions-row">
-        <button class="action-card" onclick="openPayModal()">
-            <div class="action-icon icon-green"><i class="fas fa-mobile-alt"></i></div>
-            <span>Pay Now</span>
-        </button>
-        <button class="action-card" onclick="alert('Statements feature coming soon!')">
-            <div class="action-icon icon-blue"><i class="fas fa-file-invoice"></i></div>
-            <span>Statement</span>
-        </button>
-        <button class="action-card" onclick="document.querySelector('.glass-panel').scrollIntoView({behavior: 'smooth'})">
-            <div class="action-icon icon-purple"><i class="fas fa-history"></i></div>
-            <span>History</span>
-        </button>
-    </div>
-</div>
+            <h3 class="section-title-small">Quick Actions</h3>
+            <div class="actions-row">
+                <button class="action-card" onclick="openPayModal()">
+                    <div class="action-icon icon-green"><i class="fas fa-mobile-alt"></i></div>
+                    <span>Pay Now</span>
+                </button>
+                <button class="action-card" onclick="alert('Statements feature coming soon!')">
+                    <div class="action-icon icon-blue"><i class="fas fa-file-invoice"></i></div>
+                    <span>Statement</span>
+                </button>
+                <button class="action-card" onclick="document.querySelector('.glass-panel').scrollIntoView({behavior: 'smooth'})">
+                    <div class="action-icon icon-purple"><i class="fas fa-history"></i></div>
+                    <span>History</span>
+                </button>
+            </div>
+        </div>
 
         <section class="glass-panel fade-in delay-3" style="margin-bottom: 100px;">
             <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
@@ -157,122 +176,74 @@
         </a>
     </nav>
 
+    <div class="floating-support">
+        <button class="fab-main" onclick="toggleFabMenu()">
+            <i class="fas fa-comment-dots"></i>
+        </button>
+        <div class="fab-menu" id="fabMenu">
+            <a href="https://wa.me/260970000000" target="_blank" class="fab-item item-whatsapp">
+                <span class="fab-label">WhatsApp</span>
+                <div class="fab-icon"><i class="fab fa-whatsapp"></i></div>
+            </a>
+            <a href="tel:+260970000000" class="fab-item item-call">
+                <span class="fab-label">Call Us</span>
+                <div class="fab-icon"><i class="fas fa-phone"></i></div>
+            </a>
+        </div>
+    </div>
+
     <div id="profileModal" class="drawer-overlay">
-    <div class="drawer-glass">
-        <div class="drawer-header">
-            <h3>Profile & Settings</h3>
-            <button onclick="closeProfileModal()" class="close-btn" style="font-size:1.5rem;">&times;</button>
-        </div>
-
-        <div class="drawer-body">
-            <div class="drawer-user-card">
-                <div class="drawer-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div>
-                    <h4>Drae</h4>
-                    <p>Client ID: #88291</p>
-                </div>
+        <div class="drawer-glass">
+            <div class="drawer-header">
+                <h3>Profile & Settings</h3>
+                <button onclick="closeProfileModal()" class="close-btn" style="font-size:1.5rem;">&times;</button>
             </div>
 
-            <div class="drawer-menu">
-                <button class="drawer-item" onclick="toggleTheme()">
-                    <div class="item-icon icon-purple"><i class="fas fa-moon"></i></div>
-                    <span>Switch Theme</span>
-                    <i class="fas fa-toggle-on toggle-icon"></i>
-                </button>
-
-                <button class="drawer-item" onclick="openReferralModal()">
-                    <div class="item-icon icon-gold"><i class="fas fa-gift"></i></div>
-                    <span>Refer & Earn</span>
-                    <i class="fas fa-chevron-right arrow"></i>
-                </button>
-
-                <button class="drawer-item" onclick="openSupportModal()">
-                    <div class="item-icon icon-orange"><i class="fas fa-headset"></i></div>
-                    <span>Help Center</span>
-                    <i class="fas fa-chevron-right arrow"></i>
-                </button>
-            </div>
-
-            <div class="profile-mini-details">
-                <p><i class="fas fa-phone-alt"></i> 0977-XXX-XXX</p>
-                <p><i class="fas fa-id-card"></i> 999999/11/1</p>
-            </div>
-        </div>
-
-        <div class="drawer-footer">
-            <span class="contact-title">Contact Stallz</span>
-
-            <a href="tel:+260970000000" class="contact-row">
-                <i class="fas fa-phone-alt"></i> +260 97 000 0000
-            </a>
-            <a href="mailto:support@stallz.com" class="contact-row">
-                <i class="fas fa-envelope"></i> support@stallz.com
-            </a>
-            <div class="social-row">
-                <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-            </div>
-
-            <button onclick="closeProfileModal()" class="btn-full logout-btn">Log Out</button>
-        </div>
-    </div>
-</div>
-
-    <div id="referralModal" class="modal-overlay">
-        <div class="modal-glass">
-            <div class="modal-header">
-                <h3>Refer & Earn</h3>
-                <button onclick="closeReferralModal()" class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body" style="text-align:center;">
-                <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">
-                    Invite friends to Stallz Loans. You get <strong>K50</strong> off your next interest for every friend who takes a loan!
-                </p>
-
-                <div class="referral-ticket">
-                    <span class="ticket-label">Your Code</span>
-                    <h2 class="ticket-code">DRAE2026</h2>
-                    <button class="small-text-btn" onclick="alert('Code Copied!')">Copy</button>
+            <div class="drawer-body">
+                <div class="drawer-user-card">
+                    <div class="drawer-avatar"><i class="fas fa-user"></i></div>
+                    <div>
+                        <h4>Drae</h4>
+                        <p>Client ID: #88291</p>
+                    </div>
                 </div>
 
-                <button class="btn-full" onclick="closeReferralModal()">Okay, Got it!</button>
-            </div>
-        </div>
-    </div>
+                <div class="drawer-menu">
+                    <button class="drawer-item" onclick="toggleTheme()">
+                        <div class="item-icon icon-purple"><i class="fas fa-moon"></i></div>
+                        <span>Switch Theme</span>
+                        <i class="fas fa-toggle-on toggle-icon"></i>
+                    </button>
 
-    <div id="supportModal" class="modal-overlay">
-        <div class="modal-glass">
-            <div class="modal-header">
-                <h3>Help Center</h3>
-                <button onclick="closeSupportModal()" class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="support-list">
-                    <a href="https://wa.me/260970000000" target="_blank" class="support-item">
-                        <div class="icon-box-small" style="background:#25D366; color:white;"><i class="fab fa-whatsapp"></i></div>
-                        <div>
-                            <h4>Chat on WhatsApp</h4>
-                            <p>Instant replies (8am - 5pm)</p>
-                        </div>
-                    </a>
-                    <a href="tel:+260970000000" class="support-item">
-                        <div class="icon-box-small" style="background:#3b82f6; color:white;"><i class="fas fa-phone"></i></div>
-                        <div>
-                            <h4>Call Us</h4>
-                            <p>+260 97 000 0000</p>
-                        </div>
-                    </a>
-                    <a href="mailto:support@stallz.com" class="support-item">
-                        <div class="icon-box-small" style="background:#f97316; color:white;"><i class="fas fa-envelope"></i></div>
-                        <div>
-                            <h4>Email Support</h4>
-                            <p>support@stallz.com</p>
-                        </div>
-                    </a>
+                    <button class="drawer-item" onclick="openReferralModal()">
+                        <div class="item-icon icon-gold"><i class="fas fa-gift"></i></div>
+                        <span>Refer & Earn</span>
+                        <i class="fas fa-chevron-right arrow"></i>
+                    </button>
+
+                    <button class="drawer-item" onclick="openSupportModal()">
+                        <div class="item-icon icon-orange"><i class="fas fa-headset"></i></div>
+                        <span>Help Center</span>
+                        <i class="fas fa-chevron-right arrow"></i>
+                    </button>
                 </div>
+
+                <div class="profile-mini-details">
+                    <p><i class="fas fa-phone-alt"></i> 0977-XXX-XXX</p>
+                    <p><i class="fas fa-id-card"></i> 999999/11/1</p>
+                </div>
+            </div>
+
+            <div class="drawer-footer">
+                <span class="contact-title">Contact Stallz</span>
+                <a href="tel:+260970000000" class="contact-row"><i class="fas fa-phone-alt"></i> +260 97 000 0000</a>
+                <a href="mailto:support@stallz.com" class="contact-row"><i class="fas fa-envelope"></i> support@stallz.com</a>
+                <div class="social-row">
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                </div>
+                <button onclick="closeProfileModal()" class="btn-full logout-btn">Log Out</button>
             </div>
         </div>
     </div>
@@ -302,6 +273,51 @@
                     </div>
                 </div>
                 <button class="btn-full" onclick="closePayModal(); openUploadModal();">I've Made Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="referralModal" class="modal-overlay">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3>Refer & Earn</h3>
+                <button onclick="closeReferralModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px;">
+                    Invite friends to Stallz Loans. You get <strong>K50</strong> off your next interest for every friend who takes a loan!
+                </p>
+                <div class="referral-ticket">
+                    <span class="ticket-label">Your Code</span>
+                    <h2 class="ticket-code">DRAE2026</h2>
+                    <button class="small-text-btn" onclick="alert('Code Copied!')">Copy Code</button>
+                </div>
+                <button class="btn-full" onclick="closeReferralModal()">Okay, Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="supportModal" class="modal-overlay">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3>Help Center</h3>
+                <button onclick="closeSupportModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="support-list">
+                    <a href="https://wa.me/260970000000" target="_blank" class="support-item">
+                        <div class="icon-box-small" style="background:#25D366; color:white;"><i class="fab fa-whatsapp"></i></div>
+                        <div><h4>Chat on WhatsApp</h4><p>Instant replies (8am - 5pm)</p></div>
+                    </a>
+                    <a href="tel:+260970000000" class="support-item">
+                        <div class="icon-box-small" style="background:#3b82f6; color:white;"><i class="fas fa-phone"></i></div>
+                        <div><h4>Call Us</h4><p>+260 97 000 0000</p></div>
+                    </a>
+                    <a href="mailto:support@stallz.com" class="support-item">
+                        <div class="icon-box-small" style="background:#f97316; color:white;"><i class="fas fa-envelope"></i></div>
+                        <div><h4>Email Support</h4><p>support@stallz.com</p></div>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
