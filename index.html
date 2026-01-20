@@ -19,7 +19,7 @@
                 <div class="logo-box">
                     <img src="my-logo.png" alt="Stallz Logo" class="portal-logo">
                 </div>
-                <h2 class="brand-title" id="headerGreeting">Hello, <span id="headerUserName">User</span></h2>
+                <h2 class="brand-title" id="headerGreeting">Hi, <span id="headerUserName">User</span></h2>
             </div>
 
             <div class="header-right">
@@ -61,6 +61,7 @@
                             Next Due: <span id="nextDueDisplay" style="font-weight: 700; color: #fff; margin-left: 4px;">--</span>
                         </p>
                     </div>
+
                     <div class="hero-right-visual">
                         <div class="hero-ring-container">
                             <svg class="progress-ring" viewBox="0 0 160 160">
@@ -108,10 +109,6 @@
                 <button class="action-card" onclick="openPayModal()">
                     <div class="action-icon icon-green"><i class="fas fa-mobile-alt"></i></div>
                     <span>Pay Now</span>
-                </button>
-                <button class="action-card" onclick="openRequestModal()">
-                    <div class="action-icon icon-blue"><i class="fas fa-plus"></i></div>
-                    <span>New Loan</span>
                 </button>
                 <button class="action-card" onclick="alert('Statements feature coming soon!')">
                     <div class="action-icon icon-purple"><i class="fas fa-file-invoice"></i></div>
@@ -164,12 +161,10 @@
 
     <div id="profileModal" class="drawer-overlay">
         <div class="drawer-glass">
-
             <div class="drawer-header">
                 <h3>My Profile</h3>
                 <button onclick="closeProfileModal()" class="close-btn" style="font-size:1.5rem;">&times;</button>
             </div>
-
             <div class="drawer-body">
                 <div style="text-align:center; margin-bottom:25px;">
                     <div style="width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--primary);">
@@ -178,7 +173,6 @@
                     <h4 style="color:white; font-size:1.1rem;">Drae</h4>
                     <p style="color:var(--text-muted); font-size:0.8rem;">Client ID: #88291</p>
                 </div>
-
                 <div class="profile-details">
                     <p style="margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
                         <span style="color:var(--text-muted); font-size:0.8rem;">Phone</span><br>
@@ -194,29 +188,50 @@
                     </p>
                 </div>
             </div>
-
             <div class="drawer-footer">
                 <span class="contact-title">Contact Stallz</span>
-
-                <a href="tel:+260970000000" class="contact-row">
-                    <i class="fas fa-phone-alt"></i> +260 97 000 0000
-                </a>
-                <a href="mailto:support@stallz.com" class="contact-row">
-                    <i class="fas fa-envelope"></i> support@stallz.com
-                </a>
-                <div class="contact-row">
-                    <i class="fas fa-map-marker-alt"></i> Lusaka, Zambia
-                </div>
-
+                <a href="tel:+260970000000" class="contact-row"><i class="fas fa-phone-alt"></i> +260 97 000 0000</a>
+                <a href="mailto:support@stallz.com" class="contact-row"><i class="fas fa-envelope"></i> support@stallz.com</a>
+                <div class="contact-row"><i class="fas fa-map-marker-alt"></i> Lusaka, Zambia</div>
                 <div class="social-row">
                     <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
                     <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
                     <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
                 </div>
-
                 <button onclick="closeProfileModal()" class="btn-full" style="margin-top:20px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.1);">Log Out</button>
             </div>
+        </div>
+    </div>
 
+    <div id="payModal" class="modal-overlay">
+        <div class="modal-glass">
+            <div class="modal-header">
+                <h3>Select Provider</h3>
+                <button onclick="closePayModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p style="margin-bottom:15px; font-size:0.9rem; color:var(--text-muted);">Send payment to one of our mobile money accounts below:</p>
+
+                <div class="pay-provider-card mtn-theme">
+                    <div class="provider-icon" style="background:#ffcc00; color:#000;">MTN</div>
+                    <div class="provider-info">
+                        <h4>MTN Money</h4>
+                        <p>096 700 0000</p>
+                        <span class="provider-name">Stallz Loans LTD</span>
+                    </div>
+                </div>
+
+                <div class="pay-provider-card airtel-theme">
+                    <div class="provider-icon" style="background:#ff0000; color:#fff;">Airtel</div>
+                    <div class="provider-info">
+                        <h4>Airtel Money</h4>
+                        <p>097 700 0000</p>
+                        <span class="provider-name">Stallz Loans LTD</span>
+                    </div>
+                </div>
+
+                <button class="btn-full" onclick="closePayModal(); openUploadModal();">I've Made Payment</button>
+            </div>
         </div>
     </div>
 
@@ -288,23 +303,6 @@
                     <p>Tap to select screenshot</p>
                 </div>
                 <button class="btn-full" onclick="simulateSubmit('Proof Uploaded Successfully!')">Upload Now</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="payModal" class="modal-overlay">
-        <div class="modal-glass">
-            <div class="modal-header">
-                <h3>Make Payment</h3>
-                <button onclick="closePayModal()" class="close-btn">&times;</button>
-            </div>
-            <div class="modal-body" style="text-align:center;">
-                <p style="margin-bottom:15px; font-size:0.9rem; color:var(--text-muted);">Send Mobile Money to:</p>
-                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px;">
-                    <h2 style="color:var(--primary); margin-bottom:5px;">0977-000-000</h2>
-                    <p style="font-size:0.8rem;">Stallz Loans LTD</p>
-                </div>
-                <button class="btn-full" onclick="closePayModal(); openUploadModal();">I've Made Payment</button>
             </div>
         </div>
     </div>

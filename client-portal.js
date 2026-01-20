@@ -1,7 +1,6 @@
 // ==========================================================================
 // 1. FIREBASE CONFIGURATION & SETUP
 // ==========================================================================
-// (Kept as placeholders so the app doesn't crash, but won't be used for data)
 const firebaseConfig = {
     apiKey: "YOUR_API_KEY_HERE",
     authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -11,7 +10,6 @@ const firebaseConfig = {
     appId: "YOUR_APP_ID"
 };
 
-// Initialize Firebase only if it hasn't been already
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -19,7 +17,7 @@ const db = firebase.firestore();
 
 // Global Variables
 let isTestMode = true; // FORCED TRUE for development
-let selectedRate = 0.20; // Default interest rate (20% for 1 week)
+let selectedRate = 0.20;
 
 // ==========================================================================
 // 2. MAIN INITIALIZATION (ON LOAD)
@@ -31,11 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if(rangeInput) {
         rangeInput.addEventListener('input', updateCalculator);
         setupDurationButtons();
-        updateCalculator(); // Run once on load
+        updateCalculator();
     }
 
     // 2.2 AUTO DAY/NIGHT MODE LOGIC
-    // Checks device time. If between 6 AM (06:00) and 6 PM (18:00), enable Day Mode.
     const currentHour = new Date().getHours();
     if (currentHour >= 6 && currentHour < 18) {
         document.body.classList.add('day-mode');
@@ -46,16 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2.3 FORCE TEST DATA LOADING
-    // We strictly bypass looking for URL parameters or Database IDs
     console.log("⚠️ APP IS IN TEST MODE: Using dummy data only.");
     loadTestData();
 
-    // 2.4 Close modals if user clicks outside of them
+    // 2.4 Close modals if user clicks outside
     window.onclick = function(event) {
         if (event.target.className === 'modal-overlay' || event.target.className === 'drawer-overlay') {
             event.target.style.display = 'none';
         }
-        // Also close notification dropdown if clicking elsewhere
         if (!event.target.closest('.notification-wrapper')) {
             const dropdown = document.getElementById('notificationDropdown');
             if (dropdown) dropdown.style.display = 'none';
@@ -70,25 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleNotifications() {
     const dropdown = document.getElementById('notificationDropdown');
     if (!dropdown) return;
-
-    // Toggle between flex and none
     const isVisible = dropdown.style.display === 'flex';
     dropdown.style.display = isVisible ? 'none' : 'flex';
 }
 
 function updateHeaderGreeting(name) {
-    const hour = new Date().getHours();
-    let timeGreeting = "Hello";
+    // SIMPLE GREETING UPDATE:
+    const timeGreeting = "Hi";
 
-    // Set greeting based on time of day
-    if (hour < 12) timeGreeting = "Good Morning";
-    else if (hour < 18) timeGreeting = "Good Afternoon";
-    else timeGreeting = "Good Evening";
-
-    // Format First Name Only (e.g., "John" from "John Doe")
     const firstName = name ? name.split(' ')[0] : "User";
-
-    // Inject into Header preserving the span for color
     const headerTitle = document.getElementById('headerGreeting');
     if (headerTitle) {
         headerTitle.innerHTML = `${timeGreeting}, <span id="headerUserName">${firstName}</span>`;
@@ -109,8 +94,6 @@ function loadTestData() {
     if(document.getElementById('modalAddress')) document.getElementById('modalAddress').innerText = "Test Mode Address, Zambia";
 
     // 2. Mock Loan Data
-    // Logic: 10,000 Principal + 20% Interest (2,000) = 12,000 Total Due.
-    // To get 67% Paid: 12,000 * 0.67 = 8,040.
     const fakeLoans = [
         {
             date: "2025-12-20",
@@ -164,16 +147,13 @@ function renderLoansTable(loansData) {
         tableBody.innerHTML += row;
     });
 
-    // Update Stats
     if(document.getElementById('portalTotalDebt')) document.getElementById('portalTotalDebt').innerText = 'K' + totalDebt.toLocaleString();
     if(document.getElementById('portalTotalPaid')) document.getElementById('portalTotalPaid').innerText = 'K' + totalPaid.toLocaleString();
 
-    // FORCE 67% DISPLAY (Overriding calculation for testing)
     if(document.getElementById('paymentProgressDisplay')) {
         document.getElementById('paymentProgressDisplay').innerText = "67%";
     }
 
-    // Update Ring
     updateCountdownRing(earliestDueDate);
 }
 
@@ -190,7 +170,7 @@ function updateCountdownRing(dueDate) {
 
     // 1. Setup Geometry for Full 360 Circle
     const radius = 70;
-    const circumference = 2 * Math.PI * radius; // approx 439.8
+    const circumference = 2 * Math.PI * radius;
 
     outerCircle.style.strokeDasharray = circumference;
 
@@ -208,13 +188,9 @@ function updateCountdownRing(dueDate) {
 
     // FORCE 67% RING PROGRESS
     let percent = 0.67;
-
-    // Calculate offset
     const offset = circumference - (percent * circumference);
 
     outerCircle.style.strokeDashoffset = offset;
-
-    // Color Logic (Stallz Green)
     outerCircle.style.stroke = "#4ade80";
 }
 
@@ -225,12 +201,8 @@ function updateCountdownRing(dueDate) {
 function updateCalculator() {
     const amount = parseFloat(document.getElementById('calcRange').value);
     document.getElementById('calcAmountDisplay').innerText = `K${amount}`;
-
-    // Calculate Repayment
     const interestAmt = amount * selectedRate;
     const total = amount + interestAmt;
-
-    // Update Display
     document.getElementById('calcTotalDisplay').innerText = `K${total.toLocaleString()}`;
     document.getElementById('calcInterestDisplay').innerText = `${(selectedRate * 100).toFixed(0)}%`;
 }
@@ -289,13 +261,11 @@ function closePayModal() {
     if(m) m.style.display = 'none';
 }
 
-// Simulation Logic (Makes buttons feel real)
+// Simulation Logic
 function simulateSubmit(message) {
-    // 1. Close active modals immediately
     closeRequestModal();
     closeUploadModal();
 
-    // 2. Simulate processing
     const btn = event.target;
     const originalText = btn.innerText;
     btn.innerText = "Processing...";
@@ -303,7 +273,6 @@ function simulateSubmit(message) {
     setTimeout(() => {
         btn.innerText = originalText;
         alert("✅ " + message);
-        // Ensure closed
         closeRequestModal();
         closeUploadModal();
     }, 800);

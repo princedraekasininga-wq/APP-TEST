@@ -2,33 +2,29 @@
    1. VARIABLES & THEME SETTINGS (STALLZ GREEN THEME)
    ========================================================================== */
 :root {
-    /* Core Colors */
     --bg-color: #0f172a;           /* Deep Navy Background */
     --primary: #4ade80;            /* Stallz Green */
     --primary-glow: rgba(74, 222, 128, 0.6);
-    --accent-blue: #3b82f6;        /* Blue for accents */
+    --accent-blue: #3b82f6;
 
-    /* Glassmorphism Variables */
     --glass-bg: rgba(30, 41, 59, 0.7);
     --glass-blur: blur(20px);
     --glass-border: 1px solid rgba(255, 255, 255, 0.1);
 
-    /* Text Colors */
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
 
-    /* Components */
     --icon-bg: rgba(255, 255, 255, 0.05);
     --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
 }
 
-/* Light Mode Support */
+/* Light Mode Support - Default Variables */
 body.day-mode {
-    --bg-color: #f8fafc;
+    --bg-color: #f1f5f9;
     --primary: #16a34a;
-    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-bg: rgba(255, 255, 255, 0.9);
     --text-main: #0f172a;
-    --text-muted: #64748b;
+    --text-muted: #475569;
     --icon-bg: rgba(0, 0, 0, 0.05);
 }
 
@@ -46,6 +42,7 @@ body {
     line-height: 1.4;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 .portal-shell { max-width: 800px; margin: 0 auto; padding: 15px; }
@@ -323,9 +320,7 @@ body {
 /* ==========================================================================
    NEW: QUICK ACTIONS (Horizontal Scroll)
    ========================================================================== */
-.quick-actions-scroll {
-    margin-bottom: 25px;
-}
+.quick-actions-scroll { margin-bottom: 25px; }
 
 .section-title-small {
     font-size: 0.85rem; color: var(--text-muted);
@@ -336,15 +331,13 @@ body {
 .actions-row {
     display: flex; gap: 12px;
     overflow-x: auto; padding-bottom: 5px;
-    /* Hide Scrollbar */
     -ms-overflow-style: none; scrollbar-width: none;
 }
 .actions-row::-webkit-scrollbar { display: none; }
 
 .action-card {
     background: var(--glass-bg); border: var(--glass-border);
-    border-radius: 16px; padding: 15px;
-    min-width: 90px;
+    border-radius: 16px; padding: 15px; min-width: 90px;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 8px;
     cursor: pointer; transition: transform 0.2s;
@@ -357,7 +350,6 @@ body {
     font-size: 1.2rem;
 }
 
-/* Icon Colors */
 .icon-green { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
 .icon-blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
 .icon-purple { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
@@ -382,8 +374,7 @@ body {
 .modal-input {
     width: 100%; padding: 12px;
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px; color: white; font-size: 1rem;
-    outline: none;
+    border-radius: 10px; color: white; font-size: 1rem; outline: none;
 }
 .modal-input:focus { border-color: var(--primary); }
 
@@ -402,21 +393,18 @@ body {
 /* ==========================================================================
    NEW: SLIDE-IN DRAWER (Profile & Settings)
    ========================================================================== */
-
-/* Overlay aligns content to the right */
 .drawer-overlay {
     position: fixed; inset: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    display: none; /* Hidden by default */
-    justify-content: flex-end; /* Pushes drawer to right side */
+    display: none;
+    justify-content: flex-end;
     z-index: 3000;
 }
 
-/* The Drawer Panel */
 .drawer-glass {
     width: 85%; max-width: 320px; height: 100%;
-    background: rgba(15, 23, 42, 0.98); /* Solid dark background */
+    background: rgba(15, 23, 42, 0.98);
     border-left: 1px solid rgba(255, 255, 255, 0.15);
     display: flex; flex-direction: column;
     padding: 25px;
@@ -429,23 +417,17 @@ body {
     to { transform: translateX(0); opacity: 1; }
 }
 
-/* Drawer Structure */
 .drawer-header {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 25px;
 }
 .drawer-header h3 { font-size: 1.2rem; color: var(--text-main); }
 
-.drawer-body {
-    flex: 1; /* Takes up available space */
-    overflow-y: auto;
-}
+.drawer-body { flex: 1; overflow-y: auto; }
 
-/* Drawer Footer (Contact Info) */
 .drawer-footer {
-    margin-top: auto; /* Pushes to the very bottom */
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.15); /* The Divider Line */
+    margin-top: auto; padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .contact-title {
@@ -458,85 +440,99 @@ body {
     margin-bottom: 12px; color: var(--text-main);
     font-size: 0.9rem; text-decoration: none;
 }
+.contact-row i { width: 20px; text-align: center; color: var(--primary); }
 
-.contact-row i {
-    width: 20px; text-align: center; color: var(--primary);
-}
-
-.social-row {
-    display: flex; gap: 15px; margin-top: 15px;
-}
-.social-link {
-    color: var(--text-muted); font-size: 1.2rem; transition: 0.2s;
-}
+.social-row { display: flex; gap: 15px; margin-top: 15px; }
+.social-link { color: var(--text-muted); font-size: 1.2rem; transition: 0.2s; }
 .social-link:hover { color: var(--primary); }
 
 /* ==========================================================================
-   DAY MODE OVERRIDES (Fixes for specific Dark Elements)
+   NEW: PAYMENT PROVIDER CARDS (MTN/AIRTEL)
+   ========================================================================== */
+.pay-provider-card {
+    display: flex; align-items: center; gap: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 15px; margin-bottom: 12px; text-align: left;
+}
+
+.provider-icon {
+    width: 50px; height: 50px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.8rem; flex-shrink: 0;
+}
+
+.provider-info h4 { margin: 0; font-size: 1rem; color: var(--text-main); }
+.provider-info p { margin: 2px 0 0 0; font-size: 1.1rem; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; }
+.provider-name { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+
+/* ==========================================================================
+   DAY MODE OVERRIDES (Fixes for High Contrast)
    ========================================================================== */
 
-/* 1. Hero Section: Switch from dark gradient to light */
+/* 1. Hero Section & Backgrounds */
 body.day-mode .hero-split-layout {
     background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
-/* Fix Hero Text Colors for Light Background */
+/* 2. Text Colors (Ensure Readability) */
 body.day-mode .big-percent-display {
-    /* Darker gradient for visibility on white */
-    background: linear-gradient(to right, #166534, #16a34a);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    background: linear-gradient(to right, #166534, #15803d);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
-body.day-mode .due-date-row #nextDueDisplay {
-    color: #15803d !important; /* Dark Green text */
-}
-body.day-mode .days-left-number {
-    color: #0f172a; /* Dark Navy text */
-}
+body.day-mode .due-date-row #nextDueDisplay { color: #15803d !important; }
+body.day-mode .days-left-number { color: #0f172a; }
+body.day-mode .advice-text { color: #475569; font-weight: 500; }
+body.day-mode .welcome-text { color: #334155; text-shadow: none; }
 
-/* 2. Mobile Navigation: White background */
+/* 3. Gauge Visibility */
+body.day-mode .ring-track { stroke: rgba(0, 0, 0, 0.1); }
+
+/* 4. Cards & Navigation */
+body.day-mode .glass-header,
+body.day-mode .compact-card,
+body.day-mode .action-card,
+body.day-mode .glass-panel,
 body.day-mode .mobile-bottom-nav {
-    background: rgba(255, 255, 255, 0.95);
+    background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
-body.day-mode .big-nav-icon {
-    border-color: #f8fafc; /* Match body bg */
+body.day-mode .big-nav-icon { border-color: #f8fafc; }
+
+/* 5. Icons & Buttons */
+body.day-mode .logo-box,
+body.day-mode .icon-btn,
+body.day-mode .profile-btn,
+body.day-mode .small-icon {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #334155;
 }
 
-/* 3. Slide-in Drawer: White background */
-body.day-mode .drawer-glass {
-    background: rgba(255, 255, 255, 0.98);
-    border-left: 1px solid rgba(0, 0, 0, 0.1);
-}
-body.day-mode .drawer-footer {
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
-body.day-mode .contact-row,
-body.day-mode h4 {
-    color: #0f172a !important;
-}
-
-/* 4. Modals & Notifications */
-body.day-mode .notification-dropdown,
+/* 6. Modals & Drawer */
+body.day-mode .drawer-glass,
 body.day-mode .modal-glass {
     background: #ffffff;
-    border: 1px solid rgba(0,0,0,0.1);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
 }
-body.day-mode .dropdown-header,
-body.day-mode .notify-item,
-body.day-mode .modal-header,
-body.day-mode .profile-details p {
-    border-color: rgba(0,0,0,0.05);
-}
-body.day-mode .modal-header h3,
+body.day-mode .drawer-footer { border-top-color: rgba(0, 0, 0, 0.1); }
+body.day-mode .contact-row, body.day-mode h4 { color: #0f172a !important; }
 body.day-mode .modal-input {
-    color: #0f172a;
+    background: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a;
 }
-body.day-mode .modal-input {
-    background: #f1f5f9;
-    border-color: #e2e8f0;
+
+/* 7. Payment Provider Cards in Day Mode */
+body.day-mode .pay-provider-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
+body.day-mode .provider-info h4 { color: #0f172a; }
+body.day-mode .provider-name { color: #64748b; }
+body.day-mode .mtn-theme p { color: #d97706; }
+body.day-mode .airtel-theme p { color: #dc2626; }
