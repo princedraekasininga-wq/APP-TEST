@@ -188,7 +188,7 @@ body {
 }
 
 .admin-welcome h2 {
-    font-size: 1.5rem;
+    font-size: 1.0rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1.5px;
@@ -213,6 +213,8 @@ body {
     margin-bottom: 24px; padding-bottom: 0;
     background: transparent;
 }
+
+
 
 .nav-btn {
     position: relative; background: transparent; border: none;

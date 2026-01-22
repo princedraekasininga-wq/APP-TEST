@@ -9,7 +9,7 @@
  * 1.0 | APP CONFIGURATION & CONSTANTS
  * ============================================================================ */
 
-const APP_VERSION = "2.3.0";
+const APP_VERSION = "1.9.5";
 const TEST_MODE = true;      // ENABLED AS REQUESTED
 
 // Planning & Interest Constants

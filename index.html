@@ -5,7 +5,7 @@
   <title>STALLZ LOANS — Loan Manager</title>
   <meta name="description" content="Stallz Loans Management System - Secure Admin Portal">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.85, maximum-scale=0.85, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="apple-touch.png">
   <link rel="manifest" href="manifest.json">
 
-  <link rel="stylesheet" href="styles.css?v=2.8.0">
+  <link rel="stylesheet" href="styles.css?v=1.9.5">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -125,11 +125,14 @@
             <button class="sketch-btn" onclick="switchOverviewTab('loans', this)">Loans</button>
         </div>
     </div>
+
     <div id="profileOverlay" class="sidebar-overlay hidden"></div>
     <aside id="profileSidebar" class="sidebar">
         <div class="sidebar-header">
             <h3>Profile & Settings</h3>
-            <button id="closeProfileBtn" class="icon-btn-plain">✕</button>
+            <button id="closeProfileBtn" class="icon-btn-plain" style="font-size:1.5rem; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
         </div>
         <div class="sidebar-content">
             <div class="user-profile-card">
@@ -364,7 +367,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js" defer></script>
-  <script src="app.js?v=2.2.0" defer></script>
+  <script src="app.js?v=1.9.5" defer></script>
 
 </body>
 </html>
