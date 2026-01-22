@@ -1,5 +1,5 @@
 /* ==========================================================================
-   STALLZ LOANS - OPTIMIZED APP STYLES (v2.2.0)
+   STALLZ LOANS - OPTIMIZED APP STYLES (v2.3.0)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -307,10 +307,15 @@ tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--pr
 /* Switch */
 .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
 .switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .4s; border-radius: 34px; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.2); transition: .4s; border-radius: 34px; }
 .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: var(--primary); }
+input:checked + .slider { background-color: var(--primary) !important; }
 input:checked + .slider:before { transform: translateX(20px); }
+
+/* Switch Light Mode Override */
+[data-theme="light"] .slider {
+    background-color: #cbd5e1 !important;
+}
 
 /* Stats & Tabs */
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
@@ -362,6 +367,22 @@ input:checked + .slider:before { transform: translateX(20px); }
 .welcome-input { margin-bottom: 12px; text-align: center; }
 .welcome-btn { width: 100%; background: var(--primary); border: none; padding: 12px; border-radius: 10px; font-weight: 700; color: white; box-shadow: var(--primary-glow); }
 
+/* Admin Welcome Banner (NEW) */
+.admin-welcome {
+    text-align: center;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
+.admin-welcome h2 {
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-main);
+    opacity: 0.6;
+    margin: 0;
+}
+
 #toast-container { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; width: auto; min-width: 220px; }
 .toast { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: #000000; padding: 12px 24px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-align: center; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); opacity: 0; transform: translateY(15px); animation: toastLift 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 .toast.success { border-left: 3px solid #10b981; } .toast.error { border-left: 3px solid #ef4444; }
@@ -369,10 +390,24 @@ input:checked + .slider:before { transform: translateX(20px); }
 /* Notifications & Sidebar */
 .bell-badge { position: absolute; top: 0; right: 0; width: 10px; height: 10px; background-color: #ef4444; border-radius: 50%; border: 2px solid var(--bg-color); display: none; animation: pulseRed 2s infinite; }
 .bell-badge.show { display: block; }
-.notif-dropdown { position: absolute; top: 50px; right: 0; width: 280px; background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--primary); border-radius: 12px; z-index: 5000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: scaleIn 0.2s ease; overflow: hidden; }
-.notif-dropdown.hidden { display: none; }
-.notif-header { padding: 12px; font-weight: 700; border-bottom: 1px solid var(--divider); font-size: 0.85rem; background: rgba(59,130,246,0.1); color: var(--primary); }
-.notif-item { padding: 12px; border-bottom: 1px solid var(--divider); font-size: 0.8rem; display: flex; gap: 10px; cursor: pointer; }
+
+/* Fixed Notification Dropdown */
+.notification-dropdown {
+    position: absolute; top: 120%; right: 0; width: 300px;
+    background: var(--card-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px;
+    display: none; /* Default Hidden */
+    flex-direction: column; z-index: 1001; box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    overflow: hidden; transform-origin: top right;
+}
+
+.notification-dropdown.show {
+    display: flex !important;
+    animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dropdown-header { padding: 12px 16px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary); background: rgba(0,0,0,0.2); }
+.notif-item { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-main); cursor: pointer; display: flex; gap: 10px; align-items: center; }
 .notif-item:hover { background: rgba(255,255,255,0.05); }
 
 .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index: 8000; }
@@ -422,42 +457,8 @@ input:checked + .slider:before { transform: translateX(20px); }
 .icon-btn, .profile-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; position: relative; }
 .icon-btn:hover, .profile-btn:hover { color: var(--primary); border-color: var(--primary); background: rgba(59, 130, 246, 0.1); transform: translateY(-2px); }
 .notification-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; border: 1px solid var(--bg-color); animation: pulse-red 2s infinite; }
-.notification-dropdown { position: absolute; top: 120%; right: 0; width: 300px; background: var(--card-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; display: none; flex-direction: column; z-index: 1001; box-shadow: 0 20px 50px rgba(0,0,0,0.4); overflow: hidden; transform-origin: top right; animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.dropdown-header { padding: 12px 16px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary); background: rgba(0,0,0,0.2); }
-.notif-item { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-main); cursor: pointer; display: flex; gap: 10px; align-items: center; }
-.notif-item:hover { background: rgba(255,255,255,0.05); }
 .fade-in { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 [data-theme="light"] .glass-header { background: rgba(255,255,255,0.85); }
 [data-theme="light"] .logo-box, [data-theme="light"] .icon-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
-
-/* =========================================
-   FIXES (Add to bottom of styles.css)
-   ========================================= */
-
-/* 1. Fix Notification Visibility */
-.notification-dropdown {
-    display: none; /* Hidden by default */
-}
-
-.notification-dropdown.show {
-    display: flex !important; /* Forces it to show when JS adds this class */
-    animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* 2. Fix Toggle Switch Visibility */
-/* In dark mode, it's transparent white (visible) */
-.slider {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* In light mode, make it grey so it is visible against white background */
-[data-theme="light"] .slider {
-    background-color: #cbd5e1 !important;
-}
-
-/* 3. Ensure Switch Checked State is Blue */
-input:checked + .slider {
-    background-color: var(--primary) !important;
-}

@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  * STALLZ LOANS MANAGER - APP.JS
- * Optimized & Polished Version v2.2.0
+ * Optimized & Polished Version v2.3.0
  * ============================================================================
  */
 
@@ -9,7 +9,7 @@
  * 1.0 | APP CONFIGURATION & CONSTANTS
  * ============================================================================ */
 
-const APP_VERSION = "2.2.0";
+const APP_VERSION = "2.3.0";
 const TEST_MODE = true;      // ENABLED AS REQUESTED
 
 // Planning & Interest Constants
@@ -1032,8 +1032,6 @@ function toggleProfileSidebar() {
   }
 }
 
-// REPLACE your existing toggleNotifications function with this:
-
 function toggleNotifications() {
   const dd = document.getElementById("notifDropdown");
   const btn = document.getElementById("notifBtn");
@@ -1055,7 +1053,7 @@ function toggleNotifications() {
   }
 }
 
-// ALSO ADD THIS: Close notification when clicking outside
+// Close notification when clicking outside
 document.addEventListener("click", function(event) {
   const dd = document.getElementById("notifDropdown");
   const btn = document.getElementById("notifBtn");

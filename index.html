@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="apple-touch.png">
   <link rel="manifest" href="manifest.json">
 
-  <link rel="stylesheet" href="styles.css?v=2.2.0">
+  <link rel="stylesheet" href="styles.css?v=2.3.0">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -35,7 +35,6 @@
         const metaTheme = document.querySelector('meta[name="theme-color"]');
         if(metaTheme) metaTheme.setAttribute("content", "#f1f5f9");
       }
-      // Hide loader instantly for authenticated users
       const hasTest = localStorage.getItem("stallz_test_session");
       const hasFire = localStorage.getItem("firebase:authUser:AIzaSyBRMITHX8gm0jKpEXuC4iePGWoYON85BDU:[DEFAULT]");
       if (!hasTest && !hasFire) {
@@ -63,7 +62,6 @@
   </div>
 
   <script>
-    /* Safety Timeout */
     setTimeout(function() {
       const loader = document.getElementById("loadingOverlay");
       if(loader && loader.style.display !== "none") loader.style.display = "none";
@@ -117,6 +115,10 @@
       </div>
     </header>
 
+    <div class="admin-welcome fade-in">
+        <h2>Welcome to Stallz Loans</h2>
+    </div>
+
     <div id="profileOverlay" class="sidebar-overlay hidden"></div>
     <aside id="profileSidebar" class="sidebar">
         <div class="sidebar-header">
@@ -163,7 +165,7 @@
       </button>
       <button class="nav-btn" id="navMonthlyBtn" onclick="openPopup('monthlyModal')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        <div style="white-space: nowrap; transform: scale(0.9);">Monthly Cash flow</div>
+        <div style="white-space: nowrap; transform: scale(0.9);">Monthly</div>
       </button>
       <button class="nav-btn" id="navClientsBtn" onclick="openPopup('clientsModal')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
