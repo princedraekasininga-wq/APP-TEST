@@ -138,7 +138,7 @@ body {
     top: 0;
     z-index: 900;
     width: 100%;
-    padding-top: 20px;
+    padding-top: 15px;
     margin-bottom: 24px;
     position: sticky;
     transform-style: preserve-3d;
@@ -285,12 +285,6 @@ body {
     transition: transform 0.3s ease !important;
   }
 }
-
-[data-theme="light"] .top-nav {
-    background: rgba(255, 255, 255, 0.9) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-}
-
 /* =========================================
    6.0 | HEADER & ELEMENTS
    ========================================= */
@@ -492,7 +486,7 @@ input:checked + .slider:before { transform: translateX(20px); }
     /* ACTIVE: Pure White with Black Text */
     background: #ffffff !important;
     color: #000000 !important;
-    border-color: #ffffff !important;
+
 
     transform: scale(1.05) translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
