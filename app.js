@@ -1032,17 +1032,38 @@ function toggleProfileSidebar() {
   }
 }
 
+// REPLACE your existing toggleNotifications function with this:
+
 function toggleNotifications() {
   const dd = document.getElementById("notifDropdown");
-  if (dd.classList.contains("hidden")) {
-    dd.classList.remove("hidden");
-    document.getElementById("profileSidebar").classList.remove("open");
-    document.getElementById("profileOverlay").classList.add("hidden");
-    if (typeof vibrate === "function") vibrate([10]);
-  } else {
-    dd.classList.add("hidden");
+  const btn = document.getElementById("notifBtn");
+
+  if (!dd) return;
+
+  // Toggle the 'show' class (Simple and reliable)
+  dd.classList.toggle("show");
+
+  // Optional: Add haptic feedback if available
+  if (typeof vibrate === "function") vibrate([10]);
+
+  // Close other menus if open
+  const sidebar = document.getElementById("profileSidebar");
+  const overlay = document.getElementById("profileOverlay");
+  if (sidebar && sidebar.classList.contains("open")) {
+      sidebar.classList.remove("open");
+      if (overlay) overlay.classList.add("hidden");
   }
 }
+
+// ALSO ADD THIS: Close notification when clicking outside
+document.addEventListener("click", function(event) {
+  const dd = document.getElementById("notifDropdown");
+  const btn = document.getElementById("notifBtn");
+
+  if (dd && dd.classList.contains("show") && !dd.contains(event.target) && !btn.contains(event.target)) {
+    dd.classList.remove("show");
+  }
+});
 
 // 9.5 Mobile Features
 function setupMobileUX() {

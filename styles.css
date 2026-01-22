@@ -431,3 +431,33 @@ input:checked + .slider:before { transform: translateX(20px); }
 @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 [data-theme="light"] .glass-header { background: rgba(255,255,255,0.85); }
 [data-theme="light"] .logo-box, [data-theme="light"] .icon-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
+
+/* =========================================
+   FIXES (Add to bottom of styles.css)
+   ========================================= */
+
+/* 1. Fix Notification Visibility */
+.notification-dropdown {
+    display: none; /* Hidden by default */
+}
+
+.notification-dropdown.show {
+    display: flex !important; /* Forces it to show when JS adds this class */
+    animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 2. Fix Toggle Switch Visibility */
+/* In dark mode, it's transparent white (visible) */
+.slider {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* In light mode, make it grey so it is visible against white background */
+[data-theme="light"] .slider {
+    background-color: #cbd5e1 !important;
+}
+
+/* 3. Ensure Switch Checked State is Blue */
+input:checked + .slider {
+    background-color: var(--primary) !important;
+}
