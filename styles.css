@@ -1,5 +1,5 @@
 /* ==========================================================================
-   STALLZ LOANS - OPTIMIZED APP STYLES (v2.3.0)
+   STALLZ LOANS - OPTIMIZED APP STYLES (v2.5.0)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -333,7 +333,62 @@ input:checked + .slider:before { transform: translateX(20px); }
 .mini-tab.active { background: #ffffff; border-color: #ffffff; color: #0f172a; box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25); transform: translateY(-3px) scale(1.02); }
 .mini-tab:not(.active):hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
 
-.sketch-tabs { background: transparent; box-shadow: none; border: none; display: flex; justify-content: center; gap: 20px; width: 100%; max-width: 600px; margin: 0 auto 24px auto; padding: 0 8px; }
+/* =========================================
+   NEW INVISIBLE STICKY WRAPPER
+   (Holds Header + Welcome + Tabs)
+   ========================================= */
+
+.sticky-ui-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+
+    /* BLURRED BACKGROUND - To hide scrolling content cleanly */
+    background: rgba(2, 6, 23, 0.85); /* Matches Dark Mode BG with opacity */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    /* NO BORDER OR SHADOW - Invisible look */
+    border-bottom: none;
+    box-shadow: none;
+
+    padding-top: 10px;
+    margin-bottom: 24px;
+
+    /* Layout Reset to prevent weird alignment */
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Light Mode Background Match */
+[data-theme="light"] .sticky-ui-wrapper {
+    background: rgba(241, 245, 249, 0.85);
+}
+
+/* RESET CHILDREN (So they flow naturally inside) */
+.glass-header {
+    position: relative; top: auto;
+    margin-bottom: 10px;
+}
+
+.admin-welcome {
+    position: relative; top: auto;
+    margin-bottom: 15px; padding: 5px 0;
+    background: transparent;
+}
+
+.sketch-tabs {
+    position: relative; top: auto;
+    width: 100%; max-width: 600px;
+    margin: 0 auto;
+    padding: 0 0 10px 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex; justify-content: center; gap: 20px;
+}
+
 .sketch-btn { flex: 1; padding: 18px 0; font-size: 1.1rem; font-weight: 700; border-radius: 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-muted); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
 .sketch-btn.active { background: #ffffff; border-color: #ffffff; color: #0f172a; box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3); transform: translateY(-4px) scale(1.02); }
 .sketch-btn:not(.active):hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
@@ -367,11 +422,9 @@ input:checked + .slider:before { transform: translateX(20px); }
 .welcome-input { margin-bottom: 12px; text-align: center; }
 .welcome-btn { width: 100%; background: var(--primary); border: none; padding: 12px; border-radius: 10px; font-weight: 700; color: white; box-shadow: var(--primary-glow); }
 
-/* Admin Welcome Banner (NEW) */
+/* Admin Welcome Banner */
 .admin-welcome {
     text-align: center;
-    margin-top: -10px;
-    margin-bottom: 20px;
 }
 .admin-welcome h2 {
     font-size: 0.9rem;
