@@ -143,7 +143,7 @@ body {
 
     /* KEEP LAYOUT NORMAL */
     width: 100%;
-    padding-top: 25px;
+    padding-top: 20px;
     margin-bottom: 24px;
 
     /* Ensure the background layer stays behind the text */
@@ -201,11 +201,11 @@ body {
 
 .sketch-tabs {
     position: relative; top: auto;
-    width: 100%; max-width: 600px;
+    width: 100%; max-width: 400px;
     margin: 0 auto;
-    padding: 0 0 10px 0;
+    padding: 0 0 15px 0;
     background: transparent;
-    border-radius: 0;
+    border-radius: 20;
     box-shadow: none;
     display: flex; justify-content: center; gap: 20px;
 }
@@ -439,53 +439,76 @@ tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--pr
 .avatar-0 { background: linear-gradient(135deg, #ef4444, #b91c1c); } .avatar-1 { background: linear-gradient(135deg, #f59e0b, #d97706); } .avatar-2 { background: linear-gradient(135deg, #10b981, #047857); } .avatar-3 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); } .avatar-4 { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
 
 /* =========================================
-   10.0 | BUTTONS, STATS & TABS
+   10.0 | REDESIGNED TABS & BUTTONS
    ========================================= */
-.btn {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none;
-  padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); width: auto;
+
+/* 1. Container for the Buttons */
+.sketch-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 16px; /* Space between buttons */
+    width: 100%;
+    max-width: 360px; /* Limits width to keep them compact */
+    margin: 0 auto;
+    padding: 0 0 15px 0;
+    background: transparent;
 }
-.btn:active { transform: scale(0.96); }
 
-.btn-secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: var(--text-main); padding: 12px 16px; border-radius: 10px; cursor: pointer; }
-.btn-sm { padding: 8px 14px; font-size: 0.85rem; width: auto !important; }
+/* 2. The Button Design (Default / Inactive) */
+.sketch-btn {
+    flex: 1;
 
-.btn-icon { background: transparent; border: none; padding: 6px; cursor: pointer; border-radius: 50%; transition: all 0.2s; opacity: 0.8; display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); }
-.btn-icon:hover { background: rgba(255,255,255,0.1); transform: scale(1.1); opacity: 1; color: var(--text-main); }
-.btn-icon svg { width: 18px; height: 18px; stroke-width: 2px; }
+    /* Smaller Size */
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 
-/* Switch */
-.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.2); transition: .4s; border-radius: 34px; }
-.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: var(--primary) !important; }
-input:checked + .slider:before { transform: translateX(20px); }
-[data-theme="light"] .slider { background-color: #cbd5e1 !important; }
+    /* Rounded Pill Shape */
+    border-radius: 50px;
 
-/* Stats */
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-.stat-card { background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid var(--divider); }
-.stat-value { font-size: 1.2rem; font-weight: 700; margin-top: 8px; background: linear-gradient(to right, #fff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.stat-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; opacity: 0.8; }
-.stat-purple .stat-value { background: linear-gradient(to right, #e879f9, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.stat-orange .stat-value { background: linear-gradient(to right, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.stat-green .stat-value { background: linear-gradient(to right, #4ade80, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.text-danger-glow { color: #ef4444 !important; text-shadow: 0 0 10px rgba(239, 68, 68, 0.6) !important; background: none !important; -webkit-text-fill-color: #ef4444 !important; }
+    /* Default Colors (Gray/Unselected) */
+    background: rgba(255, 255, 255, 0.08); /* Dark Gray Glass */
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 
-/* Tabs */
-.mini-tabs { display: flex; background: transparent; padding: 0; border: none; gap: 12px; margin-bottom: 24px; }
-.mini-tab { flex: 1; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-muted); padding: 14px 0; font-size: 0.95rem; font-weight: 700; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
-.mini-tab.active { background: #ffffff; border-color: #ffffff; color: #0f172a; box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25); transform: translateY(-3px) scale(1.02); }
-.mini-tab:not(.active):hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+    /* Beautiful Animation */
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy transition */
+    transform: scale(1);
+}
 
-.sketch-btn { flex: 1; padding: 18px 0; font-size: 1.1rem; font-weight: 700; border-radius: 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-muted); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-.sketch-btn.active { background: #ffffff; border-color: #ffffff; color: #0f172a; box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3); transform: translateY(-4px) scale(1.02); }
-.sketch-btn:not(.active):hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+/* Hover Effect (When Mouse Over) */
+.sketch-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
 
-.tab-content { display: none; animation: fadeIn 0.4s ease; }
-.tab-content.active { display: block; }
+/* 3. The Active State (Selected) */
+.sketch-btn.active {
+    /* Turns White */
+    background: #ffffff !important;
+    color: #020617 !important; /* Dark Text */
+    border-color: #ffffff !important;
+
+    /* Pop Animation */
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.25); /* White Glow */
+}
+
+/* --- Light Mode Adjustments --- */
+[data-theme="light"] .sketch-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.05);
+    color: #64748b;
+}
+
+[data-theme="light"] .sketch-btn.active {
+    background: #0f172a !important; /* Dark Button in Light Mode for contrast */
+    color: #ffffff !important;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.3);
+}
 
 /* =========================================
    11.0 | MODALS & DRAWER
