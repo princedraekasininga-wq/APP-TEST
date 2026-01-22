@@ -1,5 +1,5 @@
 /* ==========================================================================
-   STALLZ LOANS - MASTER STYLES (v2.8.0 - RESTORED & OPTIMIZED)
+   STALLZ LOANS - MASTER STYLES (v2.9.0 - FINAL POLISH)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -61,8 +61,11 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   line-height: 1.5;
-  overflow-x: hidden;
   padding-bottom: 100px;
+
+  /* FIX: Prevent Horizontal Scroll/Shadow Bleed */
+  overflow-x: hidden;
+  width: 100%;
 
   /* Tabular Numbers */
   font-feature-settings: "tnum" on, "cv11" on;
@@ -83,7 +86,7 @@ body {
 [data-theme="light"] {
   --bg-color: #f1f5f9;
 
-  --card-bg: rgba(255, 255, 255, 0.65);
+  --card-bg: rgba(255, 255, 255, 0.75);
   --card-border: 1px solid rgba(255, 255, 255, 0.9);
   --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
 
@@ -346,7 +349,7 @@ tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--pr
 }
 
 /* =========================================
-   9.0 | BUTTONS & UI ELEMENTS (RESTORED)
+   9.0 | BUTTONS & UI ELEMENTS
    ========================================= */
 .btn {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none;
@@ -424,11 +427,45 @@ input:checked + .slider:before { transform: translateX(20px); }
 .toast { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: #000000; padding: 12px 24px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; text-align: center; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); opacity: 0; transform: translateY(15px); animation: toastLift 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
 .toast.success { border-left: 3px solid #10b981; } .toast.error { border-left: 3px solid #ef4444; }
 
-/* Sidebar */
-.sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index: 8000; }
+/* 12.0 SIDEBAR FIX (Removes Ghost Shadow) */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 300px;
+    background: rgba(15, 23, 42, 0.98);
+    border-left: 1px solid var(--card-border);
+    z-index: 9000;
+    padding: 20px;
+
+    /* MOVED OFF-SCREEN */
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+
+    /* IMPORTANT: Remove box-shadow here so it doesn't bleed when closed */
+    box-shadow: none;
+}
+
+.sidebar.open {
+    transform: translateX(0);
+
+    /* IMPORTANT: Only show shadow when open */
+    box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+}
+
+/* Ensure overlay covers everything */
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
+    z-index: 8000;
+}
 .sidebar-overlay.hidden { display: none; }
-.sidebar { position: fixed; top: 0; right: 0; bottom: 0; width: 300px; background: rgba(15, 23, 42, 0.98); border-left: 1px solid var(--card-border); box-shadow: -10px 0 40px rgba(0,0,0,0.5); z-index: 9000; padding: 20px; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
-.sidebar.open { transform: translateX(0); }
+
 .user-profile-card { display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 20px; }
 .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .sidebar-divider { border: 0; border-top: 1px solid var(--divider); margin: 20px 0; }
