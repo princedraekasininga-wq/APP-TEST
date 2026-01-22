@@ -592,3 +592,16 @@ tbody tr:hover { background: rgba(125,125,125,0.05); border-left-color: var(--pr
 .sk-header { width: 100%; height: 80px; border-radius: 20px; margin-bottom: 20px; }
 .sk-card { width: 100%; height: 250px; border-radius: 16px; margin-bottom: 20px; }
 .sk-row { width: 100%; height: 60px; border-radius: 10px; margin-bottom: 10px; }
+
+/* ADD THIS TO THE BOTTOM OF YOUR CSS FILE TO FIX INVISIBLE CONTENT */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
