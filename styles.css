@@ -141,24 +141,39 @@ body {
     top: 0;
     z-index: 900;
 
-    /* BLURRED BACKGROUND */
+    /* KEEP LAYOUT NORMAL */
+    width: 100%;
+    padding-top: 25px;
+    margin-bottom: 24px;
+
+    /* Ensure the background layer stays behind the text */
+    position: sticky;
+    transform-style: preserve-3d;
+}
+
+/* THE BACKGROUND LAYER (The "200" Width Part) */
+.sticky-ui-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0;
+
+    /* CENTER THE BACKGROUND */
+    left: 50%;
+    transform: translateX(-50%);
+
+    /* HERE IS YOUR WIDTH SETTING */
+    width: 200%; /* <--- Change this to 200%, 100vw, or whatever you like */
+    height: 100%;
+
+    /* APPLY THE THEME STYLES HERE INSTEAD */
     background: var(--sticky-bg);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
-
-    /* SUBTLE DEMARCATION */
     border-bottom: var(--sticky-border);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
+    box-shadow: 5 2px 0px -20px rgba(0, 0, 0, 1.9);
 
-    padding-top: 10px;
-    margin-bottom: 24px;
-
-    width: 100%;
-    margin-left: 0;
-    margin-right: 0;
-    transition: background 0.3s ease, border 0.3s ease;
+    z-index: -1; /* Puts it behind the header buttons */
 }
-
 /* RESET CHILDREN */
 .glass-header {
     position: relative; top: auto;
@@ -304,7 +319,7 @@ body {
 /* =========================================
    6.0 | HEADER & ELEMENTS
    ========================================= */
-.glass-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-radius: 20px; transition: 0.3s ease; }
+.glass-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-radius: 35px; transition: 0.3s ease; }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .logo-box { width: 42px; height: 42px; background: rgba(255, 255, 255, 0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
 .portal-logo { width: 100%; height: 100%; object-fit: cover; }
