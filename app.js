@@ -9,8 +9,8 @@
  * 1.0 | APP CONFIGURATION & CONSTANTS
  * ============================================================================ */
 
-const APP_VERSION = "1.9.8";
-const TEST_MODE = true;      // ENABLED AS REQUESTED
+const APP_VERSION = "1.9.7";
+const TEST_MODE = new URLSearchParams(window.location.search).has("test=1"); // default OFF (use ?test=1 for local testing)
 
 // Planning & Interest Constants
 const INTEREST_BY_PLAN = {
@@ -24,7 +24,7 @@ const DAYS_BY_PLAN = {
   "Weekly": 7,
   "2 Weeks": 14,
   "3 Weeks": 21,
-  "Monthly": 30
+  "Monthly": 0
 };
 
 // Wizard Configuration
@@ -126,10 +126,56 @@ function formatMoney(amount) {
   return "K" + Number(amount).toFixed(2);
 }
 
+
+function escapeHTML(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function parseDateSmart(dateStr) {
+  if (!dateStr) return null;
+  const s = String(dateStr).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const [y, m, d] = s.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    dt.setHours(0, 0, 0, 0);
+    return dt;
+  }
+  const dt = new Date(s);
+  if (isNaN(dt.getTime())) return null;
+  return dt;
+}
+
+function toDateOnly(dt) {
+  if (!dt) return "";
+  const d = new Date(dt.getTime());
+  d.setHours(0, 0, 0, 0);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function addMonthsSafe(dt, months) {
+  const d = new Date(dt.getTime());
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + months);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, lastDay));
+  return d;
+}
+
+
 function formatDate(dateStr) {
   if (!dateStr) return "-";
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "-";
+  const d = parseDateSmart(dateStr);
+  if (!d) return "-";
   return d.toLocaleDateString("en-ZM", { year: "2-digit", month: "short", day: "numeric" });
 }
 
@@ -142,9 +188,8 @@ function getLocalDateVal() {
 }
 
 function getMonthKey(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return null;
+  const d = parseDateSmart(dateStr);
+  if (!d) return null;
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   return `${y}-${m}`;
@@ -253,12 +298,16 @@ function checkTimeBasedTheme() {
   }
 }
 
+let __lastActivityWrite = 0;
 function updateSessionActivity() {
-  localStorage.setItem("stallz_last_active", Date.now());
+  const now = Date.now();
+  if (now - __lastActivityWrite < 15000) return; // throttle (15s)
+  __lastActivityWrite = now;
+  try { localStorage.setItem("stallz_last_active", now); } catch (e) {}
 }
 document.addEventListener("click", updateSessionActivity);
 document.addEventListener("keydown", updateSessionActivity);
-document.addEventListener("touchstart", updateSessionActivity);
+document.addEventListener("touchstart", updateSessionActivity);;
 
 /* ============================================================================
  * 5.0 | BUSINESS LOGIC & DATA PROCESSING
@@ -266,35 +315,45 @@ document.addEventListener("touchstart", updateSessionActivity);
 
 function computeDerivedFields(loan) {
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   let rate = INTEREST_BY_PLAN[loan.plan] || 0;
   if (loan.customInterest) rate = Number(loan.customInterest) / 100;
 
-  const days = DAYS_BY_PLAN[loan.plan] || 0;
-  const startDate = loan.startDate ? new Date(loan.startDate) : today;
-  const dueDate = new Date(startDate.getTime());
-  if (days > 0) dueDate.setDate(dueDate.getDate() + days);
+  const startDate = loan.startDate ? (parseDateSmart(loan.startDate) || today) : today;
+
+  // Due date: day-based plans use DAYS_BY_PLAN, Monthly uses calendar months
+  let dueDate = new Date(startDate.getTime());
+  dueDate.setHours(0, 0, 0, 0);
+
+  if (loan.plan === "Monthly") {
+    dueDate = addMonthsSafe(dueDate, 1);
+  } else {
+    const days = DAYS_BY_PLAN[loan.plan] || 0;
+    if (days > 0) dueDate.setDate(dueDate.getDate() + days);
+  }
 
   const totalDue = (loan.amount || 0) * (1 + rate);
   const paid = loan.paid || 0;
   const sale = loan.saleAmount || 0;
-  const balance = totalDue - (paid + sale);
+
+  const balance = Number((totalDue - (paid + sale)).toFixed(2));
 
   let status = "ACTIVE";
-  if (balance <= 1) status = "PAID";
+  if (balance <= 0.01) status = "PAID";
   else if (loan.isDefaulted) status = "DEFAULTED";
-  else if (today > dueDate) status = "OVERDUE";
+  else if (today.getTime() > dueDate.getTime()) status = "OVERDUE";
 
-  const daysOverdue = (today > dueDate && status !== "PAID")
-    ? Math.floor((today - dueDate) / (1000 * 60 * 60 * 24))
+  const daysOverdue = (today.getTime() > dueDate.getTime() && status !== "PAID")
+    ? Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24))
     : 0;
 
   loan.rate = rate;
-  loan.dueDate = dueDate.toISOString();
+  loan.dueDate = toDateOnly(dueDate);
   loan.totalDue = totalDue;
   loan.balance = balance;
   loan.status = status;
   loan.daysOverdue = daysOverdue;
-  loan.profitCollected = Math.max(0, (paid + sale) - loan.amount);
 }
 
 function recomputeAllLoans() {
@@ -369,6 +428,42 @@ function applyData(parsed) {
   }
 }
 
+function mergeById(localArr = [], remoteArr = [], idKey = "id") {
+  const remoteMap = new Map();
+  (remoteArr || []).forEach(obj => {
+    if (!obj || obj[idKey] === undefined || obj[idKey] === null) return;
+    remoteMap.set(String(obj[idKey]), obj);
+  });
+
+  const out = [];
+  (localArr || []).forEach(obj => {
+    if (!obj) return;
+    if (obj[idKey] === undefined || obj[idKey] === null) { out.push(obj); return; }
+
+    const k = String(obj[idKey]);
+    const r = remoteMap.get(k);
+    if (!r) { out.push(obj); return; }
+
+    const lt = Date.parse(obj.updatedAt || obj.createdAt || 0) || 0;
+    const rt = Date.parse(r.updatedAt || r.createdAt || 0) || 0;
+
+    out.push(rt > lt ? r : obj);
+    remoteMap.delete(k);
+  });
+
+  // Append any remote items not present locally (preserve remote order)
+  (remoteArr || []).forEach(obj => {
+    if (!obj || obj[idKey] === undefined || obj[idKey] === null) return;
+    const k = String(obj[idKey]);
+    if (remoteMap.has(k)) {
+      out.push(obj);
+      remoteMap.delete(k);
+    }
+  });
+
+  return out;
+}
+
 function saveState() {
   if (!state.dataLoaded) return;
 
@@ -392,14 +487,43 @@ function saveState() {
 
   if (TEST_MODE) {
     localStorage.setItem("stallz_test_data", JSON.stringify(payload));
-  } else {
-    if (dataRef) {
-      dataRef.set(payload).catch((e) => {
-        showToast("Save Failed: Check Connection", "error");
-      });
-    }
+    return;
   }
+
+  if (!dataRef) return;
+
+  // Merge-save to reduce "last writer wins" when multiple admins are active.
+  // This keeps local ordering but prefers the most recently updated item per ID.
+  dataRef.once("value").then((snap) => {
+    const remote = snap.val() || {};
+
+    const mergedLoans = mergeById(payload.loans, remote.loans, "id");
+    const mergedRepayments = mergeById(payload.repayments, remote.repayments, "id");
+    const mergedCapitalTxns = mergeById(payload.capitalTxns, remote.capitalTxns, "id");
+    const mergedAdmins = mergeById(payload.admins, remote.admins, "id");
+
+    const merged = {
+      ...payload,
+      loans: mergedLoans,
+      repayments: mergedRepayments,
+      capitalTxns: mergedCapitalTxns,
+      admins: mergedAdmins,
+      nextId: Math.max(Number(payload.nextId || 1), Number(remote.nextId || 1)),
+      nextRepaymentId: Math.max(Number(payload.nextRepaymentId || 1), Number(remote.nextRepaymentId || 1)),
+      nextCapitalTxnId: Math.max(Number(payload.nextCapitalTxnId || 1), Number(remote.nextCapitalTxnId || 1)),
+      nextAdminId: Math.max(Number(payload.nextAdminId || 1), Number(remote.nextAdminId || 1)),
+      appVersion: APP_VERSION,
+      lastWrite: (typeof firebase !== "undefined" && firebase.database && firebase.database.ServerValue)
+        ? firebase.database.ServerValue.TIMESTAMP
+        : Date.now()
+    };
+
+    return dataRef.update(merged);
+  }).catch(() => {
+    showToast("Save Failed: Check Connection", "error");
+  });
 }
+
 
 /* ============================================================================
  * 6.0 | AUTHENTICATION
@@ -528,7 +652,7 @@ function refreshUI() {
         <div class="notif-item" onclick="openActionModal('PAY', ${l.id})">
             <span style="color:#ef4444; margin-right:8px;">⚠️</span>
             <div>
-                <div style="font-weight:600;">Overdue: ${l.clientName}</div>
+                <div style="font-weight:600;">Overdue: ${escapeHTML(l.clientName)}</div>
                 <div style="opacity:0.7;">Due: ${formatDate(l.dueDate)} • ${formatMoney(l.balance)}</div>
             </div>
         </div>
@@ -666,14 +790,16 @@ function renderLoansTable() {
   tbody.innerHTML = visibleLoans.map((l, index) => {
     const percent = Math.min(100, Math.round(((l.paid || 0) / (l.totalDue || 1)) * 100));
     let progressColor = "var(--primary)";
-    if (percent >= 100) progressColor = "#22c55e"; // Green
-    else if (l.status === "OVERDUE") progressColor = "#ef4444"; // Red
-    else if (l.status === "DEFAULTED") progressColor = "#64748b"; // Grey
+    if (percent >= 100) progressColor = "var(--success)"; // Paid
+    else if (l.status === "OVERDUE") progressColor = "var(--danger)"; // Overdue
+    else if (l.status === "DEFAULTED") progressColor = "var(--neutral)"; // Defaulted
 
     const isOverdue = l.status === "OVERDUE";
     const balanceStyle = isOverdue ? 'class="text-danger-glow" style="font-weight:bold;"' : 'style="font-weight:bold;"';
     const avatarClass = `avatar-${l.id % 5}`;
     const isClosed = l.status === "PAID" || l.status === "DEFAULTED";
+    const disabledAttr = isClosed ? 'disabled aria-disabled="true"' : '';
+    const disabledOpacity = isClosed ? 'opacity:0.3;' : '';
 
     const waNumber = formatWhatsApp(l.clientPhone);
     const waMsg = encodeURIComponent(`Hi ${l.clientName}, reminder: Balance of ${formatMoney(l.balance)} was due on ${formatDate(l.dueDate)}.`);
@@ -685,14 +811,14 @@ function renderLoansTable() {
       <td data-label="ID"><span style="opacity:0.5; font-size:0.8rem;">#${l.id}</span></td>
       <td data-label="Client">
         <div class="client-flex">
-          <div class="avatar ${avatarClass}">${getInitials(l.clientName)}</div>
+          <div class="avatar ${avatarClass}">${escapeHTML(getInitials(l.clientName))}</div>
           <div>
-            <div style="font-weight:600; color:var(--text-main);">${l.clientName}</div>
-            <div class="subtle" style="font-size:0.75rem;">${l.clientPhone || ''}</div>
+            <div style="font-weight:600; color:var(--text-main);">${escapeHTML(l.clientName)}</div>
+            <div class="subtle" style="font-size:0.75rem;">${escapeHTML(l.clientPhone || '')}</div>
           </div>
         </div>
       </td>
-      <td data-label="Item"><span style="color:var(--text-muted);">${l.collateralItem || '-'}</span></td>
+      <td data-label="Item"><span style="color:var(--text-muted);">${escapeHTML(l.collateralItem || '-')}</span></td>
       <td data-label="Progress">
         <div style="min-width: 100px;">
           <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:4px;">
@@ -710,9 +836,9 @@ function renderLoansTable() {
       <td data-label="Status"><span class="status-pill status-${(l.status || 'active').toLowerCase()}">${l.status}</span></td>
       <td data-label="Actions" style="text-align:right; white-space:nowrap;">
         <button class="btn-icon" onclick="openReceipt(${l.id})" title="Print Receipt">🖨️</button>
-        <a href="${waLink}" target="_blank" class="btn-icon" style="${waStyle}; text-decoration:none; display:inline-flex;" title="WhatsApp">💬</a>
-        <button class="btn-icon" onclick="openActionModal('PAY', ${l.id})" title="Pay" style="color:#38bdf8;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>💳</button>
-        <button class="btn-icon" onclick="openActionModal('WRITEOFF', ${l.id})" title="Bad Debt" style="color:#f87171;" ${isClosed ? 'disabled style="opacity:0.3"' : ''}>🗑️</button>
+        <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn-icon" style="${waStyle}; text-decoration:none; display:inline-flex;" title="WhatsApp">💬</a>
+        <button class="btn-icon" onclick="openActionModal('PAY', ${l.id})" title="Pay" style="color:#38bdf8; ${disabledOpacity}" ${disabledAttr}>💳</button>
+        <button class="btn-icon" onclick="openActionModal('WRITEOFF', ${l.id})" title="Bad Debt" style="color:#f87171; ${disabledOpacity}" ${disabledAttr}>🗑️</button>
         <button class="btn-icon" onclick="openActionModal('NOTE', ${l.id})" title="Note">📝</button>
       </td>
     </tr>
@@ -851,11 +977,11 @@ window.openReceipt = function(loanId) {
 
   const history = state.repayments
     .filter(r => r.loanId === loan.id)
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+    .sort((a, b) => (parseDateSmart(b.date)?.getTime() || 0) - (parseDateSmart(a.date)?.getTime() || 0));
 
   let statusColor = "#333";
   let statusText = loan.status;
-  if (loan.balance <= 0) { statusColor = "#16a34a"; statusText = "PAID IN FULL"; }
+  if (loan.balance <= 0.01) { statusColor = "#16a34a"; statusText = "PAID IN FULL"; }
   else if (loan.status === "OVERDUE") { statusColor = "#dc2626"; }
 
   const receiptHTML = `
@@ -878,13 +1004,13 @@ window.openReceipt = function(loanId) {
         <div style="display: flex; justify-content: space-between; margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #f1f5f9;">
           <div>
             <div style="font-size: 8px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 2px;">Client</div>
-            <div style="font-size: 11px; font-weight: 700; color: #334155;">${loan.clientName}</div>
+            <div style="font-size: 11px; font-weight: 700; color: #334155;">${escapeHTML(loan.clientName)}</div>
             <div style="font-size: 9px; color: #64748b;">${loan.clientPhone || ''}</div>
           </div>
           <div style="text-align: right;">
              <div style="font-size: 8px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 2px;">Due Date</div>
              <div style="font-size: 11px; font-weight: 700; color: ${statusColor};">${formatDate(loan.dueDate)}</div>
-             <div style="font-size: 8px; color: #94a3b8; margin-top:2px;">Item: ${loan.collateralItem}</div>
+             <div style="font-size: 8px; color: #94a3b8; margin-top:2px;">Item: ${escapeHTML(loan.collateralItem)}</div>
           </div>
         </div>
 
@@ -1242,7 +1368,7 @@ function saveNewLoan() {
     collateralValue: Number(wizardDraft.collateralValue || 0),
     customInterest: wizardDraft.customInterest ? Number(wizardDraft.customInterest) : null,
     paid: 0, saleAmount: 0, isDefaulted: false,
-    createdBy: "Admin", createdAt: new Date().toISOString()
+    createdBy: "Admin", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
   };
 
   state.loans.unshift(newLoan);
@@ -1267,12 +1393,12 @@ window.openActionModal = function(action, loanId) {
   if (action === "PAY") {
     title.textContent = "Record Payment";
     body.innerHTML = `
-      <div class="field"><label>Amount</label><input type="number" id="actAmount" value="${Math.ceil(loan.balance)}"></div>
+      <div class="field"><label>Amount</label><input type="number" id="actAmount" value="${Number(loan.balance || 0).toFixed(2)}"></div>
       <div class="field"><label>Date</label><input type="date" id="actDate" value="${getLocalDateVal()}"></div>
     `;
   } else if (action === "NOTE") {
     title.textContent = "Edit Note";
-    body.innerHTML = `<div class="field"><label>Note</label><textarea id="actNote">${loan.notes || ''}</textarea></div>`;
+    body.innerHTML = `<div class="field"><label>Note</label><textarea id="actNote">${escapeHTML(loan.notes || "")}</textarea></div>`;
   } else if (action === "WRITEOFF") {
     title.textContent = "Write Off Loan";
     body.innerHTML = `
@@ -1359,26 +1485,32 @@ function init() {
     if (currentAction === "PAY" && loan) {
       const inputAmt = Number(el("actAmount").value);
       const maxPay = loan.balance;
-      const safeAmt = Math.min(inputAmt, maxPay);
+      const safeAmt = Number(Math.min(inputAmt, maxPay).toFixed(2));
       if (safeAmt > 0) {
         loan.paid = (loan.paid || 0) + safeAmt;
+        loan.updatedAt = new Date().toISOString();
         state.repayments.unshift({
           id: generateRepaymentId(),
           loanId: loan.id,
           amount: safeAmt,
           date: el("actDate").value,
-          recordedBy: state.user ? (state.user.email || "Admin") : "System"
+          recordedBy: state.user ? (state.user.email || "Admin") : "System",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         });
       }
     }
     else if (currentAction === "NOTE" && loan) {
       loan.notes = el("actNote").value;
+      loan.updatedAt = new Date().toISOString();
     }
     else if (currentAction === "WRITEOFF" && loan) {
       loan.isDefaulted = true;
       loan.status = "DEFAULTED";
+      loan.updatedAt = new Date().toISOString();
       const reason = el("actNote").value;
       if (reason) loan.notes = (loan.notes ? loan.notes + "\n" : "") + "[Write-Off]: " + reason;
+      loan.updatedAt = new Date().toISOString();
     }
     saveState();
     refreshUI();

@@ -11,6 +11,10 @@
   --primary-dark: #22c55e;
   --primary-glow: 0 0 20px rgba(74, 222, 128, 0.35);
 
+  --success: #22c55e;
+  --danger: #ef4444;
+  --neutral: #64748b;
+
   --accent-blue: #3b82f6;
 
   --glass-bg: rgba(30, 41, 59, 0.70);
@@ -49,7 +53,7 @@ body {
   background-color: var(--bg-color);
   color: var(--text-main);
   min-height: 100vh;
-  padding-bottom: calc(90px + env(safe-area-inset-bottom)); /* Space for floating nav */
+  padding-bottom: 90px; /* Space for floating nav */
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -74,6 +78,10 @@ body {
   --primary: #16a34a;
   --primary-dark: #15803d;
   --primary-glow: 0 0 20px rgba(22, 163, 74, 0.25);
+
+  --success: #16a34a;
+  --danger: #dc2626;
+  --neutral: #64748b;
 
   --glass-bg: rgba(255, 255, 255, 0.90);
   --glass-border: 1px solid rgba(226, 232, 240, 0.90);
@@ -130,43 +138,44 @@ body {
    4.0 | STICKY UI WRAPPER & HEADER ELEMENTS
    ========================================= */
 
-.sticky-ui-wrapper{
-  position: sticky;
-  top: 0;
-  z-index: 900;
+.sticky-ui-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 900;
 
-  /* keep layout compact */
-  padding-top: 10px;
-  padding-bottom: 24px; /* spacing stays, but covered by background */
-  margin-bottom: 0;
+    /* Keep padding small so layout stays compact */
+    padding-top: 10px;
 
-  width: 100%;
-  isolation: isolate; /* contains ::before layer */
+    width: 100%;
+    margin-bottom: 0;
+    padding-bottom: 24px;
+    transform-style: preserve-3d;
 }
 
 /* THE BACKGROUND LAYER (Deep Glass Effect) */
-.sticky-ui-wrapper::before{
-  content: "";
-  position: absolute;
-  top: -50px; /* cover the top edge */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 200%;
-  height: calc(100% + 50px);
+.sticky-ui-wrapper::before {
+    content: "";
+    position: absolute;
 
-  /* Near-solid background so scrolled content doesn't show through */
-  background: var(--bg-color) !important;
-  background: color-mix(in srgb, var(--bg-color) 96%, transparent) !important;
+    /* FIX: Pull background UP to cover the screen edge */
+    top: -50px;
 
-  /* subtle divider */
-  border-bottom: 1px solid var(--divider) !important;
+    left: 50%;
+    transform: translateX(-50%);
 
-  /* soft glass blur */
-  backdrop-filter: blur(12px) saturate(130%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+    /* Increase height to compensate for the top pull */
+    height: calc(100% + 50px);
 
-  box-shadow: none !important;
-  z-index: -1;
+    /* Width settings */
+    width: 200%;
+
+    /* Style: Deep Navy Blur (Matches Client Portal) */
+    background: color-mix(in srgb, var(--bg-color) 94%, transparent) !important;
+    backdrop-filter: blur(12px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+    z-index: -1;
 }
 
 /* HEADER CARD */
@@ -215,7 +224,7 @@ body {
 
 /* Light Mode Overrides */
 [data-theme="light"] .sticky-ui-wrapper::before {
-    background: rgba(255, 255, 255, 0.85);
+    background: color-mix(in srgb, var(--bg-color) 94%, transparent);
     border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 [data-theme="light"] .glass-header {
@@ -249,40 +258,37 @@ body {
 .nav-btn-active { color: var(--primary); border-bottom-color: var(--primary); }
 .nav-icon { width: 20px; height: 20px; transition: all 0.3s ease; stroke: currentColor; }
 
+.nav-label { display:block; }
+.nav-label-long { font-size: 0.66rem; line-height: 1.05; text-align:center; }
+
 /* --- MOBILE SPECIFIC (FLOATING BAR) --- */
 @media (max-width: 768px) {
   .top-nav {
     position: fixed !important;
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
 
-    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-
-    width: min(92%, 420px) !important;
-    max-width: none !important;
+    width: 95% !important;
+    max-width: 380px !important;
     height: 58px !important;
-    border-radius: 999px !important;
+    border-radius: 50px !important;
 
     background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
     border: var(--glass-border) !important;
-
-    backdrop-filter: blur(16px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
-
-    box-shadow: var(--card-shadow) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3) !important;
 
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-
-    padding: 0 14px !important;
+    padding: 0 16px !important;
     margin: 0 !important;
-
-    /* Important: keep above page content, but BELOW overlays/modals */
     z-index: 850 !important;
   }
 
-.nav-btn {
+  .nav-btn {
     flex-direction: column !important;
     justify-content: flex-end !important;
     gap: 4px !important;
@@ -330,18 +336,15 @@ body {
 .notification-dropdown {
     /* 1. Fix Position: Center it on screen below header */
     position: fixed !important;
-    top: calc(72px + env(safe-area-inset-top)) !important;
-    left: 12px !important;
-    right: 12px !important;
+    top: calc(76px + env(safe-area-inset-top)) !important;
+    left: 16px !important;
+    right: 16px !important;
     width: auto !important;
 
-    /* 1b. Fit on phone screen (never off-screen) */
-    max-height: calc(100vh - (72px + env(safe-area-inset-top) + 16px)) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
-
-    /* 2. Fix Clarity: Solid Background (No transparency) */
+    
+    max-height: calc(100vh - 170px) !important;
+    overflow: auto !important;
+/* 2. Fix Clarity: Solid Background (No transparency) */
     background: #0f172a !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9) !important;
@@ -350,12 +353,6 @@ body {
     border-radius: 24px !important;
     transform-origin: top center !important;
     z-index: 10005 !important; /* Above everything */
-}
-
-.notification-dropdown .dropdown-body{
-    flex: 1 1 auto !important;
-    max-height: none !important;
-    overflow-y: auto !important;
 }
 
 /* Light Mode Mobile Override */
@@ -722,7 +719,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .step-dot.active { background: var(--primary); transform: scale(1.3); }
 
 /* Bottom Sheet */
-.modal-bottom-sheet { align-items: flex-end; padding-bottom: calc(110px + env(safe-area-inset-bottom)); justify-content: center; z-index: 3000; }
+.modal-bottom-sheet { align-items: flex-end; padding-bottom: 100px; justify-content: center; z-index: 3000; }
 .modal-bottom-sheet .modal { width: 95%; max-width: 600px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; border-top-left-radius: 30px; border-top-right-radius: 30px; max-height: 80vh; display: flex; flex-direction: column; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); }
 
 /* Sidebar */
@@ -1080,16 +1077,19 @@ input:focus, select:focus, textarea:focus {
   color: var(--text-main) !important;
 }
 
-/* Mobile floating nav: refined sizing (theme-aware) */
+/* Mobile floating nav: align closer to client bottom bar */
 @media (max-width: 768px) {
-  .top-nav{
-    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-    width: min(92%, 420px) !important;
-    height: 58px !important;
-    padding: 0 14px !important;
-    border-radius: 999px !important;
+  .top-nav {
+    bottom: 15px !important;
+    width: 92% !important;
+    height: 60px !important;
+    border-radius: 30px !important;
+    background: var(--glass-bg) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+    padding: 0 12px !important;
   }
-  .nav-btn{ font-size: 0.6rem !important; gap: 2px !important; }
+  .nav-btn { font-size: 0.6rem !important; gap: 2px !important; }
 }
 
 #closeProfileBtn{ color: var(--primary) !important; }
