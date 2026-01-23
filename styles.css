@@ -5,69 +5,57 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* --- DEFAULT: DARK MODE (DEEP SPACE) --- */
-  --bg-color: #020617;
+  /* CLIENT PORTAL THEME (Dark) */
+  --bg-color: #0f172a;              /* Deep Navy Background */
+  --primary: #4ade80;               /* Stallz Green */
+  --primary-dark: #22c55e;
+  --primary-glow: 0 0 20px rgba(74, 222, 128, 0.35);
 
-  /* Glass Cards */
-  --card-bg: rgba(15, 23, 42, 0.75);
-  --card-border: 1px solid rgba(255, 255, 255, 0.08);
-  --card-shadow: 0 0 40px rgba(59, 130, 246, 0.05); /* Neon Glow */
+  --accent-blue: #3b82f6;
 
-  /* HEADER & STICKY (Night Mode) */
-  --glass-bg: rgba(15, 23, 42, 0.6);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-  --glass-text: #ffffff;
-
-  /* Sticky Wrapper */
-  --sticky-bg: rgba(2, 6, 23, 0.6);
-  --sticky-border: 1px solid rgba(255, 255, 255, 0.05);
-
-  --divider: rgba(255, 255, 255, 0.08);
-
-  /* Inputs */
-  --input-bg: rgba(0, 0, 0, 0.5);
-  --input-border: rgba(255, 255, 255, 0.15);
-
-  /* NEON BLUE COLORS */
-  --primary: #3b82f6;       /* Royal Blue */
-  --primary-dark: #1d4ed8;
-  --primary-glow: 0 0 20px rgba(59, 130, 246, 0.4);
-
-  --text-main: #ffffff;
-  --text-muted: #94a3b8;    /* Slate Grey */
-
-  --radius: 16px;
+  --glass-bg: rgba(30, 41, 59, 0.70);
   --glass-blur: blur(20px);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.10);
+  --glass-text: #f8fafc;
+
+  --card-bg: rgba(30, 41, 59, 0.70);
+  --card-border: 1px solid rgba(255, 255, 255, 0.10);
+  --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.30);
+
+  --sticky-bg: rgba(15, 23, 42, 0.88);
+  --sticky-border: 1px solid rgba(255, 255, 255, 0.08);
+
+  --divider: rgba(255, 255, 255, 0.10);
+
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.10);
+
+  --icon-bg: rgba(255, 255, 255, 0.05);
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+
+  --radius: 20px;
 }
 
 /* =========================================
    2.0 | GLOBAL RESET & LAYOUT
    ========================================= */
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-color);
-
-  /* Mesh Gradient Background */
-  background-image:
-    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-
-  background-attachment: fixed;
   color: var(--text-main);
-  -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-  line-height: 1.5;
-  padding-bottom: 100px; /* Space for mobile nav */
+  padding-bottom: 90px; /* Space for floating nav */
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   width: 100%;
-
-  /* Tabular Numbers */
   font-feature-settings: "tnum" on, "cv11" on;
-  transition: background 0.5s ease, color 0.5s ease;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 .app-shell { max-width: 1200px; margin: 0 auto; padding: 16px; width: 100%; }
@@ -83,24 +71,33 @@ body {
    ========================================= */
 [data-theme="light"] {
   --bg-color: #f1f5f9;
-  --card-bg: rgba(255, 255, 255, 0.75);
-  --card-border: 1px solid rgba(255, 255, 255, 0.9);
-  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-  --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.5);
-  --glass-text: #1e293b;
-  --sticky-bg: rgba(241, 245, 249, 0.85);
-  --sticky-border: 1px solid rgba(0, 0, 0, 0.05);
-  --divider: rgba(148, 163, 184, 0.2);
-  --input-bg: rgba(241, 245, 249, 0.7);
+  --primary: #16a34a;
+  --primary-dark: #15803d;
+  --primary-glow: 0 0 20px rgba(22, 163, 74, 0.25);
+
+  --glass-bg: rgba(255, 255, 255, 0.90);
+  --glass-border: 1px solid rgba(226, 232, 240, 0.90);
+  --glass-text: #0f172a;
+
+  --card-bg: rgba(255, 255, 255, 0.90);
+  --card-border: 1px solid rgba(226, 232, 240, 0.90);
+  --card-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.08);
+
+  --sticky-bg: rgba(15, 23, 42, 0.88);
+  --sticky-border: 1px solid rgba(15, 23, 42, 0.08);
+
+  --divider: rgba(15, 23, 42, 0.10);
+
+  --input-bg: #f8fafc;
   --input-border: #cbd5e1;
-  --primary: #3b82f6;
+
+  --icon-bg: rgba(0, 0, 0, 0.05);
+
   --text-main: #0f172a;
-  --text-muted: #64748b;
-  --glass-blur: blur(16px);
+  --text-muted: #475569;
 }
 
-[data-theme="light"] body { background-image: none; background-color: #f1f5f9; }
+[data-theme="light"] body { background-image: none; background-color: var(--bg-color); }
 
 [data-theme="light"] input,
 [data-theme="light"] select,
@@ -130,7 +127,7 @@ body {
 [data-theme="light"] .sidebar { background: rgba(255,255,255,0.98); }
 
 /* =========================================
-   4.0 | STICKY UI WRAPPER (Fixed)
+   4.0 | STICKY UI WRAPPER & HEADER ELEMENTS
    ========================================= */
 
 .sticky-ui-wrapper {
@@ -146,7 +143,7 @@ body {
     transform-style: preserve-3d;
 }
 
-/* THE BACKGROUND LAYER */
+/* THE BACKGROUND LAYER (Deep Glass Effect) */
 .sticky-ui-wrapper::before {
     content: "";
     position: absolute;
@@ -163,43 +160,67 @@ body {
     /* Width settings */
     width: 200%;
 
-    /* Style */
-    background: var(--sticky-bg);
+    /* Style: Deep Navy Blur (Matches Client Portal) */
+    background: rgba(30, 41, 59, 0.75);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
-    border-bottom: var(--sticky-border);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
     z-index: -1;
 }
 
-/* RESET CHILDREN */
+/* HEADER CARD */
 .glass-header {
-    position: relative; top: auto;
-    margin-bottom: 10px;
+    position: relative;
+    top: auto;
+    margin-bottom: 5px; /* Reduced gap below header */
+
+    /* Header keeps its own shape but blends in */
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 12px 16px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
+/* WELCOME MESSAGE (Box Removed & Centered) */
 .admin-welcome {
-    position: relative; top: auto;
-    margin-bottom: 15px; padding: 5px 0;
-    background: transparent;
-    text-align: center;
+    position: relative;
+    width: 100%;           /* Full width ensures true centering */
+    margin: 10px 0 15px 0; /* Spacing above and below */
+    padding: 0;
+
+    /* REMOVE THE BOX STYLES */
+    background: transparent !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+
+    text-align: center;    /* Center the text */
 }
 
 .admin-welcome h2 {
-    font-size: 1.0rem;
-    font-weight: 500;
+    font-size: 0.8rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-main);
+    letter-spacing: 2px;
+    color: var(--text-muted); /* Subtle text color */
     opacity: 0.8;
     margin: 0;
 }
 
+/* Light Mode Overrides */
+[data-theme="light"] .sticky-ui-wrapper::before {
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
 [data-theme="light"] .glass-header {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
+    border-color: #e2e8f0;
 }
 
 /* =========================================
@@ -335,6 +356,21 @@ body {
 .portal-logo { width: 100%; height: 100%; object-fit: cover; }
 .brand-title { font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; }
 .header-right { display: flex; align-items: center; gap: 10px; }
+
+/* Plain icon button (no box) */
+.icon-btn-plain{
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--primary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.icon-btn-plain:hover{ opacity: 0.9; transform: translateY(-1px); }
+.icon-btn-plain:active{ transform: translateY(0px) scale(0.98); }
 .icon-btn, .profile-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted); width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; position: relative; }
 .icon-btn:hover, .profile-btn:hover { color: var(--primary); border-color: var(--primary); background: rgba(59, 130, 246, 0.1); transform: translateY(-2px); }
 
@@ -586,9 +622,16 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 /* --- 10.0 | BUTTON FIX: WHITE/BLACK THEME --- */
 .sketch-tabs {
-    display: flex; justify-content: center; gap: 16px;
-    width: 100%; max-width: 400px; margin: 0 auto;
-    padding: 0 0 15px 0; background: transparent;
+    display: flex; justify-content: center; gap: 10px;
+    width: 100%; max-width: 420px; margin: 0 auto;
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.84);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 999px;
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    margin-bottom: 15px;
 }
 
 .sketch-btn {
@@ -599,7 +642,9 @@ input:checked + .slider:before { transform: translateX(20px); }
     border-radius: 50px;
 
     /* INACTIVE: Dark/Gray Glass */
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(30, 41, 59, 0.75);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     color: #94a3b8; /* Gray Text */
     border: 1px solid rgba(255, 255, 255, 0.1);
 
@@ -609,12 +654,15 @@ input:checked + .slider:before { transform: translateX(20px); }
 }
 
 .sketch-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(30, 41, 59, 0.88);
     color: #ffffff;
     transform: translateY(-2px);
 }
 
 .sketch-btn.active {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
     /* ACTIVE: Pure White with Black Text */
     background: #ffffff !important;
     color: #000000 !important;
@@ -721,3 +769,278 @@ input:checked + .slider:before { transform: translateX(20px); }
         transform: translateY(0);
     }
 }
+
+/* ==========================================================================
+   CLIENT PORTAL THEME MATCH OVERRIDES (Admin)
+   - Styling only (no logic changes)
+   ========================================================================== */
+
+/* Make sticky wrapper behave like client (no extra "bar" behind the header) */
+.sticky-ui-wrapper::before { background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; }
+.sticky-ui-wrapper { padding-top: 10px; }
+
+/* Header (exact client style) */
+.glass-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 15px;
+  position: sticky; top: 10px; z-index: 100;
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border) !important; border-radius: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.logo-box {
+  width: 38px; height: 38px; background: var(--icon-bg);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); flex-shrink: 0;
+}
+.portal-logo { width: 100%; height: 100%; object-fit: cover; }
+.brand-title { font-size: 0.95rem; font-weight: 800; color: var(--text-main); }
+
+/* Welcome line (match client) */
+.admin-welcome { text-align: center; margin: -5px 0 15px 0; padding: 0 10px; background: transparent !important; }
+.admin-welcome h2 {
+  font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 800;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-main); opacity: 0.8;
+}
+
+/* Icon buttons (match client) */
+.icon-btn, .profile-btn {
+  background: var(--icon-bg); border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted); width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s ease; font-size: 1rem; flex-shrink: 0;
+  position: relative;
+}
+.icon-btn:hover, .profile-btn:hover {
+  color: var(--primary); border-color: var(--primary);
+  background: rgba(74, 222, 128, 0.10);
+}
+[data-theme="light"] .icon-btn:hover, [data-theme="light"] .profile-btn:hover {
+  background: rgba(22, 163, 74, 0.10);
+}
+
+.notification-wrapper { position: relative; }
+.notification-dot {
+  display: none;
+  position: absolute; top: 8px; right: 8px; width: 6px; height: 6px;
+  background: #ef4444; border-radius: 50%; border: 1px solid var(--bg-color);
+  animation: pulse-red 2s infinite;
+}
+
+
+.notification-dot.show{ display:block; }
+@keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); } 70% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+
+/* Notifications dropdown (match client) */
+.notification-wrapper .notification-dropdown {
+  position: absolute !important;
+  top: 100% !important;
+  right: -10px !important;
+  margin-top: 15px !important;
+  width: 320px !important;
+  max-width: calc(100vw - 32px) !important;
+
+  background: rgba(30, 41, 59, 0.85) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+
+  border-radius: 20px !important;
+  display: none;
+  flex-direction: column;
+  z-index: 1001 !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
+  overflow: hidden;
+  transform-origin: top right;
+  animation: scaleIn 0.2s ease-out forwards;
+}
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+.dropdown-header {
+  padding: 15px 20px; font-size: 0.75rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-muted);
+}
+.dropdown-body { max-height: 340px; overflow-y: auto; }
+.dropdown-body::-webkit-scrollbar { width: 6px; }
+.dropdown-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+
+/* Cards (match client glass) */
+.card {
+  background: var(--glass-bg) !important;
+  border: var(--glass-border) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.30) !important;
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* Buttons (match client) */
+.btn {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -10px rgba(0,0,0,0.35) !important;
+}
+.btn:hover { filter: brightness(1.03); }
+.btn-secondary {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  color: var(--text-main) !important;
+}
+[data-theme="light"] .btn-secondary {
+  background: rgba(0,0,0,0.04) !important;
+  border: 1px solid rgba(15,23,42,0.12) !important;
+}
+
+/* Inputs (client look) */
+input, select, textarea {
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border) !important;
+  color: var(--text-main) !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.12) !important;
+}
+[data-theme="light"] input:focus, [data-theme="light"] select:focus, [data-theme="light"] textarea:focus {
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12) !important;
+}
+
+/* Segmented tabs (Dashboard/Loans) */
+.sketch-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--glass-bg);
+  border: var(--glass-border);
+  border-radius: 18px;
+  padding: 6px;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: 0 10px 25px -10px rgba(0,0,0,0.35);
+  margin-bottom: 16px;
+}
+.sketch-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 10px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.sketch-btn.active {
+  background: rgba(74, 222, 128, 0.14);
+  color: var(--primary);
+  box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.25) inset;
+}
+[data-theme="light"] .sketch-btn.active {
+  background: rgba(22, 163, 74, 0.12);
+  box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.20) inset;
+}
+
+/* Profile sidebar -> match client drawer */
+.sidebar-overlay {
+  background: rgba(0,0,0,0.60) !important;
+  backdrop-filter: blur(4px) !important;
+}
+.sidebar {
+  width: 85% !important;
+  max-width: 320px !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: -10px 0 30px rgba(0,0,0,0.5) !important;
+  padding: 25px !important;
+}
+[data-theme="light"] .sidebar {
+  background: rgba(255,255,255,0.92) !important;
+  border-left: 1px solid rgba(226,232,240,0.9) !important;
+}
+
+.user-profile-card {
+  display: flex; align-items: center; gap: 15px;
+  background: rgba(255,255,255,0.05) !important;
+  padding: 15px !important;
+  border-radius: 15px !important;
+}
+
+/* Welcome/login screen (match overall) */
+.welcome-screen { background: var(--bg-color) !important; }
+.welcome-box {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border: 1px solid rgba(255,255,255,0.20) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.45) !important;
+}
+[data-theme="light"] .welcome-box {
+  background: rgba(255,255,255,0.92) !important;
+  border: 1px solid rgba(226,232,240,0.90) !important;
+  box-shadow: 0 20px 50px rgba(15,23,42,0.12) !important;
+}
+.welcome-btn {
+  background: var(--primary) !important;
+  border-radius: 12px !important;
+}
+
+/* Modals (glass) */
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.70) !important;
+  backdrop-filter: blur(5px) !important;
+}
+.modal {
+  background: rgba(30, 41, 59, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255,255,255,0.20) !important;
+  border-radius: 16px !important;
+}
+[data-theme="light"] .modal {
+  background: rgba(255,255,255,0.92) !important;
+  border: 1px solid rgba(226,232,240,0.90) !important;
+}
+
+/* Toasts (match glass theme) */
+.toast {
+  background: rgba(30,41,59,0.85) !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  color: var(--text-main) !important;
+}
+[data-theme="light"] .toast {
+  background: rgba(255,255,255,0.92) !important;
+  border: 1px solid rgba(226,232,240,0.90) !important;
+  color: var(--text-main) !important;
+}
+
+/* Mobile floating nav: align closer to client bottom bar */
+@media (max-width: 768px) {
+  .top-nav {
+    bottom: 15px !important;
+    width: 92% !important;
+    height: 60px !important;
+    border-radius: 30px !important;
+    background: rgba(30, 41, 59, 0.95) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+    padding: 0 12px !important;
+  }
+  .nav-btn { font-size: 0.6rem !important; gap: 2px !important; }
+}
+
+#closeProfileBtn{ color: var(--primary) !important; }
+#closeProfileBtn svg{ stroke: var(--primary); }
