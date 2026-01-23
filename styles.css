@@ -330,10 +330,16 @@ body {
 .notification-dropdown {
     /* 1. Fix Position: Center it on screen below header */
     position: fixed !important;
-    top: 100px !important;
-    left: 16px !important;
-    right: 16px !important;
+    top: calc(72px + env(safe-area-inset-top)) !important;
+    left: 12px !important;
+    right: 12px !important;
     width: auto !important;
+
+    /* 1b. Fit on phone screen (never off-screen) */
+    max-height: calc(100vh - (72px + env(safe-area-inset-top) + 16px)) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
 
     /* 2. Fix Clarity: Solid Background (No transparency) */
     background: #0f172a !important;
@@ -344,6 +350,12 @@ body {
     border-radius: 24px !important;
     transform-origin: top center !important;
     z-index: 10005 !important; /* Above everything */
+}
+
+.notification-dropdown .dropdown-body{
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
 }
 
 /* Light Mode Mobile Override */
@@ -710,7 +722,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .step-dot.active { background: var(--primary); transform: scale(1.3); }
 
 /* Bottom Sheet */
-.modal-bottom-sheet { align-items: flex-end; padding-bottom: 100px; justify-content: center; z-index: 3000; }
+.modal-bottom-sheet { align-items: flex-end; padding-bottom: calc(110px + env(safe-area-inset-bottom)); justify-content: center; z-index: 3000; }
 .modal-bottom-sheet .modal { width: 95%; max-width: 600px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; border-top-left-radius: 30px; border-top-right-radius: 30px; max-height: 80vh; display: flex; flex-direction: column; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); }
 
 /* Sidebar */
