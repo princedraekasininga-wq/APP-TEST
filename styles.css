@@ -49,7 +49,7 @@ body {
   background-color: var(--bg-color);
   color: var(--text-main);
   min-height: 100vh;
-  padding-bottom: 90px; /* Space for floating nav */
+  padding-bottom: calc(90px + env(safe-area-inset-bottom)); /* Space for floating nav */
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -130,43 +130,43 @@ body {
    4.0 | STICKY UI WRAPPER & HEADER ELEMENTS
    ========================================= */
 
-.sticky-ui-wrapper {
-    position: sticky;
-    top: 0;
-    z-index: 900;
+.sticky-ui-wrapper{
+  position: sticky;
+  top: 0;
+  z-index: 900;
 
-    /* Keep padding small so layout stays compact */
-    padding-top: 10px;
+  /* keep layout compact */
+  padding-top: 10px;
+  padding-bottom: 24px; /* spacing stays, but covered by background */
+  margin-bottom: 0;
 
-    width: 100%;
-    margin-bottom: 24px;
-    transform-style: preserve-3d;
+  width: 100%;
+  isolation: isolate; /* contains ::before layer */
 }
 
 /* THE BACKGROUND LAYER (Deep Glass Effect) */
-.sticky-ui-wrapper::before {
-    content: "";
-    position: absolute;
+.sticky-ui-wrapper::before{
+  content: "";
+  position: absolute;
+  top: -50px; /* cover the top edge */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200%;
+  height: calc(100% + 50px);
 
-    /* FIX: Pull background UP to cover the screen edge */
-    top: -50px;
+  /* Near-solid background so scrolled content doesn't show through */
+  background: var(--bg-color) !important;
+  background: color-mix(in srgb, var(--bg-color) 96%, transparent) !important;
 
-    left: 50%;
-    transform: translateX(-50%);
+  /* subtle divider */
+  border-bottom: 1px solid var(--divider) !important;
 
-    /* Increase height to compensate for the top pull */
-    height: calc(100% + 50px);
+  /* soft glass blur */
+  backdrop-filter: blur(12px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
 
-    /* Width settings */
-    width: 200%;
-
-    /* Style: Deep Navy Blur (Matches Client Portal) */
-    background: rgba(30, 41, 59, 0.75);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-    z-index: -1;
+  box-shadow: none !important;
+  z-index: -1;
 }
 
 /* HEADER CARD */
@@ -253,30 +253,36 @@ body {
 @media (max-width: 768px) {
   .top-nav {
     position: fixed !important;
-    bottom: 20px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
 
-    width: 95% !important;
-    max-width: 380px !important;
-    height: 70px !important;
-    border-radius: 50px !important;
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+
+    width: min(92%, 420px) !important;
+    max-width: none !important;
+    height: 58px !important;
+    border-radius: 999px !important;
 
     background: var(--glass-bg) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
     border: var(--glass-border) !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3) !important;
+
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+
+    box-shadow: var(--card-shadow) !important;
 
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    padding: 0 20px !important;
+
+    padding: 0 14px !important;
     margin: 0 !important;
-    z-index: 9999 !important;
+
+    /* Important: keep above page content, but BELOW overlays/modals */
+    z-index: 850 !important;
   }
 
-  .nav-btn {
+.nav-btn {
     flex-direction: column !important;
     justify-content: flex-end !important;
     gap: 4px !important;
@@ -776,8 +782,43 @@ input:checked + .slider:before { transform: translateX(20px); }
    ========================================================================== */
 
 /* Make sticky wrapper behave like client (no extra "bar" behind the header) */
-.sticky-ui-wrapper::before { background: transparent !important; border: none !important; box-shadow: none !important; backdrop-filter: none !important; }
-.sticky-ui-wrapper { padding-top: 10px; }
+/* Make sticky wrapper behave like client (solid background so scrolled content doesn't show through) */
+.sticky-ui-wrapper{
+  position: sticky;
+  top: 0;
+  z-index: 900;
+
+  padding-top: 10px;
+  padding-bottom: 24px; /* was margin-bottom; keep spacing but covered by background */
+  margin-bottom: 0;
+
+  width: 100%;
+  isolation: isolate; /* keeps the ::before layer contained */
+}
+
+.sticky-ui-wrapper::before{
+  content: "";
+  position: absolute;
+  top: -50px;                 /* cover the very top edge */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200%;
+  height: calc(100% + 50px);
+
+  /* Solid background = no "see-through" while scrolling */
+  background: var(--bg-color) !important;
+  /* Slight translucency for a soft glass blur (supported browsers) */
+  background: color-mix(in srgb, var(--bg-color) 88%, transparent) !important;
+
+  /* subtle divider, still matches theme */
+  border-bottom: 1px solid var(--divider) !important;
+
+  box-shadow: none !important;
+  backdrop-filter: blur(12px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+
+  z-index: -1;
+}
 
 /* Header (exact client style) */
 .glass-header {
@@ -1027,19 +1068,16 @@ input:focus, select:focus, textarea:focus {
   color: var(--text-main) !important;
 }
 
-/* Mobile floating nav: align closer to client bottom bar */
+/* Mobile floating nav: refined sizing (theme-aware) */
 @media (max-width: 768px) {
-  .top-nav {
-    bottom: 15px !important;
-    width: 92% !important;
-    height: 60px !important;
-    border-radius: 30px !important;
-    background: rgba(30, 41, 59, 0.95) !important;
-    border: 1px solid rgba(255,255,255,0.15) !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
-    padding: 0 12px !important;
+  .top-nav{
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+    width: min(92%, 420px) !important;
+    height: 58px !important;
+    padding: 0 14px !important;
+    border-radius: 999px !important;
   }
-  .nav-btn { font-size: 0.6rem !important; gap: 2px !important; }
+  .nav-btn{ font-size: 0.6rem !important; gap: 2px !important; }
 }
 
 #closeProfileBtn{ color: var(--primary) !important; }
