@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>STALLZ LOANS — Loan Manager</title>
+  <meta name="description" content="Stallz Loans Management System - Secure Admin Portal">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <link rel="icon" type="image/png" href="../assets/logo_images/myfavicon.png">
+  <link rel="apple-touch-icon" href="../apple-touch.png">
+  <link rel="manifest" href="../manifest.json">
+
+  <script src="../shared/app-config.js"></script>
+
+  <script>
+    /* Synchronous CSS Loader: Forces the browser to wait for the CSS before drawing the HTML, completely preventing the "broken page" flash */
+    document.write('<link rel="stylesheet" href="styles.css?v=' + encodeURIComponent(window.STALLZ_APP_VERSION || '2.5') + '">');
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js" defer></script>
+
+  <script>
+    /* Instant Theme Loader */
+    (function() {
+      const storedTheme = localStorage.getItem("stallz_theme_preference");
+      let isLight = false;
+      if (storedTheme) {
+        isLight = (storedTheme === "light");
+      } else {
+        const hour = new Date().getHours();
+        isLight = (hour >= 6 && hour < 18);
+      }
+      if (isLight) {
+        document.documentElement.setAttribute("data-theme", "light");
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if(metaTheme) metaTheme.setAttribute("content", "#f1f5f9");
+      }
+    })();
+  </script>
+  <script>
+    (function(){ try{ document.getElementById('adminAppVersion').textContent = 'v' + (window.STALLZ_APP_VERSION || '?.?'); }catch(e){} })();
+
+    function openAdminFeedbacks(){ const modal = document.getElementById('feedbacksModal'); if(!modal) return; modal.style.display='flex'; setTimeout(()=>modal.classList.remove('modal-hidden'),10); loadFeedbacks(); }
+    function closeAdminFeedbacks(){ const m=document.getElementById('feedbacksModal'); if(!m) return; m.classList.add('modal-hidden'); setTimeout(()=>m.style.display='none',300); }
+
+    async function loadFeedbacks(){
+      const container = document.getElementById('feedbacksList'); if(!container) return;
+      container.innerHTML = '<div style="color:var(--text-muted)">Loading feedbacks…</div>';
+      try{
+        if(typeof firebase === 'undefined') throw new Error('Firebase missing');
+        const snap = await firebase.database().ref('feedbacks').orderByChild('createdAt').limitToLast(500).once('value');
+        const data = snap.val() || {};
+        const q = String(document.getElementById('feedbackSearch')?.value || '').trim().toLowerCase();
+        const filterBy = String(document.getElementById('feedbackFilterBy')?.value || 'all');
+        const keys = Object.keys(data).reverse();
+        const rowsArr = [];
+        for(const key of keys){
+          const fb = data[key];
+          if(filterBy === 'hasUid' && !fb.clientUid) continue;
+          if(filterBy === 'noUid' && fb.clientUid) continue;
+          if(q){ const hay = [fb.name, fb.contact, fb.clientUid, fb.message].map(v=>String(v||'')).join(' ').toLowerCase(); if(!hay.includes(q)) continue; }
+          const t = new Date(fb.createdAt || Date.now()).toLocaleString();
+          rowsArr.push(`<div style="border-bottom:1px solid rgba(0,0,0,0.06); padding:10px 6px;"><div style="font-weight:600">${escapeHtml(fb.name||'Anonymous')} <span style="font-weight:400; color:#666; font-size:0.9rem">${t}</span></div><div style="color:#333; margin:6px 0">${escapeHtml(fb.message||'')}</div><div style="color:#666; font-size:0.9rem">Contact: ${escapeHtml(fb.contact||'-')} • UID: ${escapeHtml(fb.clientUid||'-')}</div></div>`);
+        }
+        container.innerHTML = rowsArr.join('') || '<div style="color:var(--text-muted)">No feedbacks found.</div>';
+      }catch(err){ console.error(err); container.innerHTML = '<div style="color:var(--text-muted)">Failed to load feedbacks.</div>'; }
+    }
+
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]; }); }
+  </script>
+</head>
+
+<body>
+
+  <!-- BOOT LOADER (prevents flashing 0s / placeholder names while RTDB loads) -->
+  <div id="loadingOverlay" class="stallz-loading-overlay">
+    <div class="stallz-loading-card">
+      <div class="stallz-loading-spinner" aria-hidden="true"></div>
+      <div class="stallz-loading-title">Loading Admin Dashboard</div>
+      <div id="loadingMsg" class="stallz-loading-msg">Syncing with database...</div>
+    </div>
+  </div>
+
+
+  <div id="feedbacksModal" class="modal-overlay" style="display:none; z-index:100000; align-items:center; justify-content:center;">
+    <div class="modal-glass" style="max-width:720px; width:92%; max-height:85vh; overflow:auto; padding:18px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3>Client Feedback</h3>
+        <button class="close-btn" onclick="document.getElementById('feedbacksModal').style.display='none'">&times;</button>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+        <input id="feedbackSearch" placeholder="Search feedback or UID..." style="flex:1; padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.06);" />
+        <select id="feedbackFilterBy" style="padding:8px; border-radius:8px; border:1px solid rgba(0,0,0,0.06);">
+          <option value="all">All</option>
+          <option value="hasUid">Has UID</option>
+          <option value="noUid">No UID</option>
+        </select>
+        <button class="btn" onclick="loadFeedbacks()">Refresh</button>
+      </div>
+      <div id="feedbacksList" style="display:flex; flex-direction:column; gap:10px; min-height:120px;">
+        <div style="text-align:center; color:var(--text-muted);">Loading feedbacks…</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="editAboutModal" class="modal-overlay" style="display:none; z-index:100000; align-items:center; justify-content:center;">
+    <div class="modal-glass" style="max-width:720px; width:92%; max-height:85vh; overflow:auto; padding:18px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3>Edit About & Credits</h3>
+        <button class="close-btn" onclick="closeEditAboutModal()">&times;</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <label style="font-weight:600">About HTML (rendered on client)</label>
+        <textarea id="adminAboutText" style="min-height:180px; width:100%; padding:10px; border-radius:8px;"></textarea>
+        <label style="font-weight:600">Credits (single-line)</label>
+        <input id="adminAboutCredits" type="text" style="width:100%; padding:8px; border-radius:8px;" />
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button class="btn" onclick="closeEditAboutModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="saveAboutContent()">Save</button>
+        </div>
+        <div id="adminAboutStatus" style="font-size:0.9rem; color:var(--text-muted);"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function openEditAboutModal(){
+      const m = document.getElementById('editAboutModal');
+      if(!m) return; m.style.display='flex'; setTimeout(()=>m.classList.remove('modal-hidden'),10);
+      try{
+        if(typeof firebase !== 'undefined'){
+          const aboutSnap = await firebase.database().ref('appConfig/about').once('value');
+          const creditsSnap = await firebase.database().ref('appConfig/credits').once('value');
+          document.getElementById('adminAboutText').value = aboutSnap.val() || '';
+          document.getElementById('adminAboutCredits').value = creditsSnap.val() || '';
+        }
+      }catch(err){ console.warn('Could not load about content', err); }
+    }
+
+    function closeEditAboutModal(){ const m=document.getElementById('editAboutModal'); if(!m) return; m.classList.add('modal-hidden'); setTimeout(()=>m.style.display='none',300); }
+
+    async function saveAboutContent(){
+      const status = document.getElementById('adminAboutStatus'); if(status) { status.textContent = 'Saving...'; }
+      try{
+        if(typeof firebase === 'undefined') throw new Error('Firebase missing');
+        const about = document.getElementById('adminAboutText').value || '';
+        const credits = document.getElementById('adminAboutCredits').value || '';
+        await firebase.database().ref('appConfig').update({ about: about, credits: credits, updatedAt: new Date().toISOString() });
+        if(status) status.textContent = 'Saved.';
+        setTimeout(()=>{ if(status) status.textContent=''; closeEditAboutModal(); }, 900);
+      }catch(err){ console.error(err); if(status) status.textContent = 'Failed to save.'; }
+    }
+  </script>
+
+  <datalist id="clientList"></datalist>
+
+  <div class="app-shell">
+    <div class="sticky-ui-wrapper">
+        <header class="glass-header fade-in">
+          <div class="header-left">
+            <div class="logo-box">
+              <img src="../assets/logo_images/my-logo.png" alt="Stallz Logo" class="portal-logo" style="width: 40px; height: 40px; object-fit: contain;" onerror="this.style.display='none'">
+            </div>
+            <h2 class="brand-title">
+              Hi, <span id="headerUsername" style="color:var(--primary);">Admin</span>
+            </h2>
+          </div>
+
+          <div class="header-right">
+            <div class="notification-wrapper" style="position: relative;">
+              <button id="notifBtn" class="icon-btn notification-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span id="bellBadge" class="notification-dot"></span>
+              </button>
+              <div id="notifDropdown" class="notification-dropdown">
+                <div class="dropdown-header">Needs Attention</div>
+                <div id="notifList" class="dropdown-body"></div>
+              </div>
+            </div>
+
+            <button id="profileToggleBtn" class="profile-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="admin-welcome fade-in">
+            <h2 id="greetingText">Welcome to Stallz Loans</h2>
+        </div>
+
+        <div class="sketch-tabs">
+            <button class="sketch-btn active" onclick="switchOverviewTab('dashboard', this)">Dashboard</button>
+            <button class="sketch-btn" onclick="switchOverviewTab('loans', this)">Loans</button>
+        </div>
+    </div>
+
+    <div id="profileOverlay" class="sidebar-overlay hidden"></div>
+    <aside id="profileSidebar" class="sidebar" aria-hidden="true">
+        <div class="sidebar-header">
+            <h3 class="sidebar-heading">Menu</h3>
+            <button id="closeProfileBtn" class="icon-btn-plain close-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="sidebar-content-scroll">
+            <div class="profile-hero">
+                <div class="avatar avatar-3 profile-avatar-lg" id="sidebarAvatar">AD</div>
+                <div class="profile-details">
+                    <div id="sidebarName" class="profile-name">Admin User</div>
+                    <div class="profile-badge">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                        <span id="sidebarEmail">Owner</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-label">Preferences</div>
+                <div class="menu-item">
+                    <div class="menu-icon-wrapper">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                    </div>
+                    <div class="menu-text">
+                        <span class="menu-title">Dark Mode</span>
+                        <span class="menu-sub">Adjust appearance</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+<div class="menu-item" onclick="handleEnableAdminPushClick()" style="cursor:pointer;">
+    <div class="menu-icon-wrapper">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+    </div>
+    <div class="menu-text">
+        <span class="menu-title">Notifications</span>
+        <span class="menu-sub">Enable device alerts</span>
+    </div>
+    <span id="adminPushBadge" class="pill">Off</span>
+</div>
+
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header-row">
+                    <div class="section-label">Client Payments</div>
+                    <button class="btn-text-action" onclick="openPaymentMethodsModal(); toggleProfileSidebar();">Manage</button>
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-muted); padding: 0 5px; margin-bottom: 5px;">Set the Mobile Money numbers clients see.</div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header-row">
+                    <div class="section-label">Loan Requests Log</div>
+                    <button class="btn-text-action" onclick="openAllRequestsModal(); toggleProfileSidebar();">View All</button>
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-muted); padding: 0 5px; margin-bottom: 5px;">Review all pending, approved, and declined requests.</div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header-row">
+                    <div class="section-label">Team Members</div>
+                    <button class="btn-text-action" onclick="openPopup('adminsModal'); toggleProfileSidebar();">Manage</button>
+                </div>
+                <div class="team-list-container">
+                    <table class="team-table">
+                        <tbody id="sidebarAdminsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px;">
+            <button type="button" id="logoutBtn" class="btn-logout" onclick="triggerAdminLogout(event)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+              <span>Sign Out</span>
+            </button>
+
+            <div style="display:flex; flex-direction:column; gap:2px; align-items:center;">
+                <div style="display:flex; gap:12px; align-items:center; justify-content:center; width:100%;">
+                  <button onclick="openEditAboutModal(); toggleProfileSidebar();" style="background:none; border:none; color:var(--text-muted); font-size:0.75rem; font-weight:600; cursor:pointer; padding:0; transition: color 0.2s;">Edit About</button>
+                  <span style="color: rgba(255,255,255,0.15); font-size: 0.75rem;">•</span>
+                  <button onclick="openPopup('feedbacksModal'); toggleProfileSidebar();" style="background:none; border:none; color:var(--text-muted); font-size:0.75rem; font-weight:600; cursor:pointer; padding:0; transition: color 0.2s;">Feedback</button>
+                </div>
+                <div style="font-size:0.6rem; color:var(--text-muted); font-family: 'Inter', sans-serif; letter-spacing:0.5px; opacity: 0.5; margin-top:0;">Stallz Loans <span id="adminAppVersion">v?</span></div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="top-nav">
+      <button class="nav-btn nav-btn-active" id="navMainBtn" onclick="closeAllModals()">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <div>Overview</div>
+      </button>
+
+      <button class="nav-btn" id="navMonthlyBtn" onclick="openPopup('monthlyModal')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <div class="nav-label">Cash Flow</div>
+      </button>
+
+      <button class="nav-btn" id="navClientsBtn" onclick="openPopup('clientsModal')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <div>Clients</div>
+      </button>
+    </div>
+
+    <main>
+      <div id="view-main" style="display:block; max-width: 800px; margin: 0 auto;">
+
+        <section class="card" id="tab-dashboard">
+  <div class="card-inner">
+    <h2>
+      <span>Dashboard</span>
+      <button id="openLoanModalBtn" class="btn btn-sm" type="button">＋ Add Loan</button>
+    </h2>
+
+    <div class="mini-tabs">
+      <button class="mini-tab active" data-target="cap-status">Status</button>
+      <button class="mini-tab" data-target="cap-actions">Manage Capital</button>
+    </div>
+
+    <div id="cap-status" class="tab-content active">
+       <div class="stat-card" style="margin-top:16px; text-align:center; padding:24px;">
+          <div class="stat-label">Estimated Cash on Hand</div>
+          <div class="stat-value" id="cashOnHandValue" style="font-size:1.8rem; margin:8px 0;">K0.00</div>
+          <div class="stat-sub" style="opacity:0.7">Available to lend</div>
+       </div>
+       <div style="margin-top:16px; display:flex; justify-content:space-between; padding:0 8px;">
+          <div style="font-size:0.8rem; color:var(--text-muted);">Starting Capital:</div>
+          <div id="startingCapitalValue" style="font-size:0.9rem; font-weight:600;">K0.00</div>
+       </div>
+       <div class="section-title" style="margin-top:24px;">Overview Stats</div>
+       <div class="stats-grid" id="dashboardStats"></div>
+    </div>
+
+    <div id="cap-actions" class="tab-content">
+       <div id="startingCapitalSetupRow" style="display:none; margin-bottom:20px; padding:15px; background:rgba(255,255,255,0.05); border-radius:12px;">
+          <div style="font-size:0.85rem; margin-bottom:10px;">Set Starting Capital</div>
+          <div style="display:flex; gap:10px;">
+              <input type="number" id="startingCapitalInitial" placeholder="Initial Amount">
+              <button id="setStartingCapitalBtn" class="btn btn-sm">Set</button>
+          </div>
+       </div>
+
+       <div class="section-title">Inject Capital</div>
+       <div style="display:flex; gap:10px; margin-bottom:24px;">
+          <input type="number" id="addCapitalInput" placeholder="Amount (K)" style="flex:1;">
+          <button id="addCapitalBtn" class="btn btn-sm">Inject</button>
+       </div>
+
+        <div class="section-title">Record Expenses</div>
+        <div style="display:flex; gap:10px; margin-bottom:24px;">
+          <button onclick="openExpenseModal('General')" class="btn" style="width:100%; background:rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid rgba(239, 68, 68, 0.3); display:flex; align-items:center; justify-content:center; gap:8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+              <circle cx="12" cy="12" r="2"></circle>
+              <path d="M6 12h.01M18 12h.01"></path>
+            </svg>
+            Record / Pay Expense
+          </button>
+        </div>
+
+       <div style="margin-top: 10px; border-top: 1px dashed var(--divider); padding-top: 20px;">
+   <button type="button" class="btn-secondary" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px;" onclick="openPopup('capitalHistoryModal')">
+     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+       <polyline points="14 2 14 8 20 8"></polyline>
+       <line x1="16" y1="13" x2="8" y2="13"></line>
+       <line x1="16" y1="17" x2="8" y2="17"></line>
+       <polyline points="10 9 9 9 8 9"></polyline>
+     </svg>
+     View Capital History
+   </button>
+</div>
+    </div>
+
+  </div>
+</section>
+
+        <section class="card" id="tab-loans" style="display:none;">
+          <div class="card-inner">
+            <h2 style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span>Loans</span>
+                <span class="label" id="loansCountLabel">0 records</span>
+              </div>
+              <button type="button" class="btn-secondary btn-sm" style="border-color: rgba(74,222,128,0.22); color: var(--text-main); font-size: 0.75rem; padding: 6px 12px;" onclick="openLoanHistoryModal()">
+                <i class="fa-solid fa-clock-rotate-left" style="margin-right: 4px;"></i> View History
+              </button>
+            </h2>
+
+            <div class="filters-row">
+              <div class="field" style="margin-bottom:16px;">
+                <input type="text" id="searchInput" placeholder="🔍 Search Client, Item, ID...">
+              </div>
+              <div class="filter-container">
+                <span class="filter-label">STATUS:</span>
+                <button class="chip" onclick="setFilter('status', 'All', this)">All</button>
+                <button class="chip active" onclick="setFilter('status', 'ACTIVE', this)">Active</button>
+                <button class="chip" onclick="setFilter('status', 'OVERDUE', this)">Overdue</button>
+                <button class="chip" onclick="setFilter('status', 'PAID', this)">Paid</button>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table><thead><tr><th width="50">ID</th><th width="140">Client</th><th width="120">Item</th><th width="180">Progress</th><th width="100">Start</th><th width="100">Due</th><th width="100">Balance</th><th width="90">Status</th><th width="100" style="text-align:right;">Actions</th></tr></thead><tbody id="loansTableBody"></tbody></table>
+              <div id="emptyState" class="empty-state" style="display:none; padding:20px; text-align:center; color:#94a3b8;"><span class="icon" style="font-size:2rem;">🧾</span><div>No loans yet.</div></div>
+            </div>
+
+            <div class="btn-group" style="margin-top:10px;">
+                <button type="button" id="exportBtn" class="btn-secondary btn-sm" style="background: #107c41; border-color: #107c41; color: white; width: 100%;">Export to Excel</button>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <div id="monthlyModal" class="modal-overlay modal-hidden modal-bottom-sheet" style="display: none;">
+    <div class="modal">
+      <div class="modal-header"><div class="modal-title">Monthly Cash Flow</div><button type="button" class="modal-close" onclick="closePopup('monthlyModal')">✕</button></div>
+      <div style="overflow-y:auto; flex:1;">
+        <div class="table-wrapper">
+            <table><thead><tr><th>Month</th><th>Loans Out</th><th>Repayments In</th><th>Sales In</th><th>Net Flow</th></tr></thead><tbody id="monthlyTableBody"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="clientsModal" class="modal-overlay modal-hidden modal-bottom-sheet" style="display: none;">
+    <div class="modal">
+  <div class="modal-header">
+    <div class="modal-title">Client Manager</div>
+    <button type="button" class="modal-close" onclick="closePopup('clientsModal')">✕</button>
+  </div>
+
+  <div class="mini-tabs" style="margin-bottom: 15px; padding: 0 10px;">
+    <button class="mini-tab active" id="tabActiveClients" onclick="setClientView('active')">Active Clients</button>
+    <button class="mini-tab" id="tabRegisteredClients" onclick="setClientView('registered')">Registered Clients</button>
+  </div>
+
+
+  <div class="client-filter-bar">
+    <input id="clientSearchInput" type="search" placeholder="Search name, phone, NRC, email…" autocomplete="off" />
+    <button type="button" id="clientSearchClearBtn" class="btn-secondary btn-sm client-clear-btn" title="Clear search">Clear</button>
+  </div>
+  <div id="clientFilterHint" class="client-filter-hint"></div>
+
+  <div style="overflow-y:auto; flex:1;">
+    <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:90px;">ID</th>
+              <th>Client</th>
+              <th>Contact</th>
+              <th style="width:140px;">NRC</th>
+              <th>Address</th>
+              <th style="width:120px;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="clientsTableBody"></tbody>
+        </table>
+    </div>
+  </div>
+</div>
+  </div>
+
+  <div id="adminsModal" class="modal-overlay modal-hidden modal-bottom-sheet" style="display: none;">
+    <div class="modal">
+      <div class="modal-header"><div class="modal-title">Admin Management</div><button type="button" class="modal-close" onclick="closePopup('adminsModal')">✕</button></div>
+      <div style="overflow-y:auto; flex:1;">
+        <div class="table-wrapper">
+            <table><thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Phone</th></tr></thead><tbody id="adminsTableBody"></tbody></table>
+        </div>
+        <div style="margin-top:20px; padding:12px; background:rgba(255,255,255,0.05); border-radius:12px; font-size:0.85rem; color:#94a3b8; text-align:center;">To add new admins, please contact the main system owner.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="loanModal" class="modal-overlay modal-hidden" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <div><div class="modal-title">New Loan</div><div id="modalStepLabel" class="modal-step">Step 1</div></div>
+        <button type="button" id="modalCloseBtn" class="modal-close">-</button>
+      </div>
+      <div id="wizardWrapper" class="wizard-content-wrapper">
+        <div class="field">
+            <div id="modalFieldLabel" class="modal-field-label" style="font-size:0.9rem; color:#94a3b8; margin-bottom:8px;"></div>
+            <div id="modalFieldContainer"></div>
+        </div>
+        <div id="modalHelper" class="modal-helper" style="font-size:0.8rem; color:#64748b; margin-top:8px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="modalBackBtn" class="btn-secondary btn-sm" style="visibility:hidden;">← Back</button>
+        <div id="modalStepDots" class="step-dots"></div>
+        <button type="button" id="modalNextBtn" class="btn btn-sm">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="actionModal" class="modal-overlay modal-hidden" style="display: none; z-index: 100060 !important;">
+    <div class="modal">
+      <div class="modal-header">
+        <div><div id="actionModalTitle" class="modal-title">Action</div><div id="actionModalSubtitle" class="modal-step"></div></div>
+        <button type="button" id="actionModalCloseBtn" class="modal-close">-</button>
+      </div>
+      <div class="modal-body">
+        <div id="actionModalBody"></div>
+        <div id="actionModalHelper" class="modal-helper" style="margin-top:10px; color:#94a3b8; font-size:0.8rem;"></div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px;">
+        <button type="button" id="actionModalCancelBtn" class="btn-secondary btn-sm">Cancel</button>
+        <button type="button" id="actionModalConfirmBtn" class="btn btn-sm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="receiptModal" class="modal-overlay modal-hidden" style="display: none; z-index: 10000; padding: 10px; align-items: center; justify-content: center;">
+    <div class="modal" style="width: 100%; max-width: 380px; background: white; border-radius: 16px; display: flex; flex-direction: column; max-height: 85vh; padding: 0; box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow: hidden;">
+      <div style="flex: 1; overflow-y: auto; background: white; padding: 0;"><div id="receiptContent"></div></div>
+      <div style="padding: 12px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; justify-content: center;">
+        <button type="button" class="btn-secondary" style="background: white; border: 1px solid #cbd5e1; color: #64748b; font-size: 0.8rem; padding: 10px 20px;" onclick="closeReceiptModal()">Close</button>
+        <button type="button" id="downloadImageBtn" class="btn" style="padding: 10px 20px; font-size: 0.8rem;">⬇ Save Image</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="iosInstallModal" class="modal-overlay modal-hidden" style="display: none; align-items: flex-end;">
+    <div class="modal" style="margin-bottom: 20px; text-align: center; max-width: 100%;">
+      <div style="font-size: 3rem; margin-bottom: 10px;">📲</div>
+      <h3 style="color:white; margin:0 0 8px 0;">Install Stallz Loans</h3>
+      <p style="color:#94a3b8; font-size:0.9rem; margin-bottom:20px;">To install this app on your iPhone, tap the <strong>Share</strong> button below and select <strong>"Add to Home Screen"</strong>.</p>
+      <button id="closeIosModalBtn" class="btn-secondary btn-sm">Got it</button>
+    </div>
+  </div>
+
+  <div id="loanRequestModal" class="modal-overlay modal-hidden" style="display: none; z-index: 10050;">
+    <div class="modal" style="max-width: 420px;">
+      <div class="modal-header">
+        <div class="modal-title">Loan Request</div>
+        <button type="button" class="modal-close" onclick="window.closeLoanRequestModal?.()">-</button>
+      </div>
+      <div class="modal-body" id="loanRequestBody"></div>
+      <div style="display:flex; gap:10px; padding:14px; border-top:1px solid var(--border);">
+        <button type="button" class="btn-secondary" style="flex:1;" onclick="window.rejectLoanRequest?.()">Reject</button>
+        <button type="button" class="btn" style="flex:1;" onclick="window.approveLoanRequest?.()">Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminMessageModal" class="modal-overlay modal-hidden" style="display: none; z-index: 10050;">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-title" id="adminMessageTitle">Message Client</div>
+        <button type="button" class="modal-close" onclick="window.closeAdminMessageModal?.()">-</button>
+      </div>
+      <div class="modal-body">
+        <div id="adminMessageThread" style="max-height: 45vh; overflow:auto; padding:10px; border:1px solid var(--border); border-radius:12px; background: rgba(0,0,0,0.15);"></div>
+        <div style="display:flex; gap:10px; margin-top:12px;">
+          <input id="adminMessageInput" class="welcome-input" placeholder="Type a message..." style="flex:1; margin:0;" />
+          <button class="btn btn-sm" type="button" onclick="window.sendAdminMessage?.()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="capitalHistoryModal" class="modal-overlay modal-hidden modal-bottom-sheet" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Capital History</div>
+        <button type="button" class="modal-close" onclick="closePopup('capitalHistoryModal')">✕</button>
+      </div>
+      <div style="overflow-y:auto; flex:1;">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:90px;">Date</th>
+                <th style="width:70px;">Time</th>
+                <th>Added By</th>
+                <th style="text-align:right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="capitalHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="loanHistoryModal" class="modal-overlay modal-hidden modal-bottom-sheet" style="display: none; z-index: 100050;">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" style="display:flex; align-items:center; gap:10px;">
+          <span style="width:10px; height:10px; border-radius:999px; background: var(--success); box-shadow: 0 0 0 4px rgba(74,222,128,0.12);"></span>
+          Loans History
+        </div>
+        <button type="button" class="modal-close" onclick="closePopup('loanHistoryModal')">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding-top: 10px; display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content: space-between;">
+          <input id="loanHistorySearchInput" type="text" placeholder="Search..." style="width: 140px; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px;">
+
+         <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="chip active" onclick="setLoanHistoryFilter('ALL', this)">All</button>
+            <button class="chip" onclick="setLoanHistoryFilter('PAST', this)">Past</button>
+            <button class="chip" onclick="setLoanHistoryFilter('ACTIVE', this)">Active</button>
+            <button class="chip" onclick="setLoanHistoryFilter('OVERDUE', this)">Overdue</button>
+          </div>
+        </div>
+
+        <div style="overflow-y:auto; flex:1;">
+          <div class="table-wrapper" style="max-height: 65vh;">
+            <table>
+              <thead>
+                <tr>
+                  <th width="70">ID</th>
+                  <th>Client</th>
+                  <th width="160">Item</th>
+                  <th width="110" style="text-align:right;">Amount</th>
+                  <th width="110" style="text-align:right;">Total</th>
+                  <th width="110" style="text-align:right;">Paid</th>
+                  <th width="110" style="text-align:right;">Balance</th>
+                  <th width="95">Status</th>
+                  <th width="110">Updated</th>
+                </tr>
+              </thead>
+              <tbody id="loanHistoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <div id="loanConfirmationModal" class="modal-overlay modal-hidden" style="display: none; z-index: 3000;">
+  <div class="modal" style="max-width: 400px;">
+    <div class="modal-header">
+      <div class="modal-title">Confirm Details</div>
+      <button type="button" class="modal-close" onclick="closePopup('loanConfirmationModal')">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div style="text-align:center; margin-bottom:15px;">
+        <div style="font-size:0.9rem; color:var(--text-muted);">You are about to lend</div>
+        <div id="confAmount" style="font-size:1.8rem; font-weight:800; color:var(--primary); margin:5px 0;">K0.00</div>
+        <div id="confClient" style="font-size:1.1rem; font-weight:700; color:#fff;">Client Name</div>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.05); border-radius:12px; padding:16px;">
+        <div style="display:grid; grid-template-columns: auto 1fr; gap:12px; font-size:0.9rem;">
+
+          <div style="color:var(--text-muted);">Item:</div>
+          <div id="confItem" style="text-align:right; font-weight:600;">--</div>
+
+          <div style="color:var(--text-muted);">Duration:</div>
+          <div id="confDuration" style="text-align:right; font-weight:600;">--</div>
+
+          <div style="color:var(--text-muted);">Interest:</div>
+          <div id="confInterest" style="text-align:right; font-weight:600;">--</div>
+
+          <div style="color:var(--text-muted);">Due Date:</div>
+          <div id="confDueDate" style="text-align:right; font-weight:600;">--</div>
+
+          <div style="height:1px; background:rgba(255,255,255,0.1); grid-column:span 2; margin:5px 0;"></div>
+
+          <div style="color:var(--text-muted);">Total Due:</div>
+          <div id="confTotal" style="text-align:right; font-weight:800; color:var(--accent-blue);">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer" style="display:flex; gap:10px; margin-top:20px;">
+      <button type="button" class="btn-secondary" onclick="closePopup('loanConfirmationModal')" style="flex:1;">Edit</button>
+      <button type="button" id="finalConfirmBtn" class="btn" style="flex:1; background:var(--primary); color:#000;">Confirm & Add</button>
+    </div>
+  </div>
+</div>
+
+  <div id="adminProfileModal" class="modal-overlay modal-hidden" style="display: none; z-index: 50000;">
+  <div class="modal" style="max-width: 600px; height: 85vh; display:flex; flex-direction:column;">
+
+    <div class="modal-header" style="flex-shrink:0;">
+      <div class="modal-title">Team Member Profile</div>
+      <button type="button" class="modal-close" onclick="closePopup('adminProfileModal')">✕</button>
+    </div>
+
+    <div class="modal-body" style="padding:0; overflow-y:auto; flex:1;">
+
+        <div style="padding: 24px; background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent); text-align:center;">
+            <div class="avatar avatar-3" id="apAvatar" style="width:80px; height:80px; font-size:2rem; margin:0 auto 12px auto; box-shadow:0 8px 20px rgba(0,0,0,0.3);">AD</div>
+            <h2 id="apName" style="margin:0; font-size:1.4rem; color:var(--text-main);">Admin Name</h2>
+            <div id="apRole" style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">Role</div>
+            <div id="apContact" style="font-family:'Courier New', monospace; font-size:0.85rem; color:var(--primary); margin-top:6px; opacity:0.8;">-</div>
+        </div>
+
+        <div class="sketch-tabs" style="margin-top:0; border-bottom:1px solid var(--divider);">
+            <button class="sketch-btn active" onclick="switchProfileTab('activity', this)">Activity</button>
+            <button class="sketch-btn" id="tabBtnCommissions" onclick="switchProfileTab('commissions', this)">Commissions</button>
+        </div>
+
+        <div id="ap-tab-activity" class="profile-tab-content active" style="padding:20px;">
+            <div class="stat-card">
+                <div class="stat-label">Loans Created</div>
+                <div class="stat-value" id="apLoansCount">0</div>
+            </div>
+            <div style="margin-top:20px;">
+                <h4 style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Recent Entries</h4>
+                <div id="apRecentList" style="display:flex; flex-direction:column; gap:8px;"></div>
+            </div>
+        </div>
+
+        <div id="ap-tab-commissions" class="profile-tab-content" style="padding:20px; display:none;">
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
+                <div class="stat-card" style="background:rgba(16, 185, 129, 0.1); border-color:rgba(16, 185, 129, 0.2);">
+                    <div class="stat-label">Total Commission</div>
+                    <div class="stat-value" id="apTotalComm" style="color:#34d399;">K0.00</div>
+                    <div class="stat-sub">Potential Earnings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg. Rate</div>
+                    <div class="stat-value" id="apAvgComm">15%</div>
+                    <div class="stat-sub">Performance</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(59, 130, 246, 0.1); border:1px solid rgba(59, 130, 246, 0.2); padding:12px; border-radius:12px; font-size:0.8rem; color:#93c5fd; margin-bottom:20px;">
+                <strong>ℹ️ Policy:</strong> Standard commission is 25% of profit. If the loan interest rate is discounted, the commission % is reduced by the same proportion.
+            </div>
+
+            <div class="table-wrapper">
+                <table style="font-size:0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>Loan</th>
+                            <th style="text-align:right;">Profit</th>
+                            <th style="text-align:center;">Rate Impact</th>
+                            <th style="text-align:right;">Comm.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apCommBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="expenseModal" class="modal-overlay modal-hidden" style="z-index: 60000; display:none;">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <div class="modal-title" id="expenseModalTitle">Record Expense</div>
+      <button type="button" class="modal-close" onclick="closePopup('expenseModal')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="field">
+        <label style="font-size:0.85rem; color:#94a3b8;">Amount (K)</label>
+        <input type="number" id="expAmount" placeholder="0.00" style="font-size:1.5rem; font-weight:800; color:#ef4444; padding:12px;">
+      </div>
+
+      <div class="field">
+        <label style="font-size:0.85rem; color:#94a3b8;">Date</label>
+        <input type="date" id="expDate">
+      </div>
+
+      <div class="field">
+         <label style="font-size:0.85rem; color:#94a3b8;">Category</label>
+         <select id="expCategory" style="padding:10px;">
+            <option value="General">General Expense</option>
+            <option value="Commission">Commission Payout</option>
+            <option value="Marketing">Marketing / Ads</option>
+            <option value="Transport">Transport</option>
+            <option value="Salary">Salary</option>
+            <option value="Utility">Data / Airtime</option>
+            <option value="Other">Other</option>
+         </select>
+      </div>
+
+      <div class="field">
+        <label style="font-size:0.85rem; color:#94a3b8;">Description</label>
+        <textarea id="expNote" rows="3" placeholder="e.g. Payment for January Commissions..."></textarea>
+      </div>
+
+      <button class="btn" style="width:100%; margin-top:15px; background:#ef4444; color:white; border:none; padding:12px;" onclick="saveExpense()">
+        Confirm Payment
+      </button>
+
+    </div>
+  </div>
+</div>
+
+  <div id="paymentMethodsModal" class="modal-overlay modal-hidden modal-bottom-sheet" style="display: none; z-index: 80000;">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Payment Methods</div>
+        <button type="button" class="modal-close" onclick="closePopup('paymentMethodsModal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding-top: 15px;">
+
+        <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; margin-bottom:20px; border: 1px solid rgba(255,255,255,0.05);">
+          <div style="font-size:0.85rem; font-weight:600; margin-bottom:10px;">Add New Payment Line</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input type="text" id="pmName" placeholder="Account Name (e.g. STALLZ MTN)" style="flex:1; min-width: 120px;" class="welcome-input">
+            <input type="text" id="pmPhone" placeholder="Phone Number (e.g. 096...)" style="flex:1; min-width: 120px;" class="welcome-input">
+            <button class="btn" onclick="addPaymentMethod()" style="padding:0 20px;">Add</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+                <tr>
+                    <th>Account Name</th>
+                    <th>Phone Number</th>
+                    <th style="text-align:right;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="paymentMethodsBody"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="allRequestsModal" class="modal-overlay modal-hidden modal-bottom-sheet" style="display: none; z-index: 80000;">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">All Loan Requests</div>
+        <button type="button" class="modal-close" onclick="closePopup('allRequestsModal')">✕</button>
+      </div>
+
+      <div style="padding: 15px 15px 0 15px; display:flex; gap:8px; overflow-x:auto;">
+         <button class="chip active" onclick="filterAllRequests('ALL', this)">All</button>
+         <button class="chip" onclick="filterAllRequests('PENDING', this)">Pending</button>
+         <button class="chip" onclick="filterAllRequests('APPROVED', this)">Approved</button>
+         <button class="chip" onclick="filterAllRequests('REJECTED', this)">Declined</button>
+      </div>
+
+      <div class="modal-body" style="padding-top: 10px; overflow-y:auto; flex:1;">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Date</th>
+                    <th>Client & Details</th>
+                    <th style="text-align:right;">Amount</th>
+                    <th style="width: 90px; text-align:center;">Status</th>
+                    <th style="text-align:right;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="allRequestsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminDialogModal" class="modal-overlay modal-hidden" style="display: none; z-index: 99999 !important;">
+    <div class="modal" style="max-width: 360px; text-align: center;">
+        <h3 id="adminDialogTitle" style="margin-bottom: 10px;">Confirm</h3>
+        <p id="adminDialogMessage" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;"></p>
+        <input type="text" id="adminDialogInput" class="modal-input" style="display: none; margin-bottom: 20px; text-align: left;" placeholder="Enter details...">
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="closeAdminDialog()">Cancel</button>
+            <button id="adminDialogConfirmBtn" class="btn btn-primary" style="flex: 1;" onclick="confirmAdminDialog()">Confirm</button>
+        </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
+
+  <script src="../shared/firebase-init.js"></script>
+
+  <script src="../shared/stallz-shared.js"></script>
+
+  <script src="../shared/auth.js"></script>
+
+  <script src="app.js"></script>
+
+</body>
+
+<script>
+  try {
+    document.getElementById('adminAppVersion').textContent = 'v' + (window.STALLZ_APP_VERSION || '?.?');
+  } catch(e) {}
+</script>
+</html>

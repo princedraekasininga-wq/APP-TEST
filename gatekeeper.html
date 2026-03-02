@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Stallz Loans — Securing Session</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+
+  <style>
+    :root {
+      --primary: #16a34a;
+      --bg-deep: #f1f5f9;
+      --bg-light: #ffffff;
+
+      /* Highly transparent glass with green morphing tint */
+      --glass-surface: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(22, 163, 74, 0.1) 100%);
+      --glass-border: rgba(148, 163, 184, 0.3);
+      --glass-highlight: rgba(255, 255, 255, 0.9);
+
+      --text-main: #0f172a;
+      --text-muted: #475569;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    body {
+      background-color: var(--bg-deep);
+      background-image: radial-gradient(circle at 50% 0%, var(--bg-light), var(--bg-deep));
+      color: var(--text-main);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* --- ANIMATED AURORA BACKGROUND (PASTEL DAY MODE) --- */
+    .aurora-bg {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; overflow: hidden;
+    }
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(70px);
+      animation: float 20s infinite ease-in-out; mix-blend-mode: multiply;
+    }
+    .blob-1 { top: -10%; left: -10%; width: 60vw; height: 60vw; background: #bbf7d0; opacity: 0.7; animation-delay: 0s; }
+    .blob-2 { bottom: -10%; right: -10%; width: 70vw; height: 70vw; background: #bfdbfe; opacity: 0.6; animation-delay: -5s; }
+    .blob-3 { top: 40%; left: 40%; width: 50vw; height: 50vw; background: #e9d5ff; opacity: 0.5; animation-delay: -10s; }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -50px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    /* --- FROSTED GLASS CARD --- */
+    .glass-container {
+      width: 90%;
+      max-width: 340px;
+      padding: 40px 30px;
+      border-radius: 36px;
+      background: var(--glass-surface);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), inset 0 0 0 1px var(--glass-highlight);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: scale(0.95);
+    }
+
+    @keyframes popIn {
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* --- CIRCULAR PULSING LOGO (DAY MODE) --- */
+    .logo-ring {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 8px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 30px rgba(22, 163, 74, 0.15), inset 0 0 15px rgba(255, 255, 255, 1);
+      animation: pulseGlow 2s infinite alternate ease-in-out;
+    }
+
+    .logo-ring img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: contain;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(1); box-shadow: 0 0 20px rgba(22, 163, 74, 0.15), inset 0 0 10px rgba(255, 255, 255, 0.8); }
+      100% { transform: scale(1.05); box-shadow: 0 0 40px rgba(22, 163, 74, 0.3), inset 0 0 20px rgba(255, 255, 255, 1); }
+    }
+
+    /* --- TYPOGRAPHY --- */
+    .splash-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+      color: var(--text-main);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .loader-status {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      margin-top: 15px;
+      margin-bottom: 25px;
+    }
+
+    /* --- SHIMMERING LOADING BAR (GREEN MODE) --- */
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background: rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #16a34a, #4ade80, #86efac, #16a34a);
+      background-size: 200% 100%;
+      box-shadow: 0 0 15px rgba(22, 163, 74, 0.5);
+      transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      animation: shimmerBar 1.5s infinite linear;
+    }
+
+    @keyframes shimmerBar {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="glass-container">
+    <div class="logo-ring">
+      <img src="assets/logo_images/my-logo.png" alt="Stallz Logo" onerror="this.style.display='none'">
+    </div>
+
+    <div class="splash-title">STALLZ LOANS</div>
+    <div id="loaderStatus" class="loader-status">Securing Session...</div>
+
+    <div class="progress-track">
+      <div id="splashProgress" class="progress-bar"></div>
+    </div>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script src="shared/app-config.js"></script>
+  <script src="shared/firebase-init.js"></script>
+
+  <script>
+    const bar = document.getElementById('splashProgress');
+    const statusText = document.getElementById('loaderStatus');
+    let progress = 0;
+
+    function advanceProgress(target, status, callback) {
+      const interval = setInterval(() => {
+        if (progress >= target) {
+          clearInterval(interval);
+          if (callback) callback();
+        } else {
+          progress += 1;
+          bar.style.width = progress + '%';
+          statusText.textContent = status;
+        }
+      }, 15);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      advanceProgress(35, "Verifying Identity...", () => {
+
+        let authResolved = false;
+
+        const hangTimer = setTimeout(() => {
+            if (!authResolved) {
+                statusText.innerHTML = "<span style='color:#ef4444; font-weight:bold;'>Auth Error. Clear Cache & Refresh.</span>";
+                console.error("Firebase onAuthStateChanged timed out.");
+            }
+        }, 4000);
+
+        try {
+            if (typeof firebase === 'undefined' || typeof firebase.auth !== 'function') {
+                throw new Error("Firebase not initialized. Check firebase-init.js");
+            }
+
+            firebase.auth().onAuthStateChanged((user) => {
+              authResolved = true;
+              clearTimeout(hangTimer);
+
+              if (user) {
+                advanceProgress(80, "Fetching Profile...", () => {
+                  (async () => {
+                    try {
+                      const uid = user.uid;
+                      let role = (localStorage.getItem('stallz_offline_role') || 'client').toLowerCase();
+
+                      try {
+                        const roleSnap = await firebase.database().ref(`roles/${uid}`).get();
+                        if (roleSnap.exists()) {
+                          role = String(roleSnap.val() || '').toLowerCase() || role;
+                        }
+                      } catch (e) {}
+
+                      try {
+                        const adminSnap = await firebase.database().ref(`admins/${uid}`).get();
+                        if (adminSnap.exists()) {
+                          role = 'admin';
+                          const av = adminSnap.val() || {};
+                          const nm = (av.name || ((av.firstname || '') + ' ' + (av.surname || ''))).trim();
+                          if (nm) localStorage.setItem('stallz_offline_name', nm);
+                        }
+                      } catch (e) {}
+
+                      localStorage.setItem('stallz_offline_role', role === 'admin' ? 'admin' : role);
+                      const finalRole = localStorage.getItem('stallz_offline_role') || 'client';
+
+                      const hour = new Date().getHours();
+                      let greeting = "Good Evening";
+                      if (hour < 12) greeting = "Good Morning";
+                      else if (hour < 18) greeting = "Good Afternoon";
+
+                      advanceProgress(100, greeting, () => {
+                        setTimeout(() => {
+                          window.location.replace(finalRole === 'admin' ? 'admin/admin.html' : 'client-portal/client.html');
+                        }, 500);
+                      });
+
+                    } catch (err) {
+                        statusText.innerHTML = "<span style='color:#ef4444'>Profile Sync Error.</span>";
+                    }
+                  })();
+                });
+              } else {
+                window.location.replace('index.html');
+              }
+            });
+        } catch (error) {
+            clearTimeout(hangTimer);
+            statusText.innerHTML = "<span style='color:#ef4444; font-weight:bold;'>System Error: " + error.message + "</span>";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

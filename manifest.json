@@ -1,0 +1,59 @@
+{
+  "name": "Stallz Loans",
+  "short_name": "Stallz APP TEST",
+  "description": "Secure loan management and tracking for admins.",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "lang": "en-ZM",
+  "categories": [
+    "finance",
+    "productivity",
+    "business"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo_images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Loan",
+      "short_name": "Add Loan",
+      "description": "Create a new loan entry",
+      "url": "./admin/admin.html?action=new_loan",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Overview",
+      "short_name": "Stats",
+      "description": "View dashboard statistics",
+      "url": "./admin/admin.html?action=dashboard",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "gcm_sender_id": "103953800507"
+}

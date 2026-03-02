@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Stallz Loans - Secure Access</title>
+  <meta name="theme-color" content="#f8fafc">
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Stallz">
+  <link rel="apple-touch-icon" href="apple-touch.png">
+
+  <link rel="icon" type="image/png" href="assets/logo_images/myfavicon.png">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #16a34a;
+      --primary-gradient: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      --accent-glow: #86efac;
+
+      /* DAY MODE COLORS */
+      --bg-deep: #f1f5f9;
+      --bg-light: #ffffff;
+
+      /* Highly transparent glass with green morphing tint */
+      --glass-surface: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(22, 163, 74, 0.1) 100%);
+      --glass-border: rgba(148, 163, 184, 0.3);
+      --glass-highlight: rgba(255, 255, 255, 0.9);
+
+      --text-main: #0f172a;
+      --text-muted: #475569;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    body {
+      background-color: var(--bg-deep);
+      background-image: radial-gradient(circle at 50% 0%, var(--bg-light), var(--bg-deep));
+      color: var(--text-main);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      padding: 10px;
+    }
+
+    /* --- ANIMATED AURORA BACKGROUND --- */
+    .aurora-bg {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; overflow: hidden;
+    }
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(70px);
+      animation: float 20s infinite ease-in-out; mix-blend-mode: multiply;
+    }
+    .blob-1 { top: -10%; left: -10%; width: 60vw; height: 60vw; background: #bbf7d0; opacity: 0.7; animation-delay: 0s; }
+    .blob-2 { bottom: -10%; right: -10%; width: 70vw; height: 70vw; background: #bfdbfe; opacity: 0.6; animation-delay: -5s; }
+    .blob-3 { top: 40%; left: 40%; width: 50vw; height: 50vw; background: #e9d5ff; opacity: 0.5; animation-delay: -10s; }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -50px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    /* --- GLASS CARD CONTAINER --- */
+    .login-wrapper {
+      width: 100%;
+      max-width: 460px;
+      display: flex; flex-direction: column;
+      align-items: center; z-index: 10; margin: auto;
+    }
+
+    .glass-card {
+      width: 100%;
+      padding: 30px 20px;
+      border-radius: 36px;
+      background: var(--glass-surface);
+      backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), inset 0 0 0 1px var(--glass-highlight);
+      position: relative; overflow-y: auto; overflow-x: hidden; max-height: 90vh;
+      transition: transform 0.3s ease, height 0.3s ease;
+    }
+
+    .glass-card::-webkit-scrollbar { width: 4px; }
+    .glass-card::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+
+    .brand-section { text-align: center; position: relative; z-index: 1; margin-bottom: 20px; }
+    .logo-container { position: relative; display: inline-block; margin-bottom: 5px; }
+
+    .logo-img {
+      height: 100px;
+      width: 100px;
+      object-fit: contain;
+      border-radius: 50%;
+      animation: gentleFloat 4s ease-in-out infinite alternate;
+      transition: all 0.3s ease;
+    }
+
+    @keyframes gentleFloat {
+      0% { transform: translateY(-4px) scale(1.02); filter: drop-shadow(0 10px 20px rgba(22, 163, 74, 0.15)) drop-shadow(0 0 30px rgba(255, 255, 255, 0.8)); }
+      100% { transform: translateY(-8px) scale(1.04); filter: drop-shadow(0 15px 25px rgba(22, 163, 74, 0.2)) drop-shadow(0 0 35px rgba(255, 255, 255, 0.9)); }
+    }
+
+    .welcome-title { font-size: 1.3rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; margin-bottom: 2px; }
+    .tagline { font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .sub-text { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+    /* --- WIZARD HEADER --- */
+    .wizard-header { display: none; text-align: center; margin-bottom: 20px; position: relative; z-index: 1; }
+    .wizard-step-text { font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; }
+    .wizard-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-top: 4px; }
+    .wizard-progress { display: flex; gap: 5px; justify-content: center; margin-top: 10px; }
+
+    .progress-dot { height: 6px; width: 25px; background: rgba(0,0,0,0.1); border-radius: 50px; transition: all 0.3s; }
+    .progress-dot.active { background: var(--primary); width: 40px; }
+
+    /* --- RATES WIDGET (PILL SHAPE & INTERACTIVE) --- */
+    .rates-widget {
+      position: relative; z-index: 1; background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 50px;
+      padding: 10px 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      cursor: default;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .rates-widget:hover, .rates-widget:active {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(255, 255, 255, 1);
+    }
+
+    .rates-label { display: none; }
+    .rates-grid { display: flex; justify-content: space-between; align-items: center; }
+    .rate-item { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; }
+    .rate-val { font-size: 0.85rem; font-weight: 800; color: var(--text-main); }
+    .rate-key { font-size: 0.6rem; color: var(--text-muted); margin-top: 2px; font-weight: 700; text-transform: uppercase; }
+
+    /* --- MULTI-STEP SLIDER FIX: No empty space --- */
+    .form-slider-container { display: flex; width: 300%; align-items: flex-start; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+    .form-step {
+        width: 33.333%; padding: 0 5px; flex-shrink: 0;
+        height: 0; overflow: hidden; opacity: 0; visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+    .form-step.active {
+        height: auto; overflow: visible; opacity: 1; visibility: visible;
+    }
+
+    /* --- FORM STYLING (PILL SHAPE) --- */
+    .input-wrapper { position: relative; z-index: 1; margin-bottom: 12px; }
+    .input-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.9rem; transition: all 0.3s ease; z-index: 2; }
+
+    .password-toggle-icon { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1rem; cursor: pointer; z-index: 3; padding: 5px; transition: color 0.2s; }
+    .password-toggle-icon:hover { color: var(--text-main); }
+
+    .form-input {
+      width: 100%; padding: 14px 14px 14px 44px; background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      border-radius: 50px;
+      color: var(--text-main);
+      font-size: 0.9rem; font-weight: 600; outline: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+    }
+
+    .form-input.has-eye { padding-right: 48px; }
+
+    select.form-input option { background-color: #ffffff; color: var(--text-main); }
+    input[type="date"].form-input { color: var(--text-main); }
+
+    .form-input:focus { border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15); }
+    .form-input:focus + .input-icon { color: var(--primary); transform: translateY(-50%) scale(1.15); }
+    .form-input::placeholder { color: #94a3b8; font-weight: 500; }
+
+    /* 🌟 NEW: Error Highlights */
+    .form-input.error-border {
+        border-color: #ef4444 !important;
+        background: #fef2f2 !important;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+    }
+
+    /* --- INTEGRATED ERROR MESSAGES --- */
+    .auth-error-message {
+        color: #b91c1c;
+        background: #fef2f2;
+        padding: 12px 18px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        margin-bottom: 16px;
+        text-align: left;
+        border: 1px solid #fca5a5;
+        font-weight: 700;
+        display: none;
+        box-shadow: 0 4px 10px rgba(185, 28, 28, 0.1);
+        z-index: 10;
+        position: relative;
+    }
+    .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+        40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    /* --- BUTTONS (PILL SHAPE) --- */
+    .btn-group { display: flex; gap: 8px; margin-top: 10px; z-index: 1; position: relative;}
+    .submit-btn {
+      width: 100%; padding: 14px;
+      border-radius: 50px;
+      background: var(--primary-gradient);
+      border: none; color: white; font-weight: 700; font-size: 0.95rem; cursor: pointer;
+      position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 8px 20px -6px rgba(22, 163, 74, 0.5);
+    }
+    .btn-secondary { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(148, 163, 184, 0.5); box-shadow: none; color: var(--text-main); }
+    .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -6px rgba(22, 163, 74, 0.6); }
+    .submit-btn.btn-secondary:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.05); background: rgba(255, 255, 255, 0.9); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn.loading { background: #cbd5e1; color: #475569; cursor: wait; box-shadow: none; }
+
+    /* --- FOOTER --- */
+    .auth-switch { text-align: center; margin-top: 16px; font-size: 0.8rem; color: var(--text-muted); position: relative; z-index: 1; font-weight: 600; }
+    .switch-link { color: var(--primary); font-weight: 800; text-decoration: none; cursor: pointer; margin-left: 5px; transition: color 0.2s; }
+    .switch-link:hover { color: #15803d; text-decoration: underline; }
+    .notice-text { margin-top: 16px; font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; text-align: center; }
+
+    /* --- CHECKBOX --- */
+    .terms-wrapper { margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px; font-size: 0.75rem; color: var(--text-muted); text-align: left; line-height: 1.4; position: relative; z-index: 1; padding: 0 4px; }
+    .terms-wrapper input[type="checkbox"] { margin-top: 2px; min-width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; border-radius: 4px; }
+    .terms-wrapper a { color: var(--primary); text-decoration: none; font-weight: 700; }
+    .terms-wrapper a:hover { text-decoration: underline; }
+
+    .hidden { display: none; }
+    .row { display: flex; gap: 8px; }
+    .col { flex: 1; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 6px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* --- MODALS --- */
+    .doc-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(241, 245, 249, 0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 99999; padding: 20px; }
+    .doc-modal-glass { width: 100%; max-width: 600px; max-height: 85vh; background: rgba(255,255,255,0.95); border: 1px solid rgba(148, 163, 184, 0.4); border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+    .doc-modal-header { padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+    .doc-modal-header h3 { font-size: 1.2rem; margin: 0; color: var(--text-main); }
+    .doc-close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
+    .doc-modal-body { padding: 24px; overflow-y: auto; color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+    .doc-modal-body h4 { color: var(--primary); margin-top: 15px; margin-bottom: 5px; font-size: 1rem; }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* --- GLOBAL TOAST --- */
+    #globalToast {
+        position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+        background: var(--text-main); color: white; padding: 12px 24px;
+        border-radius: 50px; font-weight: 700; font-size: 0.85rem;
+        z-index: 999999; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        transition: opacity 0.3s; opacity: 0;
+        display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="globalToast"></div>
+
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="login-wrapper">
+    <div class="glass-card" id="mainGlassCard">
+
+      <div class="brand-section" id="loginHeader">
+        <div class="logo-container">
+          <img src="assets/logo_images/my-logo.png" alt="Stallz" class="logo-img" onerror="this.style.display='none'">
+        </div>
+        <div class="welcome-title" id="mainTitle">STALLZ LOANS</div>
+        <div class="tagline" id="tagline">Fast. Secure. Low Rates.</div>
+        <div class="sub-text" id="subTitle">Sign in to manage your account</div>
+      </div>
+
+      <div class="wizard-header" id="wizardHeader">
+          <div class="wizard-step-text" id="wizardStepText">Step 1 of 3</div>
+          <div class="wizard-title" id="wizardTitle">Personal Details</div>
+          <div class="wizard-progress">
+              <div class="progress-dot active" id="dot1"></div>
+              <div class="progress-dot" id="dot2"></div>
+              <div class="progress-dot" id="dot3"></div>
+          </div>
+      </div>
+
+      <div class="rates-widget" id="ratesWidget">
+        <div class="rates-grid">
+          <div class="rate-item"><div class="rate-val">20%</div><div class="rate-key">Weekly</div></div>
+          <div class="rate-item"><div class="rate-val">30%</div><div class="rate-key">2 Wks</div></div>
+          <div class="rate-item"><div class="rate-val">35%</div><div class="rate-key">3 Wks</div></div>
+          <div class="rate-item"><div class="rate-val" style="color:var(--primary)">40%</div><div class="rate-key">Monthly</div></div>
+        </div>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div id="loginErrorMsg" class="auth-error-message"></div>
+
+        <div class="input-wrapper">
+          <input type="email" id="loginEmail" class="form-input" placeholder="Email Address" required autocomplete="email">
+          <i class="fa-solid fa-envelope input-icon"></i>
+        </div>
+
+        <div class="input-wrapper">
+          <input type="password" id="loginPass" class="form-input has-eye" placeholder="Password" required autocomplete="current-password">
+          <i class="fa-solid fa-lock input-icon"></i>
+          <i class="fa-solid fa-eye password-toggle-icon" onclick="togglePassword('loginPass', this)"></i>
+        </div>
+
+        <button type="submit" id="loginBtn" class="submit-btn">Sign In</button>
+
+        <div class="auth-switch">
+          New here? <span class="switch-link" onclick="switchMode('register')">Create Account</span>
+        </div>
+      </form>
+
+      <form id="registerForm" class="hidden" onsubmit="handleRegister(event)" novalidate>
+          <div style="overflow: hidden; width: 100%;">
+              <div class="form-slider-container" id="sliderContainer">
+
+                  <div class="form-step active" id="step1">
+                      <div id="regErrorMsg1" class="auth-error-message"></div>
+
+                      <div class="row">
+                        <div class="col input-wrapper"><input type="text" id="regName" class="form-input" placeholder="First Name" autocomplete="given-name"><i class="fa-solid fa-user input-icon"></i></div>
+                        <div class="col input-wrapper"><input type="text" id="regSurname" class="form-input" placeholder="Surname" autocomplete="family-name"></div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col input-wrapper">
+                          <input type="text" id="regDob" class="form-input" placeholder="Date of Birth" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" style="cursor: pointer;">
+                          <i class="fa-solid fa-calendar input-icon"></i>
+                        </div>
+                        <div class="col input-wrapper">
+                          <select id="regGender" class="form-input" style="cursor: pointer; padding-left: 40px;">
+                            <option value="" disabled selected>Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                          </select>
+                          <i class="fa-solid fa-venus-mars input-icon"></i>
+                        </div>
+                      </div>
+
+                      <div id="dobError" style="color: #ef4444; font-size: 0.75rem; display: none; margin-top: -8px; margin-bottom: 10px; padding-left: 10px; text-align: left; font-weight: 700;">
+                          <i class="fas fa-exclamation-circle"></i> You must be at least 18 years old.
+                      </div>
+
+                      <div class="input-wrapper"><input type="text" id="regNrc" class="form-input" placeholder="NRC (e.g. 123456/12/1)" maxlength="11"><i class="fa-solid fa-id-card input-icon"></i></div>
+
+                      <div class="input-wrapper">
+                        <select id="regOccupation" class="form-input" style="cursor: pointer; padding-left: 40px;">
+                          <option value="" disabled selected>Occupation</option>
+                          <option value="Formal Employment">Formal Employment</option>
+                          <option value="Business Owner">Business Owner</option>
+                          <option value="Market Trader">Market Trader</option>
+                          <option value="Civil Servant">Civil Servant</option>
+                          <option value="Student">Student</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        <i class="fa-solid fa-briefcase input-icon"></i>
+                      </div>
+
+                      <div class="btn-group">
+                          <button type="button" class="submit-btn" onclick="nextStep(2)">Next Step ➔</button>
+                      </div>
+                  </div>
+
+                  <div class="form-step" id="step2">
+                      <div id="regErrorMsg2" class="auth-error-message"></div>
+
+                      <div class="kyc-address-group" style="background: rgba(255, 255, 255, 0.5); padding: 12px; border-radius: 20px; border: 1px solid rgba(148, 163, 184, 0.3); margin-bottom: 12px; text-align: left;">
+                          <label style="display: block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; font-weight: 800; letter-spacing: 0.5px; padding-left: 6px;">Residential Address</label>
+
+                          <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                              <div class="input-wrapper" style="flex: 1; margin-bottom: 0;">
+                                  <select id="regProvince" class="form-input" style="padding-left: 40px; cursor: pointer;" onchange="updateDistricts()">
+                                      <option value="" disabled selected>Province</option>
+                                      <option value="Lusaka">Lusaka</option>
+                                      <option value="Copperbelt">Copperbelt</option>
+                                      <option value="Central">Central</option>
+                                      <option value="Southern">Southern</option>
+                                      <option value="Eastern">Eastern</option>
+                                      <option value="North-Western">North-Western</option>
+                                      <option value="Western">Western</option>
+                                      <option value="Northern">Northern</option>
+                                      <option value="Luapula">Luapula</option>
+                                      <option value="Muchinga">Muchinga</option>
+                                  </select>
+                                  <i class="fas fa-map-marked-alt input-icon"></i>
+                              </div>
+
+                              <div class="input-wrapper" style="flex: 1; margin-bottom: 0;">
+                                  <select id="regDistrict" class="form-input" style="padding-left: 40px; cursor: pointer;" disabled>
+                                      <option value="" disabled selected>District</option>
+                                  </select>
+                                  <i class="fas fa-city input-icon"></i>
+                              </div>
+                          </div>
+
+                          <div class="input-wrapper" style="margin-bottom: 8px;">
+                              <input type="text" id="regArea" class="form-input" placeholder="Area / Township">
+                              <i class="fas fa-map-marker-alt input-icon"></i>
+                          </div>
+
+                          <div class="input-wrapper" style="margin-bottom: 0;">
+                              <input type="text" id="regHouseNumber" class="form-input" placeholder="House / Plot Number">
+                              <i class="fas fa-home input-icon"></i>
+                          </div>
+                      </div>
+
+                      <div class="input-wrapper"><input type="tel" id="regPhone" class="form-input" placeholder="Primary Phone (e.g. 097...)" autocomplete="tel"><i class="fa-solid fa-phone input-icon"></i></div>
+                      <div class="input-wrapper"><input type="tel" id="regWhatsapp" class="form-input" placeholder="WhatsApp (Optional)"><i class="fa-brands fa-whatsapp input-icon"></i></div>
+                      <div class="input-wrapper"><input type="text" id="regMomoName" class="form-input" placeholder="Mobile Money Name"><i class="fa-solid fa-wallet input-icon"></i></div>
+
+                      <div class="btn-group">
+                          <button type="button" class="submit-btn btn-secondary" style="flex:0.35;" onclick="nextStep(1)">⬅</button>
+                          <button type="button" class="submit-btn" style="flex:1;" onclick="nextStep(3)">Next Step ➔</button>
+                      </div>
+                  </div>
+
+                  <div class="form-step" id="step3">
+                      <div id="regErrorMsg3" class="auth-error-message"></div>
+
+                      <div class="row">
+                        <div class="col input-wrapper"><input type="text" id="regNokName" class="form-input" placeholder="Next of Kin (Opt)"><i class="fa-solid fa-user-friends input-icon"></i></div>
+                        <div class="col input-wrapper"><input type="tel" id="regNokPhone" class="form-input" placeholder="Kin Phone (Opt)"></div>
+                      </div>
+
+                      <div class="input-wrapper"><input type="email" id="regEmail" class="form-input" placeholder="Email Address" autocomplete="email"><i class="fa-solid fa-envelope input-icon"></i></div>
+
+                      <div class="input-wrapper">
+                        <input type="password" id="regPass" class="form-input has-eye" placeholder="Create Password" autocomplete="new-password">
+                        <i class="fa-solid fa-key input-icon"></i>
+                        <i class="fa-solid fa-eye password-toggle-icon" onclick="togglePassword('regPass', this)"></i>
+                      </div>
+
+                      <div class="input-wrapper">
+                        <input type="password" id="regConfirmPass" class="form-input has-eye" placeholder="Confirm Password" autocomplete="new-password">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <i class="fa-solid fa-eye password-toggle-icon" onclick="togglePassword('regConfirmPass', this)"></i>
+                      </div>
+
+                      <div class="terms-wrapper" id="termsBox">
+                        <input type="checkbox" id="regTerms">
+                        <label for="regTerms">I agree to the <a href="#" onclick="openDocModal('termsModal'); return false;">Terms</a> & <a href="#" onclick="openDocModal('privacyModal'); return false;">Privacy Policy</a>.</label>
+                      </div>
+
+                      <div id="recaptcha-container"></div>
+
+                      <div class="btn-group">
+                          <button type="button" class="submit-btn btn-secondary" style="flex:0.35;" onclick="nextStep(2)">⬅</button>
+                          <button type="submit" id="regBtn" class="submit-btn" style="flex:1;">Create Account</button>
+                      </div>
+                  </div>
+
+              </div>
+          </div>
+          <div class="auth-switch">Already a member? <span class="switch-link" onclick="switchMode('login')">Sign In</span></div>
+      </form>
+
+    </div>
+
+    <div class="notice-text">Strictly Collateral Based Loans</div>
+  </div>
+
+  <div id="pushNotifModal" class="doc-modal-overlay" style="z-index: 99998;">
+      <div class="glass-card" style="width: 100%; max-width: 400px; text-align: center; border-radius: 36px; padding: 40px 24px; animation: slideUp 0.5s ease-out; background: rgba(255,255,255,0.95);">
+          <div class="logo-container" style="margin-bottom: 25px;">
+              <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(22, 163, 74, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 0 20px rgba(22, 163, 74, 0.2);">
+                  <i class="fas fa-bell" style="font-size: 2.2rem; color: var(--primary);"></i>
+              </div>
+          </div>
+          <h2 style="margin-bottom: 12px; font-size: 1.6rem; font-weight: 800; color: var(--text-main);">Stay Updated</h2>
+          <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 30px; line-height: 1.6;">
+              Stallz Loans uses secure notifications to instantly alert you when your loan request is approved or a payment is due.
+          </p>
+          <button id="enablePushBtn" class="submit-btn" onclick="requestPreLoginPush()">
+              <i class="fas fa-check-circle" style="margin-right: 10px;"></i> Enable Notifications
+          </button>
+          <button onclick="document.getElementById('pushNotifModal').style.display = 'none';" class="submit-btn btn-secondary" style="margin-top: 10px; font-size: 0.85rem; padding: 12px; background: transparent; border: none; box-shadow: none;">
+              Maybe Later
+          </button>
+      </div>
+  </div>
+
+  <div id="otpModal" class="doc-modal-overlay">
+    <div class="doc-modal-glass" style="max-width: 360px; text-align: center; border-radius: 36px;">
+      <h3 style="padding: 24px 0 0 0;">Verify Phone</h3>
+      <input type="number" id="otpCode" class="form-input" placeholder="000000" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px; margin: 20px; width: calc(100% - 40px);">
+      <div style="padding: 0 20px 24px 20px;">
+          <button onclick="verifyAndRegister()" class="submit-btn">Verify & Create Account</button>
+          <button onclick="closeOtpModal()" class="submit-btn btn-secondary" style="margin-top:10px;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="termsModal" class="doc-modal-overlay"><div class="doc-modal-glass" style="border-radius: 30px;"><button class="doc-close-btn" onclick="closeDocModal('termsModal')">&times;</button><h3 style="padding: 0 24px;">Terms</h3><div class="doc-modal-body">Stallz Loans operates strictly as a Collateral-Based Lending Platform...</div></div></div>
+  <div id="privacyModal" class="doc-modal-overlay"><div class="doc-modal-glass" style="border-radius: 30px;"><button class="doc-close-btn" onclick="closeDocModal('privacyModal')">&times;</button><h3 style="padding: 0 24px;">Privacy</h3><div class="doc-modal-body">This policy outlines how we collect, use, and protect your information...</div></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
+    <script src="shared/app-config.js"></script>
+
+<script src="shared/firebase-init.js"></script>
+<script src="shared/auth.js"></script>
+
+  <script>
+    const ENABLE_PHONE_OTP = false;
+    let pendingRegistrationData = null;
+    let deferredPrompt;
+    let currentStep = 1;
+
+    // --- GLOBAL TOAST NOTIFICATION ---
+    function showGlobalToast(msg, type='success') {
+        const t = document.getElementById('globalToast');
+        if (!t) return;
+        t.style.background = type === 'success' ? 'var(--primary)' : '#ef4444';
+        const icon = type === 'success' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-exclamation-triangle"></i>';
+        t.innerHTML = `${icon} <span>${msg}</span>`;
+        t.style.display = 'flex';
+        setTimeout(() => t.style.opacity = '1', 10);
+        setTimeout(() => {
+            t.style.opacity = '0';
+            setTimeout(() => t.style.display = 'none', 300);
+        }, 3500);
+        if(typeof vibrate === 'function' && type === 'error') vibrate([40]);
+    }
+
+    // --- AUTO FORMAT NRC FIELD ---
+    document.getElementById('regNrc')?.addEventListener('input', function (e) {
+        let val = e.target.value.replace(/\D/g, '');
+        if (val.length > 6 && val.length <= 8) {
+            val = val.slice(0,6) + '/' + val.slice(6);
+        } else if (val.length > 8) {
+            val = val.slice(0,6) + '/' + val.slice(6,8) + '/' + val.slice(8,9);
+        }
+        e.target.value = val;
+    });
+
+    const zambiaLocations = {
+        "Lusaka": ["Lusaka", "Kafue", "Chongwe", "Chilanga", "Luangwa", "Rufunsa"],
+        "Copperbelt": ["Ndola", "Kitwe", "Chingola", "Mufulira", "Luanshya", "Kalulushi", "Chililabombwe", "Lufwanyama", "Mpongwe", "Masilukye"],
+        "Central": ["Kabwe", "Kapiri Mposhi", "Mkushi", "Serenje", "Mumbwa", "Chibombo", "Chisamba", "Shibuyunji", "Ngabwe", "Luano"],
+        "Southern": ["Livingstone", "Choma", "Mazabuka", "Monze", "Kalomo", "Pemba", "Zimba", "Kazungula", "Gwembe", "Namwala", "Itezhi-Tezhi"],
+        "Eastern": ["Chipata", "Petauke", "Lundazi", "Katete", "Nyimba", "Sinda", "Chadiza", "Vubwi", "Mambwe"],
+        "North-Western": ["Solwezi", "Kasempa", "Mwinilunga", "Zambezi", "Kabompo", "Mufumbwe", "Chavuma", "Manyinga", "Ikelenge", "Mushindamo", "Kalumbila"],
+        "Western": ["Mongu", "Kaoma", "Senanga", "Sesheke", "Lukulu", "Kalabo", "Shang'ombo", "Sikongo", "Nalolo", "Sioma", "Mitete", "Luampa", "Nkeyema", "Mulobezi"],
+        "Northern": ["Kasama", "Mbala", "Mporokoso", "Luwingu", "Mungwi", "Lupososhi", "Lunte", "Senga Hill", "Kaputa", "Nsama", "Chilubi"],
+        "Luapula": ["Mansa", "Kawambwa", "Nchelenge", "Samfya", "Mwense", "Milenge", "Chiengi", "Mwansabombwe", "Lunga", "Chembe", "Chifunabuli", "Chipili"],
+        "Muchinga": ["Chinsali", "Mpika", "Nakonde", "Isoka", "Mafinga", "Shiwa Ng'andu", "Chama", "Kanchibiya", "Lavushimanda"]
+    };
+
+    window.updateDistricts = function() {
+        const province = document.getElementById('regProvince').value;
+        const districtSelect = document.getElementById('regDistrict');
+        districtSelect.innerHTML = '<option value="" disabled selected>District/City</option>';
+        if (province && zambiaLocations[province]) {
+            zambiaLocations[province].forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                districtSelect.appendChild(option);
+            });
+            districtSelect.disabled = false;
+        } else {
+            districtSelect.disabled = true;
+        }
+    };
+
+    window.isOver18 = function(dateString) {
+        if (!dateString) return false;
+        const dob = new Date(dateString);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        return age >= 18;
+    };
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+            try {
+                const registration = await navigator.serviceWorker.register('sw.js');
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            console.log("🔄 Background App Update Detected.");
+                        }
+                    });
+                });
+            } catch (err) {
+                console.error('Service Worker registration failed:', err);
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const isIos = () => /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isPhone = /iPhone|Android.*Mobile/i.test(navigator.userAgent);
+        const isInStandaloneMode = () => (window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches || (document.referrer.includes('android-app://'));
+
+        let isAlreadyInstalled = false;
+        if ('getInstalledRelatedApps' in navigator) {
+            try { const apps = await navigator.getInstalledRelatedApps(); isAlreadyInstalled = apps.length > 0; } catch (e) {}
+        }
+
+        const gatekeeper = document.getElementById('pwaInstallModal');
+
+        if (gatekeeper) {
+            if (isPhone && !isInStandaloneMode()) {
+                gatekeeper.style.display = 'flex';
+                const iosInst = document.getElementById('pwaIosInstructions');
+                const pwaText = document.getElementById('pwaInstallText');
+                const pwaBtn = document.getElementById('pwaInstallBtn');
+
+                if (isIos() && iosInst && pwaText) {
+                    iosInst.style.display = 'block';
+                    pwaText.style.display = 'none';
+                }
+
+                if (isAlreadyInstalled && pwaText && pwaBtn) {
+                    pwaText.innerHTML = "<span style='color:#16a34a; font-weight:bold;'>App already installed!</span><br>Please open from your home screen.";
+                    pwaBtn.style.display = 'none';
+                }
+            } else {
+                gatekeeper.style.display = 'none';
+            }
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); deferredPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn && isPhone && !isAlreadyInstalled) btn.style.display = 'block';
+        });
+
+        document.getElementById('pwaInstallBtn')?.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted' && gatekeeper) gatekeeper.style.display = 'none';
+                deferredPrompt = null;
+            }
+        });
+
+        setTimeout(() => {
+            const isPwaVisible = gatekeeper && gatekeeper.style.display !== 'none';
+            if (!isPwaVisible && 'Notification' in window && Notification.permission === 'default') {
+                if (!sessionStorage.getItem('stallz_skip_push')) {
+                    const pushModal = document.getElementById('pushNotifModal');
+                    if (pushModal) pushModal.style.display = 'flex';
+                }
+            }
+        }, 1200);
+    });
+
+    async function requestPreLoginPush() {
+        const btn = document.getElementById('enablePushBtn');
+        setLoading(btn, true, "Securing...");
+
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                const messaging = firebase.messaging();
+                const registration = await navigator.serviceWorker.register('sw.js');
+                await navigator.serviceWorker.ready;
+                const token = await messaging.getToken({
+                    serviceWorkerRegistration: registration,
+                    vapidKey: window.STALLZ_FIREBASE.config.vapidKey
+                });
+
+                if (token) {
+                    localStorage.setItem('stallz_pending_fcm_token', token);
+                    showGlobalToast("Success! Secure connection established.", "success");
+                } else {
+                    showGlobalToast("Failed to generate secure token.", "error");
+                }
+                document.getElementById('pushNotifModal').style.display = 'none';
+            } else {
+                sessionStorage.setItem('stallz_skip_push', 'true');
+                document.getElementById('pushNotifModal').style.display = 'none';
+            }
+        } catch (error) {
+            console.error("Push Error:", error);
+            showGlobalToast("Security feature unavailable on this browser.", "error");
+            sessionStorage.setItem('stallz_skip_push', 'true');
+            document.getElementById('pushNotifModal').style.display = 'none';
+        } finally {
+            setLoading(btn, false, "Enable Notifications");
+        }
+    }
+
+    function togglePassword(inputId, icon) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+            icon.style.color = '#0f172a';
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+            icon.style.color = '#94a3b8';
+        }
+    }
+
+    // --- UNIFORM ERROR INJECTION & FIELD HIGHLIGHTING ---
+    function clearBorders() {
+        document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error-border'));
+        document.getElementById('termsBox').style.border = "none";
+        document.getElementById('termsBox').style.background = "transparent";
+    }
+
+    function failField(id, msg, isRegister) {
+        const el = document.getElementById(id);
+        if(el) {
+            if (id === 'regTerms') {
+                document.getElementById('termsBox').style.border = "1px solid #fca5a5";
+                document.getElementById('termsBox').style.background = "#fef2f2";
+                document.getElementById('termsBox').style.borderRadius = "8px";
+            } else {
+                el.classList.add('error-border');
+                el.focus();
+            }
+        }
+        showAuthError(msg, isRegister);
+        return false;
+    }
+
+    function clearAuthErrors() {
+        document.querySelectorAll('.auth-error-message').forEach(el => el.style.display = "none");
+    }
+
+    function showAuthError(msg, isRegister = false) {
+        clearAuthErrors();
+
+        let errorId = "loginErrorMsg";
+        if (isRegister) {
+            errorId = "regErrorMsg" + currentStep;
+        }
+
+        const errEl = document.getElementById(errorId);
+        if (errEl) {
+            errEl.innerHTML = `<i class="fas fa-exclamation-circle" style="margin-right: 6px;"></i> ${msg}`;
+            errEl.style.display = "block";
+
+            errEl.classList.remove('shake');
+            void errEl.offsetWidth;
+            errEl.classList.add('shake');
+
+            if(typeof vibrate === 'function') vibrate([40, 40]);
+        }
+    }
+
+    function validateStep(step) {
+        clearBorders();
+
+        if (step === 1) {
+            const name = document.getElementById('regName').value.trim();
+            const surname = document.getElementById('regSurname').value.trim();
+            const dob = document.getElementById('regDob').value;
+            const gender = document.getElementById('regGender').value;
+            const nrc = document.getElementById('regNrc').value.trim();
+            const occ = document.getElementById('regOccupation').value;
+
+            if (!name) return failField('regName', 'Please enter your First Name.', true);
+            if (!surname) return failField('regSurname', 'Please enter your Surname.', true);
+            if (!dob) return failField('regDob', 'Please enter your Date of Birth.', true);
+
+            if (!window.isOver18(dob)) {
+                document.getElementById('dobError').style.display = 'block';
+                return failField('regDob', 'You must be at least 18 years old to use Stallz.', true);
+            } else {
+                document.getElementById('dobError').style.display = 'none';
+            }
+
+            if (!gender) return failField('regGender', 'Please select your Gender.', true);
+            if (!nrc) return failField('regNrc', 'Please provide your NRC Number.', true);
+            if (nrc.length < 8) return failField('regNrc', 'Please enter a complete NRC format.', true);
+            if (!occ) return failField('regOccupation', 'Please select your Occupation.', true);
+        }
+
+        if (step === 2) {
+            const prov = document.getElementById('regProvince').value;
+            const dist = document.getElementById('regDistrict').value;
+            const area = document.getElementById('regArea').value.trim();
+            const house = document.getElementById('regHouseNumber').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const momo = document.getElementById('regMomoName').value.trim();
+
+            if (!prov || prov === "Province") return failField('regProvince', 'Please select your Province.', true);
+            if (!dist || dist === "District/City" || dist === "District") return failField('regDistrict', 'Please select your District.', true);
+            if (!area) return failField('regArea', 'Please specify your Area / Township.', true);
+            if (!house) return failField('regHouseNumber', 'Please provide your House / Plot Number.', true);
+            if (!phone) return failField('regPhone', 'Primary Phone number is required.', true);
+            if (!momo) return failField('regMomoName', 'Mobile Money registered name is required.', true);
+        }
+
+        clearAuthErrors();
+        return true;
+    }
+
+    function nextStep(step) {
+        if (step > currentStep && !validateStep(currentStep)) return;
+
+        currentStep = step;
+        const slider = document.getElementById('sliderContainer');
+
+        const translateValue = (step - 1) * -33.333;
+        slider.style.transform = `translateX(${translateValue}%)`;
+
+        document.getElementById('wizardStepText').textContent = `Step ${step} of 3`;
+        const titles = {1: "Personal Details", 2: "Location & Contact", 3: "Security & Emergency"};
+        document.getElementById('wizardTitle').textContent = titles[step];
+
+        // Ensure ONLY the active step takes up vertical height to remove empty space!
+        [1, 2, 3].forEach(i => {
+            document.getElementById('dot' + i).classList.toggle('active', i === step);
+            const stepEl = document.getElementById('step' + i);
+            if (i === step) {
+                stepEl.classList.add('active');
+            } else {
+                stepEl.classList.remove('active');
+            }
+        });
+
+        document.getElementById('mainGlassCard').scrollTop = 0;
+    }
+
+    function switchMode(mode) {
+      clearAuthErrors();
+      clearBorders();
+      const login = document.getElementById('loginForm'), reg = document.getElementById('registerForm');
+      const lHead = document.getElementById('loginHeader'), wHead = document.getElementById('wizardHeader');
+      const rates = document.getElementById('ratesWidget');
+
+      document.querySelectorAll('input:not([type="checkbox"]), select').forEach(i => i.value = '');
+      document.getElementById('regTerms').checked = false;
+
+      document.querySelectorAll('.password-toggle-icon').forEach(icon => {
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+          icon.style.color = '#94a3b8';
+      });
+      ['loginPass', 'regPass', 'regConfirmPass'].forEach(id => document.getElementById(id).type = 'password');
+
+      if (mode === 'register') {
+          login.classList.add('hidden');
+          rates.classList.add('hidden');
+          lHead.style.display = 'none';
+
+          reg.classList.remove('hidden');
+          wHead.style.display = 'block';
+          nextStep(1);
+      } else {
+          reg.classList.add('hidden');
+          wHead.style.display = 'none';
+
+          login.classList.remove('hidden');
+          rates.classList.remove('hidden');
+          lHead.style.display = 'block';
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      clearAuthErrors();
+      clearBorders();
+
+      if (!navigator.onLine && (!window.isAppOffline || !window.isAppOffline())) {
+          showAuthError("You are offline. Please check your internet connection.", false);
+          return;
+      }
+
+      const btn = document.getElementById('loginBtn');
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPass').value;
+
+      if (!email) return failField('loginEmail', "Please enter your Email Address.", false);
+      if (!pass) return failField('loginPass', "Please enter your Password.", false);
+
+      setLoading(btn, true, "Verifying...");
+
+      if (window.isAppOffline && window.isAppOffline()) {
+          const savedToken = localStorage.getItem('stallz_offline_token');
+          const inputToken = btoa(email.toLowerCase() + '|' + pass);
+
+          if (savedToken === inputToken) {
+              const role = localStorage.getItem('stallz_offline_role') || 'client';
+              setTimeout(() => {
+                  window.location.replace('gatekeeper.html');
+              }, 500);
+              return;
+          } else {
+              showAuthError("Offline Mode: Details do not match the account saved on this device.", false);
+              setLoading(btn, false, "Sign In");
+              return;
+          }
+      }
+
+      try {
+        const res = await window.StallzAuth.signIn(email, pass);
+
+        localStorage.setItem('stallz_offline_token', btoa(email.toLowerCase() + '|' + pass));
+        localStorage.setItem('stallz_offline_role', res.role);
+
+        if (res.profile && res.profile.name) {
+            localStorage.setItem('stallz_offline_name', res.profile.name);
+        } else if (res.user && res.user.displayName) {
+            localStorage.setItem('stallz_offline_name', res.user.displayName);
+        } else {
+            localStorage.setItem('stallz_offline_name', email.split('@')[0]);
+        }
+
+        setTimeout(() => {
+            window.location.replace('gatekeeper.html');
+        }, 500);
+
+      } catch (err) {
+        let msg = "An error occurred. Please try again.";
+        let code = err.code || "";
+
+        if (code === 'auth/wrong-password') msg = "Incorrect password. Please try again.";
+        else if (code === 'auth/user-not-found') msg = "No account found with this email.";
+        else if (code === 'auth/invalid-email') msg = "The email address is not formatted correctly.";
+        else if (code === 'auth/network-request-failed') msg = "Network error. Please check your connection.";
+        else if (code === 'auth/too-many-requests') msg = "Too many failed attempts. Try again later.";
+        else if (code === 'auth/invalid-credential') msg = "Incorrect email or password.";
+        else msg = err.message || msg;
+
+        showAuthError(msg, false);
+        setLoading(btn, false, "Sign In");
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      clearAuthErrors();
+      clearBorders();
+
+      if (!navigator.onLine) {
+          showAuthError("You are offline. Please connect to the internet.", true);
+          return;
+      }
+
+      const email = document.getElementById('regEmail').value.trim();
+      const pass = document.getElementById('regPass').value;
+      const confirm = document.getElementById('regConfirmPass').value;
+      const termsChecked = document.getElementById('regTerms').checked;
+
+      if (!email) return failField('regEmail', 'Please enter your Email Address.', true);
+      if (!pass) return failField('regPass', 'Please create a Password.', true);
+      if (!confirm) return failField('regConfirmPass', 'Please confirm your Password.', true);
+
+      if (pass !== confirm) {
+          return failField('regConfirmPass', 'Passwords do not match. Please try again.', true);
+      }
+      if (pass.length < 6) {
+          return failField('regPass', 'Password must be at least 6 characters long.', true);
+      }
+      if (!termsChecked) {
+          return failField('regTerms', 'You must agree to the Terms and Conditions to proceed.', true);
+      }
+
+      const province = document.getElementById('regProvince').value;
+      const district = document.getElementById('regDistrict').value;
+      const area = document.getElementById('regArea').value.trim();
+      const houseNumber = document.getElementById('regHouseNumber').value.trim();
+      const fullAddress = `House ${houseNumber}, ${area}, ${district}, ${province} Province`;
+
+      const btn = document.getElementById('regBtn');
+      const data = {
+        firstName: document.getElementById('regName').value,
+        surname: document.getElementById('regSurname').value,
+        dob: document.getElementById('regDob').value,
+        gender: document.getElementById('regGender').value,
+        nrc: document.getElementById('regNrc').value,
+        occupation: document.getElementById('regOccupation').value,
+        address: fullAddress,
+        city: district,
+        phone: document.getElementById('regPhone').value,
+        whatsapp: document.getElementById('regWhatsapp').value,
+        momoName: document.getElementById('regMomoName').value,
+        nextOfKinName: document.getElementById('regNokName').value,
+        nextOfKinPhone: document.getElementById('regNokPhone').value,
+        email: email,
+        password: pass
+      };
+
+      if (!ENABLE_PHONE_OTP) {
+        setLoading(btn, true, "Creating Account...");
+        try {
+            await window.StallzAuth.registerClient(data);
+            window.location.replace('gatekeeper.html');
+        } catch (err) {
+            let msg = "Registration failed. Please try again.";
+            let code = err.code || "";
+
+            if (code === 'auth/email-already-in-use') msg = "This email address is already registered. Please sign in.";
+            else if (code === 'auth/invalid-email') msg = "The email address is not valid.";
+            else if (code === 'auth/weak-password') msg = "Password is too weak. Use a stronger password.";
+            else if (code === 'auth/network-request-failed') msg = "Network error. Please check your connection.";
+            else msg = err.message || msg;
+
+            if (code === 'auth/email-already-in-use' || code === 'auth/invalid-email') {
+                failField('regEmail', msg, true);
+            } else {
+                showAuthError(msg, true);
+            }
+            setLoading(btn, false, "Create Account");
+        }
+        return;
+      }
+
+      pendingRegistrationData = data; setLoading(btn, true, "Sending OTP...");
+      try {
+        if (!window.recaptchaVerifier) window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {'size': 'invisible'});
+        await window.StallzAuth.sendPhoneOTP(data.phone, window.recaptchaVerifier);
+        setLoading(btn, false, "Create Account"); document.getElementById('otpModal').style.display = 'flex';
+      } catch (err) {
+          showAuthError(err.message || "Failed to send code.", true);
+          setLoading(btn, false, "Create Account");
+      }
+    }
+
+    async function verifyAndRegister() {
+        const code = document.getElementById('otpCode').value;
+        const btn = document.querySelector('#otpModal .submit-btn');
+        setLoading(btn, true, "Verifying...");
+        try {
+            await window.StallzAuth.verifyOTPAndRegister(code, pendingRegistrationData);
+            window.location.replace('gatekeeper.html');
+        } catch(err) {
+            showGlobalToast("Invalid Code. Please try again.", "error");
+            setLoading(btn, false, "Verify & Create Account");
+        }
+    }
+
+    function closeOtpModal() { document.getElementById('otpModal').style.display = 'none'; }
+    function setLoading(btn, isLoading, text) {
+      if (isLoading) { btn.innerHTML = `<span class="spinner" style="border-top-color:var(--primary); border-right-color:transparent; border-bottom-color:transparent; border-left-color:transparent;"></span> ${text}`; btn.disabled = true; }
+      else { btn.innerHTML = text; btn.disabled = false; }
+    }
+    function openDocModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeDocModal(id) { document.getElementById(id).style.display = 'none'; }
+</script>
+</body>
+</html>

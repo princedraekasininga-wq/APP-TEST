@@ -1,0 +1,102 @@
+// sw.js - Aggressive Service Worker + Firebase Background Push
+
+// 1. Import Firebase Scripts
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
+
+// ============================================================================
+// 🎛️ MASTER CONFIGURATION (Single source of truth: shared/app-config.js)
+// ============================================================================
+importScripts('./shared/app-config.js');
+
+const CFG = self.STALLZ_APP_CONFIG || {};
+const ACTIVE_FIREBASE_CONFIG = (CFG.firebase && CFG.firebase.active) ? CFG.firebase.active : null;
+
+if (!ACTIVE_FIREBASE_CONFIG) {
+  console.error("[sw.js] Missing firebase config. Check shared/app-config.js");
+}
+
+// Cache name is versioned (keeps updates clean)
+const CACHE_NAME = 'stallz-loans-v' + (CFG.version || '0');
+
+// 2. Initialize Firebase (uses the active config)
+firebase.initializeApp(ACTIVE_FIREBASE_CONFIG || {});
+const messaging = firebase.messaging();
+
+
+// 3. Handle Background Messages (When app is closed)
+messaging.onBackgroundMessage(function(payload) {
+    console.log('[sw.js] Received background message: ', payload);
+
+    const notificationTitle = payload.notification?.title || 'Stallz Loans';
+    const notificationOptions = {
+        body: payload.notification?.body || 'You have a new alert from Stallz.',
+        icon: '/assets/logo_images/icon-192.png',
+        badge: '/assets/logo_images/myfavicon.png',
+        vibrate: [200, 100, 200, 100, 200, 100, 200],
+        data: {
+            click_action: payload.data?.click_action || '/client-portal/client.html'
+        }
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// 4. Handle Notification Clicks (When user taps the notification)
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow(event.notification.data.click_action || '/client-portal/client.html')
+    );
+});
+
+// ==========================================
+// 5. EXISTING AGGRESSIVE CACHE LOGIC
+// ==========================================
+self.addEventListener('install', (event) => self.skipWaiting());
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cache) => {
+                    if (cache !== CACHE_NAME) return caches.delete(cache);
+                })
+            );
+        }).then(() => self.clients.claim())
+    );
+});
+
+// ==========================================
+// 5. SMART OFFLINE CACHING (Prevents GitHub/Browser Offline Pages)
+// ==========================================
+self.addEventListener('fetch', (event) => {
+    // 1. Only intercept basic GET requests
+    if (event.request.method !== 'GET') return;
+
+    // 2. NEW FIX: Ignore non-HTTP/HTTPS requests (like chrome-extension://)
+    // to prevent Cache API crashes
+    if (!event.request.url.startsWith('http')) return;
+
+    event.respondWith(
+        caches.match(event.request).then((cachedResponse) => {
+            // Attempt to fetch fresh data from the internet
+            const networkFetch = fetch(event.request).then((response) => {
+                // If successful, silently update the cache in the background
+                if (response.status === 200) {
+                    const responseClone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseClone);
+                    });
+                }
+                return response;
+            }).catch(() => {
+                // If offline, the network fails. We catch it quietly here.
+                console.log('[Service Worker] Offline: Serving cached asset.');
+            });
+
+            // Return the cached version immediately if we have it, otherwise wait for network
+            return cachedResponse || networkFetch;
+        })
+    );
+});
