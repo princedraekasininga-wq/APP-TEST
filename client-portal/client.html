@@ -1034,7 +1034,7 @@
                         let initialLoad = true;
 
                         // Listen to this specific client's notification folder in the DB
-                        const notifRef = firebase.database().ref(`clients/${uid}/notifications`);
+                        const notifRef = firebase.database().ref(`stallzShared_v1/notifications/users/${uid}`);
 
                         notifRef.on('child_added', (snapshot) => {
                             if (initialLoad) return; // Skip old notifications so their phone doesn't get spammed on login

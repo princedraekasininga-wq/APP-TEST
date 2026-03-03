@@ -420,16 +420,14 @@
     if (!req) return Promise.reject(new Error("Request not found"));
 
     const updates = {};
-    // Update request status under client profile
     const uid = req.clientUid;
     updates[`${CLIENTS_PATH}/${uid}/requests/${req.id}/status`] = "APPROVED";
 
-    // Notify user
     const notifId = "n_" + Date.now();
     updates[`${ROOT_PATH}/notifications/users/${uid}/${notifId}`] = {
       id: notifId,
       type: "REQUEST_APPROVED",
-      title: "✅ Loan request approved",
+      title: "Loan Request Approved",
       body: "Your loan request has been approved. Please check your dashboard for loan details.",
       createdAt: new Date().toISOString(),
       read: false,
@@ -469,7 +467,7 @@
     updates[`${ROOT_PATH}/notifications/users/${uid}/${notifId}`] = {
       id: notifId,
       type: "REQUEST_REJECTED",
-      title: "❌ Loan request declined",
+      title: "Loan Request Declined",
       body: `Reason: ${String(reason || "No reason given")}`,
       createdAt: new Date().toISOString(),
       read: false,
@@ -515,7 +513,6 @@
       read: false
     };
 
-    // Also notify the user if the admin is the sender
     const updates = {};
     updates[`${ROOT_PATH}/messages/${clientUid}/${msgId}`] = msgData;
 
@@ -524,7 +521,7 @@
       updates[`${ROOT_PATH}/notifications/users/${clientUid}/${notifId}`] = {
         id: notifId,
         type: "MESSAGE",
-        title: "💬 New message from Admin",
+        title: "New Message from Admin",
         body: text.length > 120 ? (text.slice(0, 117) + "...") : text,
         createdAt: new Date().toISOString(),
         read: false,
@@ -533,30 +530,6 @@
     }
 
     return firebase.database().ref().update(updates);
-  }
-
-  function markNotifRead(scope, uid, notifId) {
-    if (!notifId) return Promise.resolve(false);
-
-    if (isTestMode()) {
-      return updateTestDB((db) => {
-        db.notifications = db.notifications || { admin: {}, users: {} };
-        if (scope === "admin") {
-          if (db.notifications.admin?.[notifId]) db.notifications.admin[notifId].read = true;
-        } else {
-          db.notifications.users = db.notifications.users || {};
-          db.notifications.users[uid] = db.notifications.users[uid] || {};
-          if (db.notifications.users[uid]?.[notifId]) db.notifications.users[uid][notifId].read = true;
-        }
-      });
-    }
-
-    ensureSeed();
-    const path = (scope === "admin")
-      ? `${ROOT_PATH}/notifications/admin/${notifId}/read`
-      : `${ROOT_PATH}/notifications/users/${uid}/${notifId}/read`;
-
-    return firebase.database().ref(path).set(true);
   }
 
   // Admin-only: optional legacy sync for older clients (kept, non-destructive)

@@ -4,7 +4,7 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 
-// Trigger: when an admin enqueues a push job for a client
+// 1. Trigger: Actually Send the Push from the Queue
 // Path: /clients/{uid}/pushQueue/{pushId}
 exports.sendPushFromQueue = functions.database
   .ref("/clients/{uid}/pushQueue/{pushId}")
@@ -14,10 +14,9 @@ exports.sendPushFromQueue = functions.database
 
     const job = snap.val() || {};
     const title = String(job.title || "Stallz Loans");
-    const body = String(job.body || "");
+    const body = String(job.body || "You have a new update.");
     const clickAction = String(job.click_action || "client-portal/client.html");
 
-    // Load all registered FCM tokens for this client
     const tokensSnap = await admin.database().ref(`/clients/${uid}/fcmTokens`).once("value");
     const tokensObj = tokensSnap.val() || {};
 
@@ -26,35 +25,30 @@ exports.sendPushFromQueue = functions.database
       .filter(x => typeof x.token === "string" && x.token.length > 0);
 
     if (tokenEntries.length === 0) {
-      // No tokens: just delete the queue job
       await snap.ref.remove();
       return null;
     }
 
     const tokens = tokenEntries.map(x => x.token);
 
-    // functions/index.js  ✅ DATA-ONLY MESSAGE (no auto-notification)
-const message = {
-  data: {
-    title: String(title),
-    body: String(body),
-    click_action: String(clickAction),
-    source: String(job.source || "STALLZ"),
-    pushId: String(pushId)
-  },
-  tokens
-};
+    // MUST use data-only payload for sw.js to catch it properly
+    const message = {
+      data: {
+        title: title,
+        body: body,
+        click_action: clickAction,
+        source: String(job.source || "STALLZ"),
+        pushId: String(pushId)
+      },
+      tokens: tokens
+    };
 
-const res = await admin.messaging().sendEachForMulticast(message);
-    // Clean up invalid tokens
+    const res = await admin.messaging().sendEachForMulticast(message);
+
+    // Cleanup bad tokens
     const badKeys = [];
     res.responses.forEach((r, i) => {
-      if (!r.success) {
-        const code = r.error && r.error.code ? String(r.error.code) : "";
-        if (code.includes("registration-token-not-registered") || code.includes("invalid-argument")) {
-          badKeys.push(tokenEntries[i].key);
-        }
-      }
+      if (!r.success) badKeys.push(tokenEntries[i].key);
     });
 
     if (badKeys.length) {
@@ -63,18 +57,15 @@ const res = await admin.messaging().sendEachForMulticast(message);
       await admin.database().ref().update(updates);
     }
 
-    // Remove the job (prevents duplicates)
     await snap.ref.remove();
-
     return null;
   });
 
 
-
-// Trigger: when ANY client notification is created, enqueue an FCM push job
-// Path: /clients/{uid}/notifications/{notifId}
+// 2. Trigger: Listen to the NEW Shared Notifications Path for Clients
+// Path: /stallzShared_v1/notifications/users/{uid}/{notifId}
 exports.enqueuePushOnClientNotification = functions.database
-  .ref("/clients/{uid}/notifications/{notifId}")
+  .ref("/stallzShared_v1/notifications/users/{uid}/{notifId}")
   .onCreate(async (snap, context) => {
     const uid = context.params.uid;
     const notifId = context.params.notifId;
@@ -83,11 +74,10 @@ exports.enqueuePushOnClientNotification = functions.database
     const title = String(n.title || "Stallz Loans");
     const body = String(n.body || "You have a new update.");
     const clickAction = String(n.click_action || "client-portal/client.html");
-    const source = String(n.type || n.source || "CLIENT_NOTIFICATION");
+    const source = String(n.type || "CLIENT_NOTIFICATION");
 
     try {
-      const qRef = admin.database().ref(`/clients/${uid}/pushQueue`).push();
-      await qRef.set({
+      await admin.database().ref(`/clients/${uid}/pushQueue`).push().set({
         title,
         body,
         click_action: clickAction,
@@ -96,46 +86,43 @@ exports.enqueuePushOnClientNotification = functions.database
         notifId
       });
     } catch (e) {
-      console.warn("Failed to enqueue pushQueue for notification:", e);
+      console.warn("Failed to enqueue pushQueue:", e);
     }
-
     return null;
   });
 
-// Trigger: Notify ALL Admins when a new loan request is created
-// Path: /stallzShared_v1/loanRequests/{reqId}
+
+// 3. Trigger: Listen to the NEW Client Requests Path to Notify Admins
+// Path: /clients/{clientUid}/requests/{reqId}
 exports.notifyAdminsOnLoanRequest = functions.database
-  .ref("/stallzShared_v1/loanRequests/{reqId}")
+  .ref("/clients/{clientUid}/requests/{reqId}")
   .onCreate(async (snap, context) => {
     const req = snap.val() || {};
+
+    // Only fire for brand new pending requests
+    if (String(req.status).toUpperCase() !== "PENDING") return null;
+
     const clientName = String(req.clientName || "A client");
     const amount = String(req.amount || "0");
 
-    const title = "📝 New Loan Request";
+    const title = "New Loan Request";
     const body = `${clientName} has requested K${amount}.`;
-    const clickAction = "admin/admin.html"; // Clicking the push opens the admin panel
+    const clickAction = "admin/admin.html";
 
-    // 1. Fetch all admin tokens
     const adminsSnap = await admin.database().ref("/admins").once("value");
     const adminsObj = adminsSnap.val() || {};
 
     const tokens = [];
     Object.values(adminsObj).forEach(adminUser => {
         if (adminUser.fcmTokens) {
-            Object.values(adminUser.fcmTokens).forEach(tokenData => {
-                if (tokenData && tokenData.token) {
-                    tokens.push(tokenData.token);
-                }
+            Object.values(adminUser.fcmTokens).forEach(td => {
+                if (td && td.token) tokens.push(td.token);
             });
         }
     });
 
-    if (tokens.length === 0) {
-        console.log("No admin tokens registered.");
-        return null;
-    }
+    if (tokens.length === 0) return null;
 
-    // 2. Create the data payload for sw.js
     const message = {
       data: {
         title: title,
@@ -147,9 +134,6 @@ exports.notifyAdminsOnLoanRequest = functions.database
       tokens: tokens
     };
 
-    // 3. Send the multicast message to all admins
-    const res = await admin.messaging().sendEachForMulticast(message);
-    console.log(`Sent to ${tokens.length} admins. Success: ${res.successCount}, Failures: ${res.failureCount}`);
-
+    await admin.messaging().sendEachForMulticast(message);
     return null;
   });

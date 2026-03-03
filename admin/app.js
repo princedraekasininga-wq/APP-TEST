@@ -1110,33 +1110,41 @@ function refreshUI() {
         notifList.innerHTML = `<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">All caught up! No alerts.</div>`;
     } else {
         const sharedHtml = sharedNotifs.map(n => {
-        const icon = n.type === "LOAN_REQUEST" ? "📝"
-            : n.type === "NEW_CLIENT" ? "🆕"
-            : n.type === "MESSAGE" ? "💬"
-            : n.type === "DUE_SOON" ? "⏳"
-            : "🔔";
-        const sub = n.body ? `<div style="opacity:0.7;">${escapeHTML(n.body)}</div>` : "";
+        const getIconSvg = (type) => {
+            const svgBase = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"`;
+            if (type === "LOAN_REQUEST") return `${svgBase} style="color:#38bdf8;"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>`;
+            if (type === "NEW_CLIENT") return `${svgBase} style="color:#a855f7;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>`;
+            if (type === "MESSAGE") return `${svgBase} style="color:#60a5fa;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+            if (type === "DUE_SOON") return `${svgBase} style="color:#f59e0b;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+            return `${svgBase} style="color:#94a3b8;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
+        };
+
+        const iconHtml = `<div style="width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-right: 12px; border: 1px solid rgba(255,255,255,0.05);">${getIconSvg(n.type)}</div>`;
+
+        const sub = n.body ? `<div style="opacity:0.7; font-size:0.8rem; margin-top:2px; line-height: 1.3;">${escapeHTML(n.body)}</div>` : "";
         const click = n.type === "LOAN_REQUEST" ? `window.openLoanRequestModal(${Number(n.meta?.requestId) || 0})`
             : n.type === "MESSAGE" ? `window.openAdminMessageModal('${String(n.meta?.clientUid || "")}')`
             : n.type === "NEW_CLIENT" ? `openPopup('clientsModal')`
             : n.type === "DUE_SOON" ? (n.meta?.loanId ? `openActionModal('PAY', ${Number(n.meta.loanId)})` : `openPopup('clientsModal')`)
             : `void 0`;
         return `
-            <div class="notif-item" onclick="${click}">
-            <span style="margin-right:8px;">${icon}</span>
-            <div>
-                <div style="font-weight:600;">${escapeHTML(n.title || "Notification")}</div>
+            <div class="notif-item" onclick="${click}" style="display:flex; align-items:flex-start; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; transition:background 0.2s;">
+            ${iconHtml}
+            <div style="flex:1;">
+                <div style="font-weight:700; font-size:0.9rem; color:#f8fafc;">${escapeHTML(n.title || "Notification")}</div>
                 ${sub}
             </div>
             </div>`;
         }).join("");
 
         const overdueHtml = overdueLoans.map(l => `
-            <div class="notif-item" onclick="openActionModal('PAY', ${l.id})">
-                <span style="color:#ef4444; margin-right:8px;">⚠️</span>
-                <div>
-                    <div style="font-weight:600;">Overdue: ${escapeHTML(l.clientName)}</div>
-                    <div style="opacity:0.7;">Due: ${formatDate(l.dueDate)} • ${formatMoney(l.balance)}</div>
+            <div class="notif-item" onclick="openActionModal('PAY', ${l.id})" style="display:flex; align-items:flex-start; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; transition:background 0.2s;">
+                <div style="width:36px; height:36px; border-radius:10px; background:rgba(239, 68, 68, 0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-right: 12px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div style="flex:1;">
+                    <div style="font-weight:700; font-size:0.9rem; color:#f8fafc;">Overdue: ${escapeHTML(l.clientName)}</div>
+                    <div style="opacity:0.7; font-size:0.8rem; margin-top:2px;">Due: ${formatDate(l.dueDate)} • ${formatMoney(l.balance)}</div>
                 </div>
             </div>
         `).join("");
@@ -1158,7 +1166,6 @@ function refreshUI() {
                 <span style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05);">${(a.role||"Admin").toUpperCase()}</span>
             </div>
         </div>`).join("");
-  }
 
   try { renderDashboard(); } catch (e) { console.error("Dash Error:", e); }
   try { renderLoansTable(); } catch (e) { console.error("Loans Table Error:", e); }
@@ -3111,7 +3118,7 @@ function init() {
       if (uid) {
           const notifId = "n_" + Date.now();
           const isFull = loan.balance <= 0.01;
-          rootUpdates[`clients/${uid}/notifications/${notifId}`] = { id: notifId, title: isFull ? "🎉 Loan Fully Paid!" : "💰 Payment Received", body: isFull ? `Congratulations! Your loan of K${loan.amount} is fully settled.` : `We received your payment of K${safeAmt}. Remaining balance: K${loan.balance}`, read: false, createdAt: now, type: "PAYMENT" };
+          rootUpdates[`clients/${uid}/notifications/${notifId}`] = { id: notifId, title: isFull ? "Loan Fully Paid!" : "Payment Received", body: isFull ? `Congratulations! Your loan of K${loan.amount} is fully settled.` : `We received your payment of K${safeAmt}. Remaining balance: K${loan.balance}`, read: false, createdAt: now, type: "PAYMENT" };
       }
 
       applyLoanUpdates(loan, updates, true);
@@ -3139,7 +3146,7 @@ function init() {
            const preview = (newNote.length > 140) ? (newNote.slice(0, 137) + "...") : newNote;
            rootUpdates[`clients/${uid}/notifications/${notifId}`] = {
              id: notifId,
-             title: "📝 Loan Note Added",
+             title: " Loan Note Added",
              body: preview,
              read: false,
              createdAt: now,
@@ -3170,7 +3177,7 @@ function init() {
            const preview = (reason.length > 160) ? (reason.slice(0, 157) + "...") : reason;
            rootUpdates[`clients/${uid}/notifications/${notifId}`] = {
              id: notifId,
-             title: "⚠️ Loan Marked Defaulted",
+             title: "Loan Marked Defaulted",
              body: `Reason: ${preview}`,
              read: false,
              createdAt: now,
@@ -3225,7 +3232,7 @@ function init() {
           const notifId = "n_" + Date.now();
           rootUpdates[`clients/${uid}/notifications/${notifId}`] = {
               id: notifId,
-              title: "⬆️ Loan Refinanced",
+              title: "Loan Refinanced",
               body: `Your loan was topped up by K${extraAmt}. Your due date has been successfully extended!`,
               read: false,
               createdAt: now,
@@ -3559,7 +3566,7 @@ window.approveLoanRequest = async function(){
         const notifId = "n_" + Date.now();
         rootUpdates[`clients/${newLoan.clientUid}/notifications/${notifId}`] = {
             id: notifId,
-            title: "✅ Loan Approved",
+            title: "Loan Approved",
             body: `Your loan request for K${newLoan.amount} has been approved. Check your dashboard for details.`,
             read: false,
             createdAt: new Date().toISOString(),
@@ -3610,7 +3617,7 @@ window.rejectLoanRequest = async function(){
                 const notifId = "n_" + Date.now();
                 await firebase.database().ref(`clients/${uid}/notifications/${notifId}`).set({
                     id: notifId,
-                    title: "❌ Loan Declined",
+                    title: "Loan Declined",
                     body: `Reason: ${reason.trim()}`,
                     read: false,
                     createdAt: new Date().toISOString(),
@@ -3699,7 +3706,7 @@ window.sendAdminMessage = async function(){
     const notifId = "n_" + Date.now();
     await firebase.database().ref(`clients/${__activeClientUidForMsg}/notifications/${notifId}`).set({
         id: notifId,
-        title: "💬 New Message from Admin",
+        title: "New Message from Admin",
         body: text,
         read: false,
         createdAt: new Date().toISOString(),
@@ -4375,7 +4382,7 @@ async function runSmartEngagementEngine() {
                     const notifId = "n_" + Date.now() + Math.floor(Math.random() * 1000);
                     updates[`clients/${uid}/notifications/${notifId}`] = {
                         id: notifId,
-                        title: "👋 We miss you!",
+                        title: "We miss you!",
                         body: `Hi ${firstName}, need a boost? Request a loan today and you can negotiate your interest rate directly with us!`,
                         read: false,
                         createdAt: new Date().toISOString(),
@@ -4397,7 +4404,7 @@ async function runSmartEngagementEngine() {
                     const notifId = "n_" + Date.now() + Math.floor(Math.random() * 1000);
                     updates[`clients/${uid}/notifications/${notifId}`] = {
                         id: notifId,
-                        title: "💡 Stallz Repayment Hack",
+                        title: "Stallz Repayment Hack",
                         body: `Did you know? If you pay just K${dailyAmount} every day, your loan will be completely cleared by your due date!`,
                         read: false,
                         createdAt: new Date().toISOString(),
@@ -4411,7 +4418,7 @@ async function runSmartEngagementEngine() {
                     const notifId = "n_" + Date.now() + Math.floor(Math.random() * 1000);
                     updates[`clients/${uid}/notifications/${notifId}`] = {
                         id: notifId,
-                        title: "⏳ Due Date Approaching",
+                        title: "Due Date Approaching",
                         body: `Hi ${firstName}, you have exactly 3 days left until your loan is due. Tap here to view payment options.`,
                         read: false,
                         createdAt: new Date().toISOString(),
