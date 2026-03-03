@@ -42,21 +42,26 @@ function toAbsoluteTarget(target) {
     }
 }
 
+// sw.js ✅ SHOW NOTIFICATION FROM payload.data (data-only messages)
 messaging.onBackgroundMessage(function(payload) {
-    console.log('[sw.js] Received background message: ', payload);
+  const title = payload.data?.title || 'Stallz Loans';
+  const body  = payload.data?.body  || 'You have a new alert from Stallz.';
+  const click = payload.data?.click_action || '/client-portal/client.html';
 
-    const notificationTitle = payload.notification?.title || 'Stallz Loans';
-    const clickAction = toAbsoluteTarget(payload.data?.click_action);
+  const notificationOptions = {
+    body,
+    icon: '/assets/logo_images/icon-192.png',
+    badge: '/assets/logo_images/myfavicon.png',
+    vibrate: [200, 100, 200, 100, 200, 100, 200],
 
-    const notificationOptions = {
-        body: payload.notification?.body || 'You have a new alert from Stallz.',
-        icon: toAbsoluteTarget('assets/logo_images/icon-192.png'),
-        badge: toAbsoluteTarget('assets/logo_images/myfavicon.png'),
-        vibrate: [200, 100, 200, 100, 200, 100, 200],
-        data: { click_action: clickAction }
-    };
+    // ✅ DEDUPE ON DEVICE (stops “same push twice” from showing twice)
+    tag: payload.data?.pushId || undefined,
+    renotify: false,
 
-    self.registration.showNotification(notificationTitle, notificationOptions);
+    data: { click_action: click }
+  };
+
+  return self.registration.showNotification(title, notificationOptions);
 });
 
 // 4. Handle Notification Clicks (When user taps the notification)

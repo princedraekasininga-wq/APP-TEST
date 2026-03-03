@@ -33,18 +33,19 @@ exports.sendPushFromQueue = functions.database
 
     const tokens = tokenEntries.map(x => x.token);
 
-    const message = {
-      notification: { title, body },
-      data: {
-        click_action: clickAction,
-        source: String(job.source || "STALLZ"),
-        pushId: String(pushId)
-      },
-      tokens
-    };
+    // functions/index.js  ✅ DATA-ONLY MESSAGE (no auto-notification)
+const message = {
+  data: {
+    title: String(title),
+    body: String(body),
+    click_action: String(clickAction),
+    source: String(job.source || "STALLZ"),
+    pushId: String(pushId)
+  },
+  tokens
+};
 
-    const res = await admin.messaging().sendEachForMulticast(message);
-
+const res = await admin.messaging().sendEachForMulticast(message);
     // Clean up invalid tokens
     const badKeys = [];
     res.responses.forEach((r, i) => {

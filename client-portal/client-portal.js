@@ -2558,29 +2558,15 @@ async function initPushNotifications(forcePrompt = false) {
         let swReg = null;
         try {
             if ('serviceWorker' in navigator) {
-                // If SW is not registered yet (deep link), register it now
-const isTest = !!(window.STALLZ_APP_CONFIG && window.STALLZ_APP_CONFIG.firebase && window.STALLZ_APP_CONFIG.firebase.testMode);
-const mode = isTest ? 'test' : 'main';
-const baseSwPath = (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/')) ? '../sw.js' : 'sw.js';
-const v = encodeURIComponent(window.STALLZ_APP_VERSION || window.STALLZ_APP_CONFIG?.version || '');
-const regPath = baseSwPath + `?db=${mode}` + (v ? `&v=${v}` : '');
+                // Remove query parameters from the SW path.
+                // { updateViaCache: 'none' } already handles cache bypassing natively.
+                const baseSwPath = (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/'))
+                    ? '../sw.js'
+                    : 'sw.js';
 
-// Ensure we are registered on the correct SW (MAIN vs TEST), otherwise unregister and re-register.
-const desiredAbs = new URL(regPath, location.href).href;
-
-swReg = await navigator.serviceWorker.getRegistration();
-try {
-    const currentAbs = swReg && swReg.active && swReg.active.scriptURL ? swReg.active.scriptURL : (swReg && swReg.installing && swReg.installing.scriptURL ? swReg.installing.scriptURL : '');
-    if (swReg && currentAbs && currentAbs !== desiredAbs) {
-        await swReg.unregister();
-        swReg = null;
-    }
-} catch (_) {}
-
-if (!swReg) {
-    swReg = await navigator.serviceWorker.register(regPath, { updateViaCache: 'none' });
-}
-swReg = await navigator.serviceWorker.ready;
+                // Explicitly register ONLY sw.js
+                swReg = await navigator.serviceWorker.register(baseSwPath, { updateViaCache: 'none' });
+                swReg = await navigator.serviceWorker.ready;
             }
         } catch (e) {
             console.warn("Service worker not ready for messaging:", e);
@@ -2588,13 +2574,13 @@ swReg = await navigator.serviceWorker.ready;
 
         const messaging = firebase.messaging();
 
-        // 3) Get (or refresh) the FCM token
+        // 3) Get (or refresh) the FCM token, explicitly passing the single sw.js registration
         const vapidKey = window.STALLZ_FIREBASE?.config?.vapidKey || window.STALLZ_APP_CONFIG?.firebase?.active?.vapidKey;
         if (!vapidKey) console.warn("Missing VAPID key (STALLZ_FIREBASE.config.vapidKey). Push may fail.");
 
         const token = await messaging.getToken({
             vapidKey: vapidKey,
-            serviceWorkerRegistration: swReg || undefined
+            serviceWorkerRegistration: swReg // 👈 THIS PREVENTS THE DUPLICATE
         });
 
         if (!token) {
@@ -2609,7 +2595,6 @@ swReg = await navigator.serviceWorker.ready;
         }
         localStorage.setItem("stallz_active_fcm_token", token);
 
-        // If logged in already, sync immediately (no need to wait for next login)
         try {
             const user = firebase.auth().currentUser;
             if (user && window.StallzAuth?.syncPendingFCMToken) {
@@ -2623,29 +2608,23 @@ swReg = await navigator.serviceWorker.ready;
             messaging.onMessage((payload) => {
                 console.log('[Foreground] Push received: ', payload);
 
-                // Play tone
                 const audio = document.getElementById('pushTone');
                 if (audio) audio.play().catch(e => console.log('Audio blocked by browser:', e));
 
-                // Haptics
                 if (typeof __haptic === 'function') __haptic('success');
 
-                // In-app popup
-                const title = payload.notification?.title || "Stallz Loans";
-                const body = payload.notification?.body || "You have a new update.";
+                const title = payload.data?.title || payload.notification?.title || "Stallz Loans";
+                const body  = payload.data?.body  || payload.notification?.body  || "You have a new update.";
                 showCustomAlert(`${title}: ${body}`, true);
 
-                // Refresh the notification dropdown
                 if (typeof renderSharedNotifications === 'function') {
                     renderSharedNotifications();
                 }
             });
         }
 
-        // Update settings UI if present
         if (typeof updatePushPermissionUI === "function") updatePushPermissionUI();
 
-        // FIX: Only show the popup if the user manually clicked the 'Enable' button
         if (forcePrompt) {
             showCustomAlert("✅ Notifications enabled on this device.", true);
         }
@@ -2658,4 +2637,3 @@ swReg = await navigator.serviceWorker.ready;
         return false;
     }
 }
-
