@@ -269,7 +269,8 @@ function formatWhatsApp(phone) {
 
 function getInitials(name) {
   if (!name) return "??";
-  return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  // Wrap name in String() to prevent .split() crashing on objects/numbers
+  return String(name).split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 }
 
 /* admin/app.js */
@@ -714,12 +715,6 @@ function applyData(parsed, isFromCache = false) {
     refreshUI();
     updateWelcomeUI();
 
-    // Dismiss boot overlay only after the UI has real data (prevents flashing 0s / wrong names)
-    if (!state.__bootOverlayDismissed) {
-      state.__bootOverlayDismissed = true;
-      try { hideBootLoader(); } catch(e) {}
-    }
-
     if (state.loans && state.loans.length > 0) {
         const force = !state.__initialClientSyncDone;
         distributeLoansToClients(state.loans, force);
@@ -731,6 +726,13 @@ function applyData(parsed, isFromCache = false) {
 
   } catch (e) {
     console.error("Render error:", e);
+  } finally {
+    // 🚀 THE FIX: Dismiss boot overlay even if rendering throws an error
+    // (prevents flashing 0s / wrong names, but never hangs forever)
+    if (!state.__bootOverlayDismissed) {
+      state.__bootOverlayDismissed = true;
+      try { hideBootLoader(); } catch(e) {}
+    }
   }
 
   // =========================================================================
@@ -878,15 +880,22 @@ async function ensureAdminAccess() {
 
     let foundProfile = null;
     try {
+      // Priority 1: Check Root Admin Node
       const rootSnap = await firebase.database().ref(`admins/${user.uid}`).get();
       if (rootSnap.exists()) foundProfile = rootSnap.val();
     } catch(e) {}
 
     if (!foundProfile) {
+      try {
+        // Priority 2: Check V5 Admin List
         const snap = await dataRef.child("admins").get();
         const adminsList = snap.val() || [];
         const listArray = Array.isArray(adminsList) ? adminsList : Object.values(adminsList);
         foundProfile = listArray.find(admin => admin.email && admin.email.toLowerCase() === user.email.toLowerCase());
+      } catch (e) {
+        // Prevent permission errors from crashing the bootloader
+        console.warn("Could not read V5 admins array:", e);
+      }
     }
 
     if (!foundProfile) {
@@ -908,7 +917,9 @@ async function ensureAdminAccess() {
     return true;
 
   } catch(e) {
-    if (window.location.pathname.includes("admin.html")) window.location.replace("../index.html");
+    // Redirect unconditionally if the auth gate completely fails
+    console.error("Auth Gate Error:", e);
+    window.location.replace("../index.html");
     return false;
   }
 }
@@ -931,28 +942,28 @@ function updateWelcomeUI() {
   // 1. Restore the cached name if offline/missing
   const cachedName = localStorage.getItem('stallz_offline_name');
   if (cachedName && cachedName !== "undefined" && cachedName !== "null") {
-      fullName = cachedName.toUpperCase();
+      fullName = String(cachedName).toUpperCase();
       firstName = fullName.split(' ')[0];
   }
 
   // 2. Overwrite with live Firebase data if available
   let hasLiveProfile = false;
   if (profile && profile.name) {
-    fullName = profile.name.toUpperCase();
+    fullName = String(profile.name).toUpperCase();
     firstName = fullName.split(' ')[0];
     hasLiveProfile = true;
   } else if (profile && profile.firstname) {
-     firstName = profile.firstname.toUpperCase();
-     fullName = (profile.firstname + " " + (profile.surname||"")).toUpperCase();
+     firstName = String(profile.firstname).toUpperCase();
+     fullName = String(profile.firstname + " " + (profile.surname||"")).toUpperCase();
      hasLiveProfile = true;
   } else if (state.user && state.user.displayName) {
-     fullName = state.user.displayName.toUpperCase();
+     fullName = String(state.user.displayName).toUpperCase();
      firstName = fullName.split(' ')[0];
      hasLiveProfile = true;
   } else if (state.user && state.user.email) {
      // Only fallback to email if we don't have a better cache
      if (!cachedName || cachedName.includes('@') || cachedName.toLowerCase() === state.user.email.split('@')[0].toLowerCase()) {
-         firstName = state.user.email.split('@')[0].toUpperCase();
+         firstName = String(state.user.email.split('@')[0]).toUpperCase();
          fullName = firstName;
      }
   }
@@ -963,7 +974,7 @@ function updateWelcomeUI() {
   }
 
   if (profile && profile.role) {
-      role = profile.role.toUpperCase();
+      role = String(profile.role).toUpperCase();
       localStorage.setItem('stallz_offline_role', role.toLowerCase());
   }
 
