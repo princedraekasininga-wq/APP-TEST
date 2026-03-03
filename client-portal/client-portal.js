@@ -1178,7 +1178,7 @@ async function markAllNotificationsRead(event) {
 
 function renderSharedNotifications() {
     const list = document.getElementById("notificationList");
-    const dot = document.querySelector(".notification-dot");
+    const badge = document.getElementById("notificationBadge"); // Changed to target the badge
     if (!list) return;
 
     const uid = currentUserUid || window.StallzAuth?.getSession?.()?.uid;
@@ -1196,7 +1196,12 @@ function renderSharedNotifications() {
     } catch (e) { console.error("Notif Error", e); }
 
     const unreadCount = pendingReqs.length + notifs.filter(n => !n.read).length;
-    if (dot) dot.style.display = unreadCount > 0 ? "block" : "none";
+
+    // Inject the number and show/hide the badge
+    if (badge) {
+        badge.textContent = unreadCount > 99 ? '99+' : unreadCount; // Caps it at 99+ so it doesn't break layout
+        badge.style.display = unreadCount > 0 ? "flex" : "none";
+    }
 
     const dropdownHeader = document.querySelector(".dropdown-header");
 

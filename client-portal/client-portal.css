@@ -98,20 +98,31 @@ body {
 }
 
 .notification-wrapper { position: relative; }
-.notification-dot {
+.notification-badge {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 6px;
-    height: 6px;
+    top: -4px;         /* Pushes the badge outside the top edge */
+    right: -4px;       /* Pushes the badge outside the right edge */
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
     background: #ef4444;
-    border-radius: 50%;
-    border: 1px solid var(--bg-color);
-    animation: pulse-red 2s infinite;
-    display: none; /* Hidden by default */
+    color: #ffffff;
+    border-radius: 10px;
+    border: 2px solid var(--bg-color); /* Creates a nice cutout effect */
+    font-size: 0.65rem;
+    font-weight: 800;
+    display: none;     /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3); /* Solid shadow instead of breathing */
 }
 
-@keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+/* Ensure the cutout border matches in Day Mode */
+body.day-mode .notification-badge {
+    border-color: #ffffff;
+}
 
 /* UPDATED NOTIFICATION DROPDOWN */
 .notification-dropdown {
