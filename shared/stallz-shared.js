@@ -62,7 +62,8 @@
 
   // Client-scoped caches
   let _clientRequests = {};              // clients/{uid}/requests
-  let _clientNotifs = {};                // notifications/users/{uid}
+  let _clientNotifs = {};                // stallzShared_v1/notifications/users/{uid}
+  let _clientNotifsClients = {};         // clients/{uid}/notifications
   let _clientMessages = {};              // messages/{uid}
 
   // Admin-scoped caches
@@ -141,6 +142,12 @@
     // Notifications
     onValueSafe(firebase.database().ref(`${ROOT_PATH}/notifications/users/${uid}`), (snap) => {
       _clientNotifs = snap.val() || {};
+      notify();
+    });
+
+    // Client notifications (direct path)
+    onValueSafe(firebase.database().ref(`${CLIENTS_PATH}/${uid}/notifications`), (snap) => {
+      _clientNotifsClients = snap.val() || {};
       notify();
     });
 
@@ -588,6 +595,7 @@
       isAdmin: _isAdmin,
       clientRequests: _clientRequests,
       clientNotifications: _clientNotifs,
+      clientNotificationsClients: _clientNotifsClients,
       clientMessages: _clientMessages,
       clients: _clientsMap,
       adminNotifications: _adminNotifs,
@@ -714,12 +722,14 @@
       let _backOnlineTimer = null;
 
       const showBanner = (state, text) => {
+           if (document.hidden) return;
           _everShownBanner = true;
           setBannerState(state, text);
           banner.classList.add('show');
       };
 
       const showBackOnlinePulse = (text) => {
+           if (document.hidden) return;
           if (!_everShownBanner) return;
           clearTimeout(_backOnlineTimer);
           setBannerState('online', text || "Back online — syncing...");
@@ -838,6 +848,40 @@
       };
 
 // 4. Listeners
+       // Visibility: don't flash offline banners while app is backgrounded (prevents "random offline")
+       const reconcileOnVisible = () => {
+           if (isTestMode()) return;
+           if (document.hidden) return;
+           // Re-evaluate quickly on return
+           if (!navigator.onLine) {
+               _isOffline = true;
+               showBanner('offline', "You are offline. Reconnect to sync with Stallz Cloud.");
+               return;
+           }
+           if (_firebaseLastConnected === false) {
+               _isOffline = false;
+               showBanner('connecting', "Reconnecting to Stallz Cloud...");
+               escalateToOfflineIfStillDown(_firebaseConnectedOnce ? 18000 : 26000, "Connection lost. Please check your internet.");
+               return;
+           }
+           // Online
+           const _shouldPulse = (banner.classList && banner.classList.contains('show')) && banner.dataset.state !== 'online';
+           _isOffline = false;
+           hideAllSilent();
+           if (_shouldPulse) showBackOnlinePulse("Back online — syncing...");
+       };
+
+       document.addEventListener('visibilitychange', () => {
+           if (document.hidden) {
+               // Hide banners when backgrounded & cancel timers (avoids false offline)
+               hideAllSilent();
+               clearTimeout(_offlineDebounceTimer);
+               clearTimeout(_connectingTimer);
+               return;
+           }
+           reconcileOnVisible();
+       });
+
       window.addEventListener('offline', () => handleBrowserStatus(true));
       window.addEventListener('online', () => handleBrowserStatus(false));
 

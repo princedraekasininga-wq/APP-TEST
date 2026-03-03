@@ -1132,31 +1132,43 @@ function setNotifFilter(filter, event) {
 }
 
 async function markNotificationRead(notifId, event) {
-    if (event) { event.stopPropagation(); event.preventDefault(); }
-    if (!currentUserUid || notifId === 'PENDING_UI') return;
+    if (event) event.stopPropagation();
+    if (!notifId || notifId === 'PENDING_UI') return;
 
     try {
-        if (window.StallzShared && window.StallzShared.markNotifRead) {
-            await window.StallzShared.markNotifRead("client", currentUserUid, notifId);
-        } else {
-            await firebase.database().ref(`stallzShared_v1/notifications/users/${currentUserUid}/${notifId}/read`).set(true);
-        }
+        const uid = currentUserUid || window.StallzAuth?.getSession?.()?.uid;
+        if (!uid) return;
+
+        const updates = {};
+        updates[`stallzShared_v1/notifications/users/${uid}/${notifId}/read`] = true;
+        updates[`clients/${uid}/notifications/${notifId}/read`] = true;
+
+        await firebase.database().ref().update(updates).catch(async () => {
+            try { await firebase.database().ref(`stallzShared_v1/notifications/users/${uid}/${notifId}/read`).set(true); } catch(_) {}
+            try { await firebase.database().ref(`clients/${uid}/notifications/${notifId}/read`).set(true); } catch(_) {}
+        });
+
         renderSharedNotifications();
-    } catch (e) { console.error("Failed to mark read", e); }
+    } catch(e) { console.error(e); }
 }
 
 async function markAllNotificationsRead(event) {
-    if (event) { event.stopPropagation(); event.preventDefault(); }
-    if (!currentUserUid) return;
+    if (event) event.stopPropagation();
 
     try {
-        const notifs = window.StallzShared?.getUserNotifications?.(currentUserUid) || [];
+        const uid = currentUserUid || window.StallzAuth?.getSession?.()?.uid;
+        if (!uid) return;
+
+        const notifs = window.StallzShared?.getUserNotifications?.(uid) || [];
         const updates = {};
+
         notifs.forEach(n => {
-            if (!n.read) {
-                updates[`stallzShared_v1/notifications/users/${currentUserUid}/${n.id}/read`] = true;
+            if (n && n.id && !n.read) {
+                updates[`stallzShared_v1/notifications/users/${uid}/${n.id}/read`] = true;
+                updates[`clients/${uid}/notifications/${n.id}/read`] = true;
             }
         });
+
         if (Object.keys(updates).length > 0) {
             await firebase.database().ref().update(updates);
             renderSharedNotifications();
@@ -2091,12 +2103,18 @@ window.closeAnimatedModal = function(modalId, onCompleteCallback) {
 };
 
 // 1. Profile Drawer
-window.openProfileModal = function() { openAnimatedModal('profileModal'); try{ updatePushPermissionUI(); }catch(_){} };
-window.closeProfileModal = function() { closeAnimatedModal('profileModal'); };
+window.openProfileModal = function() {
+    openAnimatedModal('profileModal');
+    try { window.updatePushPermissionUI && window.updatePushPermissionUI(); } catch(_) {}
+};
+
+window.closeProfileModal = function() {
+    closeAnimatedModal('profileModal');
+};
 
 // 1b. Push Permission UI (Profile Drawer)
 window.handleEnablePushClick = async function() {
-    try { __haptic('tap'); } catch(_) {}
+    try { if (typeof __haptic === 'function') __haptic('tap'); } catch(_) {}
     await initPushNotifications(true);
 };
 
@@ -2541,10 +2559,28 @@ async function initPushNotifications(forcePrompt = false) {
         try {
             if ('serviceWorker' in navigator) {
                 // If SW is not registered yet (deep link), register it now
-                const regPath = (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/')) ? '../sw.js' : 'sw.js';
-                swReg = await navigator.serviceWorker.getRegistration();
-                if (!swReg) swReg = await navigator.serviceWorker.register(regPath);
-                swReg = await navigator.serviceWorker.ready;
+const isTest = !!(window.STALLZ_APP_CONFIG && window.STALLZ_APP_CONFIG.firebase && window.STALLZ_APP_CONFIG.firebase.testMode);
+const mode = isTest ? 'test' : 'main';
+const baseSwPath = (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/')) ? '../sw.js' : 'sw.js';
+const v = encodeURIComponent(window.STALLZ_APP_VERSION || window.STALLZ_APP_CONFIG?.version || '');
+const regPath = baseSwPath + `?db=${mode}` + (v ? `&v=${v}` : '');
+
+// Ensure we are registered on the correct SW (MAIN vs TEST), otherwise unregister and re-register.
+const desiredAbs = new URL(regPath, location.href).href;
+
+swReg = await navigator.serviceWorker.getRegistration();
+try {
+    const currentAbs = swReg && swReg.active && swReg.active.scriptURL ? swReg.active.scriptURL : (swReg && swReg.installing && swReg.installing.scriptURL ? swReg.installing.scriptURL : '');
+    if (swReg && currentAbs && currentAbs !== desiredAbs) {
+        await swReg.unregister();
+        swReg = null;
+    }
+} catch (_) {}
+
+if (!swReg) {
+    swReg = await navigator.serviceWorker.register(regPath, { updateViaCache: 'none' });
+}
+swReg = await navigator.serviceWorker.ready;
             }
         } catch (e) {
             console.warn("Service worker not ready for messaging:", e);

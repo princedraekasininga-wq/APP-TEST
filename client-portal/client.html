@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Stallz Loans - Client Portal</title>
 
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <script src="../shared/app-config.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1022,45 +1022,67 @@
     <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
 </audio>
 <script>
-  // Legacy in-app tone for DB notifications (clients/{uid}/notifications).
-  // System notifications are handled by FCM + Service Worker (works even when the app is closed).
-  document.addEventListener('DOMContentLoaded', () => {
-    const checkAuth = setInterval(() => {
-      if (typeof firebase !== 'undefined' && firebase.auth && firebase.database) {
-        clearInterval(checkAuth);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Wait for Firebase to load and authenticate the user
+        const checkAuth = setInterval(() => {
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                clearInterval(checkAuth);
 
-        firebase.auth().onAuthStateChanged((user) => {
-          if (!user) return;
+                firebase.auth().onAuthStateChanged((user) => {
+                    if (user) {
+                        const uid = user.uid;
+                        let initialLoad = true;
 
-          const uid = user.uid;
-          let initialLoad = true;
+                        // Listen to this specific client's notification folder in the DB
+                        const notifRef = firebase.database().ref(`clients/${uid}/notifications`);
 
-          const notifRef = firebase.database().ref(`clients/${uid}/notifications`);
-          notifRef.on('child_added', (snapshot) => {
-            if (initialLoad) return;
+                        notifRef.on('child_added', (snapshot) => {
+                            if (initialLoad) return; // Skip old notifications so their phone doesn't get spammed on login
 
-            const notif = snapshot.val();
-            if (notif && notif.read === false) {
-              const tone = document.getElementById('pushTone');
-              if (tone) {
-                try { tone.currentTime = 0; } catch(_) {}
-                tone.play().catch(() => {});
-              }
+                            const notif = snapshot.val();
 
-              try {
-                if (typeof showCustomAlert === 'function') {
-                  showCustomAlert(`${notif.title || "Stallz Update"}: ${notif.body || ""}`, true);
-                }
-              } catch(_) {}
+                            // Only trigger if it is a brand new, unread notification
+                            if (notif && notif.read === false) {
+
+                                // 1. Play the Custom 'Ding' Sound
+                                const tone = document.getElementById('pushTone');
+                                if (tone) {
+                                    tone.currentTime = 0;
+                                    tone.play().catch(e => console.log('Autoplay blocked by browser'));
+                                }
+
+                                // 2. Trigger the Native OS Notification (Phone/PC)
+                                if ('Notification' in window && Notification.permission === 'granted') {
+                                    const sysNotif = new Notification(notif.title || "Stallz Update", {
+                                        body: notif.body || "You have a new message.",
+                                        icon: "../assets/logo_images/icon-192.png",
+                                        badge: "../assets/logo_images/myfavicon.png"
+                                    });
+
+                                    // If they tap the notification, open the app tab
+                                    sysNotif.onclick = function() {
+                                        window.focus();
+                                        this.close();
+                                    };
+                                }
+
+                                // 3. Show the Green In-App Popup Alert on the screen
+                                if (typeof showCustomAlert === 'function') {
+                                    showCustomAlert(notif.body, true, notif.title);
+                                }
+                            }
+                        });
+
+                        // Firebase guarantees 'value' fires after all initial database checks are done
+                        notifRef.once('value', () => {
+                            initialLoad = false;
+                            console.log("🟢 Local Real-time Push Listener Active! (No FCM Needed)");
+                        });
+                    }
+                });
             }
-          }, (err) => console.warn("DB notif listener error:", err));
-
-          // Flip the initial-load guard after a short delay so we don't spam on login
-          setTimeout(() => { initialLoad = false; }, 1200);
-        });
-      }
-    }, 500);
-  });
+        }, 500);
+    });
 </script>
 
 </body>

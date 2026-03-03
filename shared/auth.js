@@ -42,7 +42,7 @@
     /**
      * Completes the Anonymous Token Handoff securely (Multi-Device Version).
      */
-    async syncPendingFCMToken(uid, roleOverride) {
+    async syncPendingFCMToken(uid) {
       try {
         const pendingToken = localStorage.getItem("stallz_pending_fcm_token");
         if (!pendingToken || !uid) return;
@@ -59,10 +59,7 @@
           return;
         }
 
-        let role = String(roleOverride || (this.getSession && this.getSession()?.role) || 'client').toLowerCase();
-        if (role !== 'admin' && role !== 'client') role = 'client';
-        const tokensPath = (role === 'admin') ? `admins/${uid}/fcmTokens` : `clients/${uid}/fcmTokens`;
-        const tokensRef = firebase.database().ref(tokensPath);
+        const tokensRef = firebase.database().ref(`clients/${uid}/fcmTokens`);
 
         // Avoid duplicates (small per-user list, safe to scan once)
         let alreadyThere = false;

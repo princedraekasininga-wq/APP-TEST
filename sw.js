@@ -25,18 +25,35 @@ const messaging = firebase.messaging();
 
 
 // 3. Handle Background Messages (When app is closed)
+function toAbsoluteTarget(target) {
+    try {
+        const t = String(target || "").trim();
+        const fallback = new URL("client-portal/client.html", self.registration.scope).href;
+
+        if (!t) return fallback;
+        if (/^https?:\/\//i.test(t)) return t;
+
+        // If it's a root path like "/client-portal/...", make it scope-relative.
+        const cleaned = t.replace(/^\//, "");
+        return new URL(cleaned, self.registration.scope).href;
+    } catch (e) {
+        try { return new URL("client-portal/client.html", self.registration.scope).href; } catch(_) {}
+        return "client-portal/client.html";
+    }
+}
+
 messaging.onBackgroundMessage(function(payload) {
     console.log('[sw.js] Received background message: ', payload);
 
     const notificationTitle = payload.notification?.title || 'Stallz Loans';
+    const clickAction = toAbsoluteTarget(payload.data?.click_action);
+
     const notificationOptions = {
         body: payload.notification?.body || 'You have a new alert from Stallz.',
-        icon: '/assets/logo_images/icon-192.png',
-        badge: '/assets/logo_images/myfavicon.png',
+        icon: toAbsoluteTarget('assets/logo_images/icon-192.png'),
+        badge: toAbsoluteTarget('assets/logo_images/myfavicon.png'),
         vibrate: [200, 100, 200, 100, 200, 100, 200],
-        data: {
-            click_action: payload.data?.click_action || '/client-portal/client.html'
-        }
+        data: { click_action: clickAction }
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
@@ -46,10 +63,9 @@ messaging.onBackgroundMessage(function(payload) {
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
     event.waitUntil(
-        clients.openWindow(event.notification.data.click_action || '/client-portal/client.html')
+        clients.openWindow(toAbsoluteTarget(event.notification?.data?.click_action))
     );
 });
-
 // ==========================================
 // 5. EXISTING AGGRESSIVE CACHE LOGIC
 // ==========================================
