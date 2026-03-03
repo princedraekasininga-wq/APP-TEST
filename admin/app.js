@@ -3338,6 +3338,7 @@ function init() {
         __suppressSharedSync = true;
         try { refreshUI(); } finally { __suppressSharedSync = false; }
       });
+      initAdminPushNotifications();
     } catch(e) {}
   });
 
@@ -4429,5 +4430,59 @@ async function runSmartEngagementEngine() {
 
     } catch (error) {
         console.warn("Engagement Engine error:", error);
+    }
+}
+
+// ==========================================================================
+// ADMIN PUSH NOTIFICATIONS
+// ==========================================================================
+async function initAdminPushNotifications() {
+    if (typeof firebase === 'undefined' || !firebase.messaging) return;
+    if (typeof Notification === "undefined") return;
+
+    try {
+        // 1. Ask for permission
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+            console.warn("Admin notifications denied.");
+            return;
+        }
+
+        // 2. Register the shared service worker
+        const swReg = await navigator.serviceWorker.register('../sw.js', { updateViaCache: 'none' });
+        await navigator.serviceWorker.ready;
+
+        const messaging = firebase.messaging();
+        const vapidKey = window.STALLZ_FIREBASE?.config?.vapidKey || window.STALLZ_APP_CONFIG?.firebase?.active?.vapidKey;
+
+        // 3. Get the token
+        const token = await messaging.getToken({
+            vapidKey: vapidKey,
+            serviceWorkerRegistration: swReg
+        });
+
+        // 4. Save the token to the admin's database profile
+        if (token && state.user && state.user.uid) {
+            await firebase.database().ref(`admins/${state.user.uid}/fcmTokens/${token}`).set({
+                token: token,
+                updatedAt: new Date().toISOString()
+            });
+        }
+
+        // 5. Handle messages while the admin dashboard is open (Foreground)
+        if (!window.__ADMIN_PUSH_BOUND) {
+            window.__ADMIN_PUSH_BOUND = true;
+            messaging.onMessage((payload) => {
+                const title = payload.data?.title || "Admin Alert";
+                const body  = payload.data?.body  || "You have a new update.";
+
+                // Show toast and refresh the bell icon
+                if (typeof showToast === 'function') showToast(`${title}: ${body}`, "success");
+                if (typeof vibrate === 'function') vibrate([200, 100, 200]);
+                if (typeof refreshUI === 'function') refreshUI();
+            });
+        }
+    } catch (e) {
+        console.warn("Failed to setup admin push:", e);
     }
 }

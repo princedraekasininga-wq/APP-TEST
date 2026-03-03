@@ -1,5 +1,5 @@
 /* eslint-disable */
-const functions = require("firebase-functions");
+const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
@@ -102,3 +102,54 @@ exports.enqueuePushOnClientNotification = functions.database
     return null;
   });
 
+// Trigger: Notify ALL Admins when a new loan request is created
+// Path: /stallzShared_v1/loanRequests/{reqId}
+exports.notifyAdminsOnLoanRequest = functions.database
+  .ref("/stallzShared_v1/loanRequests/{reqId}")
+  .onCreate(async (snap, context) => {
+    const req = snap.val() || {};
+    const clientName = String(req.clientName || "A client");
+    const amount = String(req.amount || "0");
+
+    const title = "📝 New Loan Request";
+    const body = `${clientName} has requested K${amount}.`;
+    const clickAction = "admin/admin.html"; // Clicking the push opens the admin panel
+
+    // 1. Fetch all admin tokens
+    const adminsSnap = await admin.database().ref("/admins").once("value");
+    const adminsObj = adminsSnap.val() || {};
+
+    const tokens = [];
+    Object.values(adminsObj).forEach(adminUser => {
+        if (adminUser.fcmTokens) {
+            Object.values(adminUser.fcmTokens).forEach(tokenData => {
+                if (tokenData && tokenData.token) {
+                    tokens.push(tokenData.token);
+                }
+            });
+        }
+    });
+
+    if (tokens.length === 0) {
+        console.log("No admin tokens registered.");
+        return null;
+    }
+
+    // 2. Create the data payload for sw.js
+    const message = {
+      data: {
+        title: title,
+        body: body,
+        click_action: clickAction,
+        source: "ADMIN_ALERT",
+        pushId: "req_" + context.params.reqId
+      },
+      tokens: tokens
+    };
+
+    // 3. Send the multicast message to all admins
+    const res = await admin.messaging().sendEachForMulticast(message);
+    console.log(`Sent to ${tokens.length} admins. Success: ${res.successCount}, Failures: ${res.failureCount}`);
+
+    return null;
+  });
