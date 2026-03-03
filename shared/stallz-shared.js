@@ -852,18 +852,23 @@
        const reconcileOnVisible = () => {
            if (isTestMode()) return;
            if (document.hidden) return;
+
            // Re-evaluate quickly on return
            if (!navigator.onLine) {
                _isOffline = true;
                showBanner('offline', "You are offline. Reconnect to sync with Stallz Cloud.");
                return;
            }
+
            if (_firebaseLastConnected === false) {
                _isOffline = false;
-               showBanner('connecting', "Reconnecting to Stallz Cloud...");
+               // THE FIX: Do not use showBanner() instantly upon waking up.
+               // Give Firebase a 3.5 second silent grace period to wake up in the background first.
+               showConnectingIfStillDown(3500, "Reconnecting to Stallz Cloud...");
                escalateToOfflineIfStillDown(_firebaseConnectedOnce ? 18000 : 26000, "Connection lost. Please check your internet.");
                return;
            }
+
            // Online
            const _shouldPulse = (banner.classList && banner.classList.contains('show')) && banner.dataset.state !== 'online';
            _isOffline = false;
@@ -897,6 +902,7 @@
       // Initial check on load
       if (!navigator.onLine) handleBrowserStatus(true);
   }
+
   // 4. The Global Blocker Function
   window.enforceOfflineView = function(containerElement) {
       if (!containerElement || isTestMode() || !_isOffline) return false;
