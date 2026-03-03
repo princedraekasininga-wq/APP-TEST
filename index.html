@@ -601,7 +601,11 @@
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
             try {
-                const registration = await navigator.serviceWorker.register('sw.js');
+                const cfg = (window.STALLZ_APP_CONFIG || {});
+                const mode = (cfg.firebase && cfg.firebase.testMode) ? "test" : "main";
+                const ver  = (window.STALLZ_APP_VERSION || cfg.version || "0");
+                const swUrl = `sw.js?db=${encodeURIComponent(mode)}&v=${encodeURIComponent(ver)}`;
+                const registration = await navigator.serviceWorker.register(swUrl);
                 registration.addEventListener('updatefound', () => {
                     const newWorker = registration.installing;
                     newWorker.addEventListener('statechange', () => {
@@ -683,7 +687,11 @@
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 const messaging = firebase.messaging();
-                const registration = await navigator.serviceWorker.register('sw.js');
+                const cfg = (window.STALLZ_APP_CONFIG || {});
+                const mode = (cfg.firebase && cfg.firebase.testMode) ? "test" : "main";
+                const ver  = (window.STALLZ_APP_VERSION || cfg.version || "0");
+                const swUrl = `sw.js?db=${encodeURIComponent(mode)}&v=${encodeURIComponent(ver)}`;
+                const registration = await navigator.serviceWorker.register(swUrl);
                 await navigator.serviceWorker.ready;
                 const token = await messaging.getToken({
                     serviceWorkerRegistration: registration,

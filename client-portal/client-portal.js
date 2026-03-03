@@ -2565,12 +2565,18 @@ async function initPushNotifications(forcePrompt = false) {
             if ('serviceWorker' in navigator) {
                 // Remove query parameters from the SW path.
                 // { updateViaCache: 'none' } already handles cache bypassing natively.
-                const baseSwPath = (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/'))
-                    ? '../sw.js'
-                    : 'sw.js';
+                const cfg = (window.STALLZ_APP_CONFIG || {});
+const mode = (cfg.firebase && cfg.firebase.testMode) ? "test" : "main";
+const ver  = (window.STALLZ_APP_VERSION || cfg.version || "0");
 
-                // Explicitly register ONLY sw.js
-                swReg = await navigator.serviceWorker.register(baseSwPath, { updateViaCache: 'none' });
+const baseSwPath = (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/'))
+    ? '../sw.js'
+    : 'sw.js';
+
+const swUrl = `${baseSwPath}?db=${encodeURIComponent(mode)}&v=${encodeURIComponent(ver)}`;
+
+// Register SW with mode+version so SW uses the SAME firebase project as the page
+swReg = await navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' });
                 swReg = await navigator.serviceWorker.ready;
             }
         } catch (e) {

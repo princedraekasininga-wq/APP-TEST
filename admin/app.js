@@ -1102,8 +1102,12 @@ function refreshUI() {
     return true;
   });
 
-  const hasAny = (sharedNotifs.length + overdueLoans.length) > 0;
-  if (bellBadge) bellBadge.classList.toggle("show", hasAny);
+  const attentionCount = (sharedNotifs.length + overdueLoans.length);
+const hasAny = attentionCount > 0;
+if (bellBadge) {
+  bellBadge.textContent = attentionCount > 99 ? "99+" : String(attentionCount);
+  bellBadge.classList.toggle("show", hasAny);
+}
 
   if (notifList) {
     if (!hasAny) {
@@ -3028,7 +3032,16 @@ function init() {
   document.getElementById("profileToggleBtn")?.addEventListener("click", toggleProfileSidebar);
   document.getElementById("closeProfileBtn")?.addEventListener("click", toggleProfileSidebar);
   document.getElementById("profileOverlay")?.addEventListener("click", toggleProfileSidebar);
-  document.getElementById("notifBtn")?.addEventListener("click", toggleNotifications);
+  document.getElementById("notifBtn")?.addEventListener("click", async () => {
+    try {
+        if (typeof Notification !== "undefined" && Notification.permission !== "granted") {
+            await initAdminPushNotifications(true);
+        } else {
+            await initAdminPushNotifications(false);
+        }
+    } catch(e) {}
+    toggleNotifications();
+});
 
   document.getElementById("themeToggle")?.addEventListener("change", (e) => {
     localStorage.setItem("stallz_theme_preference", e.target.checked ? "dark" : "light");
@@ -3345,7 +3358,7 @@ function init() {
         __suppressSharedSync = true;
         try { refreshUI(); } finally { __suppressSharedSync = false; }
       });
-      initAdminPushNotifications();
+      initAdminPushNotifications(false);
     } catch(e) {}
   });
 
@@ -4443,53 +4456,65 @@ async function runSmartEngagementEngine() {
 // ==========================================================================
 // ADMIN PUSH NOTIFICATIONS
 // ==========================================================================
-async function initAdminPushNotifications() {
-    if (typeof firebase === 'undefined' || !firebase.messaging) return;
-    if (typeof Notification === "undefined") return;
+async function initAdminPushNotifications(forcePrompt = false) {
+    if (typeof firebase === 'undefined' || !firebase.messaging) return false;
+    if (typeof Notification === "undefined") return false;
 
     try {
-        // 1. Ask for permission
-        const perm = await Notification.requestPermission();
-        if (perm !== 'granted') {
-            console.warn("Admin notifications denied.");
-            return;
+        // 1) Permission (ONLY prompt on user gesture)
+        if (Notification.permission !== 'granted') {
+            if (!forcePrompt) return false;
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') {
+                console.warn("Admin notifications denied.");
+                return false;
+            }
         }
 
-        // 2. Register the shared service worker
-        const swReg = await navigator.serviceWorker.register('../sw.js', { updateViaCache: 'none' });
+        // 2) Register the shared service worker with mode+version so SW matches firebase project
+        const cfg = (window.STALLZ_APP_CONFIG || {});
+        const mode = (cfg.firebase && cfg.firebase.testMode) ? "test" : "main";
+        const ver  = (window.STALLZ_APP_VERSION || cfg.version || "0");
+        const swUrl = `../sw.js?db=${encodeURIComponent(mode)}&v=${encodeURIComponent(ver)}`;
+
+        const swReg = await navigator.serviceWorker.register(swUrl, { updateViaCache: 'none' });
         await navigator.serviceWorker.ready;
 
         const messaging = firebase.messaging();
         const vapidKey = window.STALLZ_FIREBASE?.config?.vapidKey || window.STALLZ_APP_CONFIG?.firebase?.active?.vapidKey;
 
-        // 3. Get the token
+        // 3) Get the token (tied to the SAME SW registration)
         const token = await messaging.getToken({
             vapidKey: vapidKey,
             serviceWorkerRegistration: swReg
         });
 
-        // 4. Save the token to the admin's database profile
+        // 4) Save token under deterministic key (token string) to avoid duplicates
         if (token && state.user && state.user.uid) {
             await firebase.database().ref(`admins/${state.user.uid}/fcmTokens/${token}`).set({
                 token: token,
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                appVersion: (window.STALLZ_APP_VERSION || cfg.version || null),
+                ua: (typeof navigator !== "undefined" ? navigator.userAgent : null)
             });
         }
 
-        // 5. Handle messages while the admin dashboard is open (Foreground)
+        // 5) Foreground handler
         if (!window.__ADMIN_PUSH_BOUND) {
             window.__ADMIN_PUSH_BOUND = true;
             messaging.onMessage((payload) => {
                 const title = payload.data?.title || "Admin Alert";
                 const body  = payload.data?.body  || "You have a new update.";
 
-                // Show toast and refresh the bell icon
                 if (typeof showToast === 'function') showToast(`${title}: ${body}`, "success");
                 if (typeof vibrate === 'function') vibrate([200, 100, 200]);
                 if (typeof refreshUI === 'function') refreshUI();
             });
         }
+
+        return true;
     } catch (e) {
         console.warn("Failed to setup admin push:", e);
+        return false;
     }
 }

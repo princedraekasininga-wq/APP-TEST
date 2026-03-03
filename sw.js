@@ -46,12 +46,12 @@ function toAbsoluteTarget(target) {
 messaging.onBackgroundMessage(function(payload) {
   const title = payload.data?.title || 'Stallz Loans';
   const body  = payload.data?.body  || 'You have a new alert from Stallz.';
-  const click = payload.data?.click_action || '/client-portal/client.html';
+  const click = payload.data?.click_action || 'client-portal/client.html';
 
   const notificationOptions = {
     body,
-    icon: '/assets/logo_images/icon-192.png',
-    badge: '/assets/logo_images/myfavicon.png',
+    icon: new URL('assets/logo_images/icon-192.png', self.registration.scope).href,
+    badge: new URL('assets/logo_images/myfavicon.png', self.registration.scope).href,
     vibrate: [200, 100, 200, 100, 200, 100, 200],
 
     // ✅ DEDUPE ON DEVICE (stops “same push twice” from showing twice)
