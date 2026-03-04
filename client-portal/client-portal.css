@@ -2,6 +2,8 @@
    1. VARIABLES & THEME SETTINGS (STALLZ GREEN THEME)
    ========================================================================== */
 :root {
+  --stallz-glass-blur: 18px;
+
     --bg-color: #0f172a;           /* Deep Navy Background */
     --primary: #4ade80;            /* Stallz Green */
     --primary-glow: rgba(74, 222, 128, 0.6);
@@ -113,15 +115,15 @@ body {
 
 /* UPDATED NOTIFICATION DROPDOWN */
 .notification-dropdown {
-    position: absolute; top: 100%; right: -10px; margin-top: 15px; width: 320px;
-    background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+    position: absolute; top: 100%; right: -50px; margin-top: 15px; width: 300px;
+    background: rgba(30, 41, 59, 0.98); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px; display: none; flex-direction: column; z-index: 1001;
     box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow: hidden;
-    transform-origin: top right; animation: scaleIn 0.2s ease-out forwards;
+    transform-origin: top right; animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.75); } to { opacity: 1; transform: scale(1); } }
 
 .dropdown-header {
     padding: 15px 20px; font-size: 0.75rem; font-weight: 800;
@@ -225,16 +227,64 @@ body {
 #ringHandleGroup {
     transition: transform 1.0s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 /* ==========================================================================
-   7. ADVICE MESSAGE
+   7. ADVICE MESSAGE (PREMIUM CARD)
    ========================================================================== */
 .advice-box {
-    background: transparent; border: none; box-shadow: none;
-    padding: 5px 0; margin-top: 5px; margin-bottom: 15px;
-    text-align: center; width: 100%;
+    background: rgba(255, 255, 255, 0.03); /* Lighter than background to separate it */
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-.advice-text { font-family: 'Inter', sans-serif; font-size: 0.65rem; color: rgba(255, 255, 255, 0.7); line-height: 1.3; margin: 0 auto; max-width: 95%; }
-.advice-text span { color: #60a5fa; font-weight: 700; letter-spacing: 0.3px; margin-right: 3px; }
+
+.advice-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.advice-icon {
+    color: var(--primary); /* Soft Stallz Green */
+    font-size: 0.85rem;
+}
+
+.advice-title {
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+}
+
+.advice-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* --- Day Mode Overrides for Advice Box --- */
+body.day-mode .advice-box {
+    background: rgba(241, 245, 249, 0.8); /* Slate-100 background */
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+body.day-mode .advice-icon,
+body.day-mode .advice-title {
+    color: #16a34a; /* Darker green for visibility in day mode */
+}
+body.day-mode .advice-text {
+    color: #475569;
+    font-weight: 500;
+}
+
 
 /* ==========================================================================
    8. STATS GRID & TABLE
@@ -333,6 +383,7 @@ body {
 .center-item .nav-label {
     margin-top: -22px; font-weight: 700; color: var(--primary);
 }
+
 /* ==========================================================================
    10. MODALS, INPUTS & NEW ELEMENTS
    ========================================================================== */
@@ -347,7 +398,52 @@ body {
     width: 85%; max-width: 350px;
 }
 
-.btn-full { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; margin-top: 15px; cursor: pointer; }
+/* --- THE MISSING BUTTON CLASSES ADDED HERE --- */
+.btn-group {
+    display: flex; gap: 10px; margin-top: 15px; position: relative; width: 100%; z-index: 1;
+}
+
+/* Sidebar action buttons (Logout / About / Feedback) */
+.sidebar-action {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.08s ease;
+}
+
+#logoutBtn.sidebar-action {
+    padding: 8px 10px;
+    margin-right: 8px;
+    background: rgba(255,255,255,0.06);
+    border: none;
+}
+
+.drawer-footer .sidebar-action { display: inline-flex; align-items: center; gap: 8px; }
+
+.sidebar-action:hover { background: rgba(255,255,255,0.08); transform: translateY(-1px); }
+
+.submit-btn, .btn-full {
+    width: 100%; padding: 12px; background: var(--primary); color: white;
+    border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
+}
+
+.submit-btn:active, .btn-full:active { transform: scale(0.98); }
+
+.submit-btn.btn-secondary {
+    background: rgba(255, 255, 255, 0.08); color: var(--text-muted);
+    box-shadow: none; border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.submit-btn.btn-secondary:hover { background: rgba(255, 255, 255, 0.12); }
+/* --------------------------------------------- */
+
+
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
 .modal-header h3 { font-size: 1.1rem; color: var(--text-main); }
 .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
@@ -370,6 +466,32 @@ body {
 .support-item h4 { margin: 0; font-size: 0.95rem; }
 .support-item p { margin: 2px 0 0 0; font-size: 0.8rem; color: var(--text-muted); }
 
+
+/* ==========================================================================
+   10.5 LOAN REQUEST WIZARD CLASSES
+   ========================================================================== */
+.wizard-header {
+    text-align: center; margin-bottom: 20px; position: relative; z-index: 1;
+}
+.wizard-step-text {
+    font-size: 0.75rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em;
+}
+.wizard-title {
+    font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin-top: 4px;
+}
+.wizard-progress {
+    display: flex; gap: 5px; justify-content: center; margin-top: 10px;
+}
+.progress-dot {
+    height: 6px; width: 25px; background: rgba(255, 255, 255, 0.2); border-radius: 3px; transition: all 0.3s;
+}
+.progress-dot.active { background: var(--primary); }
+
+.form-slider-container { display: flex; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+.form-step { flex-shrink: 0; }
+.form-error { color: #ef4444; font-size: 0.75rem; font-weight: 600; margin-top: 5px; margin-bottom: 10px; display: none; text-align: left; }
+
+
 /* ==========================================================================
    11. DRAWER (PROFILE/SETTINGS)
    ========================================================================== */
@@ -389,21 +511,88 @@ body {
 .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .drawer-header h3 { font-size: 1.1rem; color: var(--text-main); }
 .drawer-body { flex: 1; overflow-y: auto; }
-.drawer-user-card { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-bottom: 25px; }
-.drawer-avatar { width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-.drawer-user-card h4 { margin: 0; font-size: 1rem; color: #fff; }
-.drawer-user-card p { margin: 0; font-size: 0.75rem; color: var(--text-muted); }
-.drawer-menu { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
-.drawer-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; color: var(--text-main); font-size: 0.9rem; cursor: pointer; transition: 0.2s; text-align: left; width: 100%; }
+/* Make the sidebar profile card horizontal & premium */
+.drawer-user-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px 16px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 0 20px rgba(255,255,255,0.02), 0 8px 20px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+.drawer-user-card:active { transform: scale(0.97); }
+.drawer-user-card:hover { background: rgba(255, 255, 255, 0.08); }
+
+.drawer-avatar {
+    width: 54px;
+    height: 54px;
+    background: linear-gradient(135deg, rgba(74,222,128,0.15), rgba(59,130,246,0.06));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.1), 0 6px 12px rgba(0,0,0,0.3);
+    flex-shrink: 0;
+}
+
+.drawer-user-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.drawer-user-meta h4, .drawer-user-meta h4#sidebarUserName {
+    margin: 0; font-size: 1.05rem; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
+}
+.drawer-user-meta p, .drawer-user-meta p#sidebarUserDetail {
+    margin: 0; font-size: 0.75rem; color: var(--primary); font-weight: 600;
+}
+
+/* Day Mode Overrides for Drawer Card */
+body.day-mode .drawer-user-card { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(0, 0, 0, 0.08); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+body.day-mode .drawer-user-card:hover { background: rgba(0, 0, 0, 0.08); }
+body.day-mode .drawer-avatar { border-color: #ffffff !important; box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15), 0 4px 10px rgba(0,0,0,0.1); }
+body.day-mode .drawer-user-meta h4 { color: #0f172a; }
+
+/* Compact drawer for small screens: reduce padding and font sizes so less scrolling is required */
+@media (max-width: 520px) {
+    .drawer-glass { padding: 12px !important; }
+    .drawer-user-card { padding: 10px 12px; gap: 12px; margin-bottom: 15px; }
+    .drawer-avatar { width: 48px; height: 48px; font-size: 1.1rem; }
+    .drawer-user-meta h4 { font-size: 0.98rem; }
+    .drawer-user-meta p { font-size: 0.78rem; }
+    .drawer-menu .drawer-item { padding: 10px; font-size: 0.85rem; }
+    .drawer-footer { padding-top: 10px; }
+    .drawer-body { gap: 8px; }
+}
+
+/* Compact Menu Links */
+.drawer-menu { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+.drawer-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; color: var(--text-main); font-size: 0.85rem; cursor: pointer; transition: 0.2s; text-align: left; width: 100%; }
 .drawer-item:hover { background: rgba(255,255,255,0.05); }
-.item-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.item-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
+
+/* Existing helper classes */
 .icon-gold { background: rgba(253, 224, 71, 0.15); color: #facc15; }
 .icon-orange { background: rgba(249, 115, 22, 0.15); color: #f97316; }
 .arrow { margin-left: auto; font-size: 0.8rem; color: var(--text-muted); }
 .toggle-icon { margin-left: auto; font-size: 1.2rem; color: var(--text-muted); }
 body.day-mode .toggle-icon { color: var(--primary); transform: rotate(180deg); }
 .profile-mini-details p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
-.drawer-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.15); }
+.drawer-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.15); }
 .contact-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 15px; display: block; }
 .contact-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: var(--text-main); font-size: 0.85rem; text-decoration: none; }
 .contact-row i { width: 20px; text-align: center; color: var(--primary); }
@@ -411,7 +600,6 @@ body.day-mode .toggle-icon { color: var(--primary); transform: rotate(180deg); }
 .social-link { color: var(--text-muted); font-size: 1.2rem; transition: 0.2s; }
 .social-link:hover { color: var(--primary); }
 .logout-btn { margin-top: 15px; background: rgba(255,255,255,0.1); }
-
 /* ==========================================================================
    12. PAYMENT PROVIDER CARDS
    ========================================================================== */
@@ -510,10 +698,9 @@ body.day-mode .small-icon {
     color: #334155;
 }
 
-/* 6. Modals, Notifications & Drawer (UPDATED WITH TRANSPARENCY) */
+/* 6. Modals & Drawer (REMOVED DROPDOWN FROM HERE) */
 body.day-mode .drawer-glass,
-body.day-mode .modal-glass,
-body.day-mode .notification-dropdown {
+body.day-mode .modal-glass {
     background: rgba(255, 255, 255, 0.9); /* Transparent White */
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -524,6 +711,14 @@ body.day-mode .contact-row, body.day-mode h4 { color: #0f172a !important; }
 body.day-mode .modal-input {
     background: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a;
 }
+
+/* DAY MODE FIXES FOR WIZARD AND BUTTONS */
+body.day-mode .wizard-title { color: #0f172a; }
+body.day-mode .progress-dot { background: rgba(0, 0, 0, 0.1); }
+body.day-mode .progress-dot.active { background: var(--primary); }
+body.day-mode .submit-btn.btn-secondary { background: rgba(0, 0, 0, 0.05); color: #475569; border-color: rgba(0, 0, 0, 0.1); }
+body.day-mode .submit-btn.btn-secondary:hover { background: rgba(0, 0, 0, 0.08); }
+
 
 /* 7. Payment & Features */
 body.day-mode .pay-provider-card {
@@ -555,19 +750,51 @@ body.day-mode .drawer-item { border-color: rgba(0,0,0,0.1); color: #0f172a; }
 body.day-mode .drawer-item:hover { background: rgba(0,0,0,0.05); }
 body.day-mode .logout-btn { background: rgba(0,0,0,0.05); color: #0f172a; }
 
-/* 8. Notification Specifics */
-body.day-mode .dropdown-header {
-    background: rgba(0,0,0,0.03);
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-    color: #64748b;
+/* 8. Notification Specifics (FIXED FOR DAY MODE) */
+body.day-mode .notification-dropdown {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(var(--stallz-glass-blur)); -webkit-backdrop-filter: blur(var(--stallz-glass-blur));
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
 }
+
+body.day-mode .dropdown-header {
+    background: rgba(241, 245, 249, 0.8) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+body.day-mode .dropdown-header span {
+    color: #0f172a !important;
+}
+
+body.day-mode .notif-filters {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+body.day-mode .notif-filters button {
+    color: #475569 !important;
+}
+body.day-mode .notif-filters button.active {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}
+
 body.day-mode .notify-item {
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-    color: #0f172a;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 body.day-mode .notify-item:hover {
-    background: rgba(0,0,0,0.03);
+    background: rgba(0, 0, 0, 0.02) !important;
 }
+body.day-mode .notify-item.unread {
+    background: linear-gradient(90deg, rgba(22, 163, 74, 0.05), transparent) !important;
+}
+
+body.day-mode .notif-title { color: #0f172a !important; }
+body.day-mode .notif-body { color: #475569 !important; }
+body.day-mode .notif-time { color: #94a3b8 !important; }
+
+body.day-mode .notify-empty { color: #64748b !important; }
+body.day-mode .notify-empty i { color: #94a3b8 !important; }
 
 /* Mobile Optimizations */
 @media (max-width: 600px) {
@@ -596,7 +823,7 @@ body.day-mode .notify-item:hover {
 }
 
 /* ==========================================================================
-   15. MISSING CALCULATOR STYLES (FIX)
+   15. CALCULATOR STYLES
    ========================================================================== */
 .calc-group { margin-bottom: 20px; }
 .calc-label-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; color: var(--text-muted); }
@@ -782,6 +1009,56 @@ body.day-mode .option-btn.active {
 body.day-mode .upload-box-small {
     border-color: #cbd5e1;
     background: #f8fafc;
+}
+
+/* Day Mode for "No loan request yet" empty state */
+body.day-mode .rp-empty {
+    background: rgba(241, 245, 249, 0.8); /* Nice light greyish-blue background */
+    border: 1px solid rgba(0, 0, 0, 0.05); /* Soft border */
+    border-radius: 16px;
+    padding: 20px 15px;
+    margin-top: 5px;
+}
+
+body.day-mode .rp-empty-title {
+    color: #0f172a; /* Dark text for the title */
+}
+
+body.day-mode .rp-empty-sub {
+    color: #475569; /* Slate grey for the subtitle */
+}
+
+body.day-mode .rp-empty-icon {
+    color: #3b82f6; /* Optional: Make the 📝 icon pop with a slight color */
+}
+/* Day Mode for the Loan Request Header (Title and X button) */
+body.day-mode #loanRequestProgressPanel .rp-header {
+    background: rgba(226, 232, 240, 0.6); /* A nice light grey-blue background */
+    padding: 12px 15px; /* Adds breathing room inside the header */
+    margin: -12px -12px 12px -12px; /* Stretches the header to the very edges of the panel */
+    border-radius: 20px 20px 0 0; /* Rounds the top corners so it doesn't poke out */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08); /* A soft line separating it from the content */
+}
+/* FORCE DAY MODE ON THE LOAN REQUEST PANEL */
+body.day-mode .request-progress-panel,
+body.day-mode #loanRequestProgressPanel {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Fix the Title and Meta text colors in the header */
+body.day-mode #loanRequestProgressPanel .rp-title {
+    color: #0f172a !important; /* Dark text for title */
+}
+
+body.day-mode #loanRequestProgressPanel .rp-meta {
+    color: #64748b !important; /* Gray text for the date/meta */
+}
+
+/* Fix the header bottom border */
+body.day-mode #loanRequestProgressPanel .rp-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
 /* ==========================================================================
@@ -1086,221 +1363,1165 @@ body.day-mode .loader-bar { background: rgba(0,0,0,0.1); }
 .m-loan-progress-fill.paid { background: #22c55e; }
 
 /* ==========================================================================
-   NEXT-LEVEL PATCH (Client Portal)
-   - Payment methods (no more "Failed to load")
-   - Loan cards pop out of the background
-   - Loan request progress tracker
-   - Statements modal
+   99. 2026-02-15 UI FIXES (Payments + Statements + Request Progress)
    ========================================================================== */
 
-.payment-card {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  padding:14px 14px;
-  border-radius:14px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.10);
-  cursor:pointer;
-  transition: transform .12s ease, background .12s ease;
-}
-.payment-card:active { transform: scale(.985); background:rgba(255,255,255,0.06); }
-.payment-card-title { font-weight:900; }
-.payment-card-sub { font-size:.9rem; opacity:.78; margin-top:2px; }
-.payment-card-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
-.payment-badge {
-  font-size:.75rem;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,0.14);
-  background: rgba(34,197,94,0.12);
-  color: #bbf7d0;
-}
-.payment-copy { font-size:.75rem; opacity:.72; }
-
-/* Make loan cards stand out more (glass + shadow) */
-.m-loan-card {
-  background: rgba(2,6,23,0.55) !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  box-shadow: 0 18px 45px rgba(0,0,0,0.45) !important;
-  backdrop-filter: blur(14px) !important;
-}
-
-/* Loan history actions */
-.m-loan-actions { display:flex; gap:10px; padding: 10px 14px 14px; }
-.mini-btn {
-  flex: 1;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: var(--text, #f8fafc);
-  font-weight: 800;
-  cursor:pointer;
-}
-.mini-btn:active { transform: scale(.985); }
-.mini-btn-primary {
-  background: rgba(225,29,46,0.18);
-  border-color: rgba(225,29,46,0.32);
-}
-
-/* Loan Request Status */
-.request-progress-card{
-  margin-top: 14px;
-  padding: 14px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
-  backdrop-filter: blur(14px);
-}
-.rpc-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 12px; }
-.rpc-title{ display:flex; align-items:center; gap:10px; }
-
-.status-badge{
-  font-size: .75rem;
-  padding: 6px 10px;
-  border-radius:999px;
+/* Make Loan History feel "on top" (less washed into the background) */
+.loan-history-panel {
+  background: rgba(30, 41, 59, 0.78);
   border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  font-weight: 900;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
 }
-.status-badge.pending { background: rgba(245,158,11,0.14); border-color: rgba(245,158,11,0.28); color: #fde68a; }
-.status-badge.approved { background: rgba(34,197,94,0.14); border-color: rgba(34,197,94,0.28); color: #bbf7d0; }
-.status-badge.rejected { background: rgba(239,68,68,0.14); border-color: rgba(239,68,68,0.28); color: #fecaca; }
-.status-badge.cancelled { background: rgba(148,163,184,0.16); border-color: rgba(148,163,184,0.28); color: #e2e8f0; }
 
-.rpc-body{ display:flex; flex-direction:column; gap: 12px; }
-.rpc-empty{
-  opacity:.85;
-  font-size:.95rem;
-  padding: 10px;
+.loan-history-panel .m-loan-card{
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.loan-history-panel .m-loan-header{
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.day-mode .loan-history-panel{
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(2, 6, 23, 0.10);
+}
+body.day-mode .loan-history-panel .m-loan-card{
+  background: rgba(255,255,255,0.88);
+  border: 1px solid rgba(2, 6, 23, 0.10);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.12);
+}
+
+/* Loan Request Progress Panel (dashboard, below loan ring) */
+.request-progress-panel {
+  margin-top: 10px;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 14px;
-  background: rgba(255,255,255,0.03);
-  border:1px dashed rgba(255,255,255,0.12);
-}
-.rpc-meta{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.rpc-meta-item{
-  padding: 10px;
-  border-radius: 14px;
-  background: rgba(2,6,23,0.45);
-  border:1px solid rgba(255,255,255,0.10);
-}
-.rpc-meta-item span{ display:block; font-size:.75rem; opacity:.75; margin-bottom: 4px; }
-.rpc-meta-item strong{ font-size:.95rem; }
-
-.rpc-steps{ display:flex; align-items:center; gap: 10px; }
-.rpc-step{
-  flex:1;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding: 10px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.10);
-  opacity:.78;
-}
-.rpc-step .dot{ width: 10px; height: 10px; border-radius:999px; background: rgba(148,163,184,0.55); }
-.rpc-step.done{ opacity:1; background: rgba(34,197,94,0.10); border-color: rgba(34,197,94,0.22); }
-.rpc-step.done .dot{ background: rgba(34,197,94,0.9); }
-.rpc-step.active{ opacity:1; background: rgba(245,158,11,0.10); border-color: rgba(245,158,11,0.22); }
-.rpc-step.active .dot{ background: rgba(245,158,11,0.9); }
-.rpc-step.rejected{ opacity:1; background: rgba(239,68,68,0.10); border-color: rgba(239,68,68,0.22); }
-.rpc-step.rejected .dot{ background: rgba(239,68,68,0.9); }
-.rpc-step.cancelled{ opacity:1; background: rgba(148,163,184,0.12); border-color: rgba(148,163,184,0.24); }
-.rpc-step.cancelled .dot{ background: rgba(148,163,184,0.9); }
-.rpc-step .label{ font-weight: 900; font-size:.85rem; }
-
-.rpc-foot{ display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-.rpc-small{ font-size:.8rem; opacity:.85; }
-
-/* Statement Modal */
-.statement-glass{ max-height: 86vh; overflow:hidden; }
-.statement-controls{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 12px; }
-.mini-label{ font-size: .75rem; opacity:.75; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
-.glass-select{
-  flex:1;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.10);
-  color: var(--text, #f8fafc);
-  outline:none;
-}
-.statement-content{ display:flex; flex-direction:column; gap: 14px; }
-.statement-empty{
   padding: 12px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.03);
-  border:1px dashed rgba(255,255,255,0.12);
-  opacity:.9;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.25);
 }
 
-.statement-summary{
-  padding: 14px;
-  border-radius: 18px;
-  background: rgba(2,6,23,0.45);
-  border:1px solid rgba(255,255,255,0.10);
+.rp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 8px;
 }
-.ss-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 12px; }
-.ss-title{ font-weight: 950; font-size: 1.05rem; }
-.ss-badge{
-  font-size:.75rem;
+
+.rp-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: .2px;
+}
+
+.rp-icon {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--primary);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  font-size: 0.8rem;
+}
+
+.rp-meta {
+  font-size: .7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.rp-body { display: flex; flex-direction: column; gap: 10px; }
+
+.rp-empty {
+  text-align: center;
+  padding: 12px 10px;
+  color: var(--text-muted);
+}
+
+.rp-empty-icon {
+  font-size: 1.5rem;
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+
+.rp-empty-title {
+  color: var(--text-main);
+  font-weight: 800;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+.rp-empty-sub {
+  font-size: .75rem;
+  opacity: .8;
+  line-height: 1.3;
+}
+
+.rp-steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.rp-step {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+
+.rp-bullet {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem;
+  font-weight: 900;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.65);
+  background: rgba(255,255,255,0.04);
+  flex: 0 0 auto;
+}
+
+.rp-step.done .rp-bullet {
+  background: rgba(34,197,94,0.14);
+  border-color: rgba(34,197,94,0.35);
+  color: #86efac;
+}
+.rp-step.current {
+  border-color: rgba(74, 222, 128, 0.22);
+  background: rgba(74, 222, 128, 0.08);
+}
+.rp-step.current .rp-bullet {
+  background: rgba(74, 222, 128, 0.14);
+  border-color: rgba(74, 222, 128, 0.35);
+  color: var(--primary);
+}
+.rp-step.rejected {
+  border-color: rgba(239,68,68,0.30);
+  background: rgba(239,68,68,0.10);
+}
+.rp-step.rejected .rp-bullet {
+  background: rgba(239,68,68,0.16);
+  border-color: rgba(239,68,68,0.35);
+  color: #fecaca;
+}
+
+.rp-step-title {
+  font-weight: 800;
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+  color: var(--text-main);
+}
+
+.rp-step-sub {
+  font-size: .75rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.rp-footnote {
+  font-size: .75rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px dashed rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.02);
+}
+
+/* ==========================================================================
+   STATEMENTS MODAL (PREMIUM PHONE OPTIMIZED + ANIMATIONS + COLORED TOTALS)
+   ========================================================================== */
+/* 1. Animation Keyframes */
+@keyframes glassSlideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes glassSlideDown {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(30px); opacity: 0; }
+}
+
+@keyframes entryFadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* 2. Modal Overlay States */
+#statementsModal.modal-overlay {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#statementsModal.active {
+    display: flex;
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+/* 3. Glass Window Styling & Opening Animation */
+.statements-glass {
+    max-width: 500px !important;
+    width: 95% !important;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 18px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+
+    /* Animation initial state */
+    transform: translateY(30px);
+    opacity: 0;
+}
+
+#statementsModal.active .statements-glass {
+    animation: glassSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+}
+
+#statementsModal.closing .statements-glass {
+    animation: glassSlideDown 0.3s ease forwards;
+}
+
+.statements-body {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding-right: 0px;
+}
+.statements-body::-webkit-scrollbar { display: none; }
+
+/* 4. Enhanced Summary Section with Distinction Colors */
+.statement-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.sum-chip {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px 6px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.sum-label {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 800;
+    margin-bottom: 5px;
+    letter-spacing: 0.3px;
+}
+
+.sum-value {
+    font-weight: 900;
+    font-size: 0.95rem;
+}
+
+/* Distinction Colors for Summary Figures */
+#stmtTotalBorrowed { color: #60a5fa; } /* Premium Blue for Principal */
+#stmtTotalPaid { color: #4ade80; }     /* Stallz Green for Payments */
+#stmtCurrentBalance { color: #fbbf24; } /* Amber/Orange for Remaining Debt */
+
+/* Day Mode Color Adjustments for readability */
+body.day-mode #stmtTotalBorrowed { color: #2563eb; }
+body.day-mode #stmtTotalPaid { color: #16a34a; }
+body.day-mode #stmtCurrentBalance { color: #d97706; }
+
+/* 5. Filter Toolbar Button Transition */
+.statement-toolbar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stmt-filter {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    cursor: pointer;
+    /* Smooth button background switching */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stmt-filter.active {
+    background: var(--primary);
+    color: #020617;
+    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+    transform: scale(1.02);
+}
+
+/* 6. Ledger Card Styling (Replaces Table) */
+.statement-ledger {
+    background: transparent;
+    border: none;
+}
+
+.stmt-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    animation: entryFadeIn 0.4s ease-out forwards;
+}
+
+.stmt-entry:last-child { border-bottom: none; }
+
+.stmt-left { display: flex; align-items: flex-start; gap: 14px; }
+
+.stmt-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0; margin-top: 2px;
+}
+
+.icon-loan { background: rgba(59, 130, 246, 0.12); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+.icon-pay { background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+
+.stmt-info { display: flex; flex-direction: column; gap: 3px; }
+.stmt-title { font-weight: 800; font-size: 0.9rem; color: var(--text-main); }
+.stmt-date { font-size: 0.75rem; color: var(--text-muted); }
+.stmt-detail-row { font-size: 0.7rem; color: var(--text-muted); opacity: 0.8; }
+
+.stmt-right { text-align: right; }
+.stmt-amt { font-size: 1rem; font-weight: 900; margin-bottom: 3px; }
+.amt-pos { color: #4ade80; } /* Payment credits */
+.amt-neg { color: #f87171; } /* Loan debits */
+
+.stmt-sub-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+/* 7. Stacking for Summary Chips on Mobile */
+@media (max-width: 440px) {
+    .statement-summary { grid-template-columns: 1fr; gap: 8px; }
+    .sum-chip { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; }
+    .sum-label { margin-bottom: 0; }
+}
+
+/* ==========================================================================
+   FIX: HISTORY MODAL VISIBILITY & ANIMATIONS
+   ========================================================================== */
+
+#historyModal.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease; /* Adds the smooth background fade */
+}
+
+#historyModal.active {
+    display: flex !important;
+    opacity: 1; /* Fades the dark background in */
+}
+
+#historyModal .statements-glass {
+    background: rgba(30, 41, 59, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    width: 92%;
+    max-width: 450px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transform: translateY(30px);
+    opacity: 0;
+}
+
+/* 1. The Opening Animation */
+#historyModal.active .statements-glass {
+    animation: glassSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 2. THE FIX: The missing Closing Animation */
+#historyModal.closing .statements-glass {
+    animation: glassSlideDown 0.3s ease forwards;
+}
+
+/* Scrollable area inside history */
+.history-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 15px;
+    scrollbar-width: none;
+}
+.history-body::-webkit-scrollbar { display: none; }
+
+/* Day Mode fix for History */
+body.day-mode #historyModal .statements-glass {
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* ==========================================================================
+   100. BOTTOM SHEET MODALS & HIDDEN SCROLLBARS
+   ========================================================================== */
+.bottom-sheet-glass {
+    width: 92% !important;           /* Leaves a nice little gap on the left and right */
+    max-width: 400px !important;     /* Keeps it compact like your other modals */
+    margin: 0 auto 55px auto !important; /* Centers it and lifts it 20px off the bottom edge */
+    border-radius: 24px !important;  /* Rounds ALL corners beautifully */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important; /* Restores the glass edge */
+    padding-bottom: 20px !important; /* Standard inner padding */
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.hide-scrollbar {
+    overflow-y: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+/* Hide native scrollbar visuals in the side drawer/sidebar */
+.drawer-body {
+    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none; /* Firefox */
+}
+.drawer-body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* Enhanced Notification Styles */
+.notification-dropdown {
+    width: 300px;
+    background: rgba(15, 23, 42, 0.95) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.notification-dropdown.active {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.notif-filters {
+    display: flex;
+    background: rgba(255,255,255,0.05);
+    padding: 3px;
+    border-radius: 10px;
+}
+
+.notif-filters button {
+    background: none; border: none; color: #64748b;
+    padding: 4px 12px; font-size: 0.7rem; font-weight: 800;
+    cursor: pointer; border-radius: 8px; transition: 0.2s;
+}
+
+.notif-filters button.active {
+    background: var(--primary); color: #000;
+}
+
+.notify-item {
+    display: flex; gap: 12px; padding: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    position: relative; transition: background 0.2s;
+}
+
+.notify-item.unread { background: rgba(59, 130, 246, 0.03); }
+
+.notif-icon-circle {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+}
+
+.notif-content { flex: 1; }
+.notif-title { font-weight: 800; font-size: 0.85rem; color: #fff; margin-bottom: 2px; }
+.notif-body { font-size: 0.75rem; color: #94a3b8; line-height: 1.4; }
+.notif-time { font-size: 0.65rem; color: #64748b; margin-top: 6px; font-weight: 600; }
+
+.unread-indicator {
+    width: 8px; height: 8px; background: var(--primary);
+    border-radius: 50%; position: absolute; right: 15px; top: 15px;
+    box-shadow: 0 0 10px var(--primary);
+}
+
+.notify-empty {
+    padding: 40px 20px; text-align: center;
+    color: #64748b; font-size: 0.85rem; font-weight: 600;
+}
+
+
+
+/* ==========================================================================
+   101. 2026-02-17 MOBILE HARDENING (NO OFF-SCREEN ELEMENTS)
+   ========================================================================== */
+
+img, svg { max-width: 100%; height: auto; }
+
+/* Keep dropdowns & modals inside the viewport on small screens */
+@media (max-width: 600px){
+  body{ padding-bottom: 130px; }
+
+  .portal-shell{ padding-left: 12px; padding-right: 12px; }
+
+  .glass-header{
+    top: calc(10px + env(safe-area-inset-top));
+    margin-left: 0; margin-right: 0;
+  }
+
+  .notification-dropdown{
+    right: -10 !important;
+    left: auto !important;
+    width: min(340px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .modal-glass,
+  .statements-glass,
+  .bottom-sheet-glass{
+    width: calc(100vw - 24px) !important;
+    max-width: 420px !important;
+  }
+
+  .drawer-glass{ width: min(92vw, 340px); }
+
+  /* Prevent tables/cards from causing horizontal scroll */
+  .glass-panel,
+  .compact-card,
+  .action-card,
+  .hero-split-layout{ overflow: hidden; }
+
+  /* Improve tap spacing for bottom nav */
+  .mobile-bottom-nav{ width: 94%; }
+}
+
+/* --- Animated Request Panel Close --- */
+@keyframes slideOutFade {
+    0% { opacity: 1; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0.95) translateY(-10px); }
+}
+
+.rp-closing {
+    animation: slideOutFade 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+    pointer-events: none; /* Prevents clicking while it fades out */
+}
+
+/* --- DAY MODE FIX: SYNC MODAL BUTTONS --- */
+body.day-mode #firstTimeSyncModal .btn-full[onclick="closeFirstTimeSync(true)"] {
+    color: #1e293b !important; /* Dark slate text for better visibility */
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.day-mode #firstTimeSyncModal .btn-full[onclick="closeFirstTimeSync(true)"]:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Ensure the code input text is visible in Day Mode */
+body.day-mode #ftSyncCodeInput {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: #0f172a !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ==========================================================================
+   REQUEST MODAL LIVE CALCULATOR (ACTIVE & ALWAYS VISIBLE)
+   ========================================================================== */
+.req-calc-box {
+    background: linear-gradient(145deg, rgba(74, 222, 128, 0.15), rgba(30, 41, 59, 0.5));
+    border: 1px solid rgba(74, 222, 128, 0.4); /* Prominent Green Border */
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 15px;
+    display: block; /* ALWAYS VISIBLE NOW */
+    box-shadow: 0 8px 25px rgba(74, 222, 128, 0.15); /* Soft green glow */
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Tiny pulse animation when typing */
+.req-calc-box.active-pulse {
+    transform: scale(1.02);
+    box-shadow: 0 8px 30px rgba(74, 222, 128, 0.35);
+}
+
+.req-calc-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.req-calc-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.05rem;
+    color: var(--text-main);
+    font-weight: 800;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(74, 222, 128, 0.3);
+}
+
+.req-calc-total span:last-child {
+    font-size: 1.4rem; /* Big bold total */
+    color: var(--primary);
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+}
+
+/* Day Mode Overrides */
+body.day-mode .req-calc-box {
+    background: linear-gradient(145deg, rgba(34, 197, 94, 0.1), #ffffff);
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.1);
+}
+body.day-mode .req-calc-box.active-pulse {
+    box-shadow: 0 8px 30px rgba(34, 197, 94, 0.25);
+}
+body.day-mode .req-calc-row { color: #475569; }
+body.day-mode .req-calc-total { border-top-color: rgba(34, 197, 94, 0.2); color: #0f172a; }
+body.day-mode .req-calc-total span:last-child { color: #16a34a; text-shadow: none; }
+
+
+/* ==========================================================================
+   11. ADVANCED UX LAYER (SKELETONS • TRUST RING • SMART PROMPTS • STATUS THEME)
+   ========================================================================== */
+
+/* Depth layers (glassmorphic hierarchy) */
+.glass-header{
+    backdrop-filter: blur(var(--stallz-glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--stallz-glass-blur)) !important;
+    background: color-mix(in srgb, var(--glass-bg), rgba(0,0,0,0.15) 35%);
+}
+.hero-split-layout{
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+.compact-card,
+.glass-panel,
+.action-card,
+.advice-box{
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Fallback if color-mix is unsupported */
+@supports not (background: color-mix(in srgb, #000, #fff)){
+  .glass-header{ background: rgba(30, 41, 59, 0.80) !important; }
+  body.day-mode .glass-header{ background: rgba(255,255,255,0.92) !important; }
+}
+
+/* Status-based theming (soft warning amber) */
+body.status-warning{
+    --primary: #f59e0b;
+    --primary-glow: rgba(245, 158, 11, 0.55);
+}
+body.day-mode.status-warning{
+    --primary: #d97706;
+    --primary-glow: rgba(217, 119, 6, 0.35);
+}
+
+/* Mini amortization preview */
+.mini-preview{ margin-top: 10px; }
+.mini-preview-chip{
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.80);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: .2px;
+}
+.mini-preview-chip i{ color: var(--primary); }
+body.day-mode .mini-preview-chip{
+    background: rgba(15,23,42,0.04);
+    border: 1px solid rgba(2,6,23,0.08);
+    color: rgba(2,6,23,0.70);
+}
+
+/* Dual-ring (trust score) */
+.trust-track{
+    stroke: rgba(255,255,255,0.12);
+}
+.trust-progress{
+    stroke: var(--primary);
+    opacity: 0.75;
+    transition: stroke-dashoffset 1.0s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.trust-pill{
+    margin-top: 6px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: rgba(15,23,42,0.85);
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: .25px;
+}
+.trust-pill i{ color: var(--primary); }
+.trust-pill #trustScoreValue{ color: rgba(15,23,42,0.88); }
+body.day-mode .trust-pill{
+    background: rgba(2,6,23,0.04);
+    border: 1px solid rgba(2,6,23,0.08);
+    color: rgba(2,6,23,0.70);
+}
+
+/* Smart contextual bubble near the ring */
+.context-bubble{
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    max-width: 170px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(30, 41, 59, 0.92);
+    border: 1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+    color: rgba(255,255,255,0.88);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: .15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    animation: bubbleFloat 2.6s ease-in-out infinite;
+    transform: translateZ(0);
+}
+.context-bubble i{ color: var(--primary); font-size: 0.85rem; opacity: 0.95; }
+.context-bubble:active{ transform: scale(0.98); }
+@keyframes bubbleFloat{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-3px); }
+}
+body.day-mode .context-bubble{
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(2,6,23,0.08);
+    color: rgba(2,6,23,0.78);
+    box-shadow: 0 16px 45px rgba(2,6,23,0.10);
+}
+
+/* Advice as "stories" */
+.advice-carousel{
+    touch-action: pan-y;
+    cursor: grab;
+    transition: transform 160ms ease;
+}
+.advice-carousel.dragging{ cursor: grabbing; }
+.advice-dots{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+}
+.advice-dot{
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    border: 0;
+    background: rgba(255,255,255,0.18);
+    cursor: pointer;
+    transition: width 180ms ease, background 180ms ease, opacity 180ms ease;
+    opacity: 0.9;
+}
+.advice-dot.active{
+    width: 18px;
+    background: var(--primary);
+    opacity: 1;
+}
+body.day-mode .advice-dot{ background: rgba(2,6,23,0.18); }
+body.day-mode .advice-dot.active{ background: var(--primary); }
+
+/* Tip slide micro-animations */
+.advice-text.tip-out-left{ animation: tipOutLeft 160ms ease both; }
+.advice-text.tip-out-right{ animation: tipOutRight 160ms ease both; }
+.advice-text.tip-in-left{ animation: tipInLeft 240ms ease both; }
+.advice-text.tip-in-right{ animation: tipInRight 240ms ease both; }
+
+@keyframes tipOutLeft{ to{ opacity: 0; transform: translateX(-10px); } }
+@keyframes tipOutRight{ to{ opacity: 0; transform: translateX(10px); } }
+@keyframes tipInLeft{ from{ opacity: 0; transform: translateX(-10px);} to{ opacity: 1; transform: translateX(0);} }
+@keyframes tipInRight{ from{ opacity: 0; transform: translateX(10px);} to{ opacity: 1; transform: translateX(0);} }
+
+/* Skeleton loaders (replace "full-screen wait" feel) */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+body.is-skeleton .skeleton-block{
+    background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.08) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.15s ease-in-out infinite;
+    border-radius: 10px;
+}
+body.day-mode.is-skeleton .skeleton-block{
+    background: linear-gradient(90deg, rgba(2,6,23,0.06) 0%, rgba(2,6,23,0.12) 50%, rgba(2,6,23,0.06) 100%);
+}
+
+/* Skeleton for key numbers */
+body.is-skeleton #paymentProgressDisplay,
+body.is-skeleton #portalTotalDebt,
+body.is-skeleton #portalTotalPaid,
+body.is-skeleton #nextDueDisplay,
+body.is-skeleton #daysRemaining{
+    color: transparent !important;
+    position: relative;
+}
+body.is-skeleton #paymentProgressDisplay::after,
+body.is-skeleton #portalTotalDebt::after,
+body.is-skeleton #portalTotalPaid::after,
+body.is-skeleton #nextDueDisplay::after,
+body.is-skeleton #daysRemaining::after{
+    content:"";
+    display:inline-block;
+    height: 14px;
+    width: 64px;
+    margin-left: 6px;
+    vertical-align: middle;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.08) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.15s ease-in-out infinite;
+}
+body.is-skeleton #daysRemaining::after{ width: 28px; height: 18px; margin-left: 0; }
+body.is-skeleton #nextDueDisplay::after{ width: 52px; }
+
+body.day-mode.is-skeleton #paymentProgressDisplay::after,
+body.day-mode.is-skeleton #portalTotalDebt::after,
+body.day-mode.is-skeleton #portalTotalPaid::after,
+body.day-mode.is-skeleton #nextDueDisplay::after,
+body.day-mode.is-skeleton #daysRemaining::after{
+    background: linear-gradient(90deg, rgba(2,6,23,0.06) 0%, rgba(2,6,23,0.12) 50%, rgba(2,6,23,0.06) 100%);
+    background-size: 200% 100%;
+}
+
+/* Skeleton loan cards */
+.skeleton-loans{ display: flex; flex-direction: column; gap: 14px; }
+.skeleton-loan-card{
+    border-radius: 22px;
+    padding: 18px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+body.day-mode .skeleton-loan-card{
+    background: rgba(255,255,255,0.90);
+    border: 1px solid rgba(2,6,23,0.06);
+}
+.skeleton-row{ display:flex; align-items:center; justify-content:space-between; gap: 10px; margin-bottom: 12px; }
+.skeleton-line{ height: 12px; width: 46%; }
+.skeleton-pill{ height: 18px; width: 86px; border-radius: 999px; }
+.skeleton-big{ height: 26px; width: 62%; margin: 8px 0 12px; }
+.skeleton-bar{ height: 10px; width: 100%; border-radius: 999px; }
+
+/* Success pop (tiny confetti) */
+.stallz-confetti-piece{
+    position: fixed;
+    width: 6px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--primary);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 99999;
+    animation: confettiPop 700ms ease-out forwards;
+}
+@keyframes confettiPop{
+    0%{ transform: translate(0,0) scale(0.8) rotate(0deg); opacity: 0; }
+    12%{ opacity: 1; }
+    100%{ transform: translate(var(--dx), var(--dy)) scale(1) rotate(240deg); opacity: 0; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+    .context-bubble{ animation: none !important; }
+    .advice-text.tip-out-left,
+    .advice-text.tip-out-right,
+    .advice-text.tip-in-left,
+    .advice-text.tip-in-right{ animation: none !important; }
+    body.is-skeleton .skeleton-block,
+    body.is-skeleton #paymentProgressDisplay::after,
+    body.is-skeleton #portalTotalDebt::after,
+    body.is-skeleton #portalTotalPaid::after,
+    body.is-skeleton #nextDueDisplay::after,
+    body.is-skeleton #daysRemaining::after{ animation: none !important; }
+}
+
+/* ==========================================================================
+   12. CLIENT DETAILS MODAL & INTERACTIVE PROFILE CARD
+   ========================================================================== */
+
+
+/* Make the sidebar profile card feel like a button */
+.drawer-user-card {
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+.drawer-user-card:active {
+    transform: scale(0.97);
+}
+.drawer-user-card:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+body.day-mode .drawer-user-card:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Client Details Modal Layout */
+.cd-row {
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.cd-row:last-of-type {
+    border-bottom: none;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+}
+
+/* Labels and Values */
+.cd-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 700;
+}
+.cd-val {
+    font-size: 1rem;
+    color: var(--text-main);
+    font-weight: 600;
+    word-break: break-word;
+}
+
+/* Footer Link / Contact Support text */
+.cd-footer-text {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.15);
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+.cd-footer-text a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+    transition: opacity 0.2s;
+}
+.cd-footer-text a:hover {
+    opacity: 0.8;
+}
+
+/* --- Day Mode Overrides --- */
+body.day-mode .cd-row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+body.day-mode .cd-footer-text {
+    border-top: 1px dashed rgba(0, 0, 0, 0.15);
+}
+
+/* ==========================================================================
+   UNIVERSAL "SNAPPY & BOUNCY" MODAL ANIMATIONS
+   ========================================================================== */
+
+/* Smooth, quick background fade for ALL modals */
+.modal-overlay {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+}
+
+/* Base state for ALL glass cards */
+.modal-overlay .modal-glass {
+    opacity: 0;
+    transform: scale(0.85) translateY(20px);
+}
+
+/* Universal Open Animation */
+.modal-overlay.active .modal-glass {
+    animation: snappySpringOpen 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Universal Close Animation */
+.modal-overlay.closing .modal-glass {
+    animation: snappySpringClose 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Keyframes */
+@keyframes snappySpringOpen {
+    from { opacity: 0; transform: scale(0.85) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes snappySpringClose {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to { opacity: 0; transform: scale(0.9) translateY(15px); }
+}
+
+/* --- Sidebar Drawer Animations --- */
+.drawer-overlay {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+.drawer-overlay.active {
+    opacity: 1;
+}
+.drawer-overlay.closing .drawer-glass {
+    animation: slideOutRight 0.3s ease forwards;
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+/* ==========================================================================
+   ULTRA-SMALL PHONE OPTIMIZATION (Client)
+   - Layout-only tweaks to reduce "chunky" feel on small screens.
+   ========================================================================== */
+@media (max-width: 360px) {
+  html { font-size: 15px; }
+
+  .glass-header { padding: 10px 12px; margin-bottom: 12px; }
+  .header-left { gap: 8px; }
+  .logo-box { width: 34px; height: 34px; }
+  .brand-title { font-size: 0.95rem; }
+
+  .stats-grid { grid-template-columns: 1fr; gap: 10px; }
+  .compact-card { padding: 10px; gap: 10px; border-radius: 14px; }
+  .small-icon { width: 30px; height: 30px; }
+
+  .actions-row { gap: 10px; }
+  .action-card { padding: 12px; min-width: 86px; border-radius: 14px; }
+
+  /* Keep popups usable without overflowing */
+  .modal-overlay .modal-glass { width: min(560px, 94vw); }
+  .drawer-glass { width: min(360px, 92vw); }
+}
+
+
+/* ================================
+   PUSH PERMISSION BUTTON (Profile)
+   ================================ */
+.stallz-mini-badge{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:56px;
   padding:6px 10px;
   border-radius:999px;
-  border:1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  font-weight: 900;
-  letter-spacing:.08em;
-}
-.ss-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-.ss-item{
-  padding: 10px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.08);
-}
-.ss-item span{ display:block; font-size:.75rem; opacity:.75; margin-bottom:4px; }
-.ss-item strong{ font-size:.95rem; }
-
-.statement-section{
-  padding: 14px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.03);
+  font:700 12px/1 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:rgba(148,163,184,0.14);
+  color:#cbd5e1;
   border:1px solid rgba(255,255,255,0.10);
 }
-.statement-section-title{ font-weight: 950; margin-bottom: 10px; }
-.statement-notes{ opacity:.88; white-space: pre-wrap; line-height: 1.4; }
-
-.statement-table{ display:flex; flex-direction:column; gap: 8px; }
-.statement-row{
-  display:grid;
-  grid-template-columns: 1.1fr 1fr 0.8fr;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 14px;
-  background: rgba(2,6,23,0.40);
-  border:1px solid rgba(255,255,255,0.08);
+.drawer-item.is-enabled .stallz-mini-badge{
+  background:rgba(34,197,94,0.16);
+  color:#bbf7d0;
+  border-color:rgba(34,197,94,0.28);
 }
-.statement-row.head{
-  background: rgba(2,6,23,0.65);
-  border-color: rgba(255,255,255,0.12);
-  font-weight: 950;
+.icon-amber{
+  background:rgba(245,158,11,0.14) !important;
+  color:#f59e0b !important;
 }
-.statement-row .amt{ text-align:right; font-weight: 950; }
 
-@media (max-width: 420px) {
-  .rpc-meta { grid-template-columns: 1fr; }
-  .rpc-steps { flex-direction: column; }
-  .ss-grid { grid-template-columns: 1fr; }
-  .statement-row { grid-template-columns: 1fr; }
-  .statement-row .amt { text-align:left; }
+/* ================================
+   PUSH PERMISSION BUTTON (Profile)
+   ================================ */
+.stallz-mini-badge{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:56px;
+  padding:6px 10px;
+  border-radius:999px;
+  font:700 12px/1 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:rgba(148,163,184,0.14);
+  color:#cbd5e1;
+  border:1px solid rgba(255,255,255,0.10);
+}
+.drawer-item.is-enabled .stallz-mini-badge{
+  background:rgba(34,197,94,0.16);
+  color:#bbf7d0;
+  border-color:rgba(34,197,94,0.28);
+}
+.icon-amber{
+  background:rgba(245,158,11,0.14) !important;
+  color:#f59e0b !important;
+}
+
+/* --- DAY MODE OVERRIDES FOR PUSH BADGE --- */
+body.day-mode .stallz-mini-badge {
+  background: rgba(0, 0, 0, 0.05);
+  color: #475569;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.day-mode .drawer-item.is-enabled .stallz-mini-badge {
+  background: rgba(22, 163, 74, 0.15);
+  color: #15803d; /* Darker green for visibility */
+  border-color: rgba(22, 163, 74, 0.3);
 }
