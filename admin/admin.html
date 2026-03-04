@@ -208,16 +208,7 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
         </div>
-
-        <!-- Push notifications (Admin) -->
-        <div style="padding: 0 18px 14px 18px;">
-          <button id="enableAdminPushBtn" class="btn-primary" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px;">
-            <span style="font-weight:900;">Enable Notifications</span>
-            <span id="adminPushStatePill" style="font-size:12px; font-weight:900; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,0.10);">Off</span>
-          </button>
-        </div>
-
-        <div class="sidebar-content-scroll">
+<div class="sidebar-content-scroll">
             <div class="profile-hero">
                 <div class="avatar avatar-3 profile-avatar-lg" id="sidebarAvatar">AD</div>
                 <div class="profile-details">
@@ -245,6 +236,21 @@
                     </label>
                 </div>
             </div>
+            <button id="enableAdminPushBtn" class="menu-item menu-item--action" type="button" aria-label="Enable notifications">
+                <div class="menu-icon-wrapper">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </div>
+                <div class="menu-text">
+                    <span class="menu-title">Notifications</span>
+                    <span class="menu-sub" id="adminNotifSub">Tap to enable device alerts</span>
+                </div>
+                <span id="adminPushStatePill" class="menu-pill off">Off</span>
+            </button>
+
+
 
             <div class="sidebar-section">
                 <div class="section-header-row">

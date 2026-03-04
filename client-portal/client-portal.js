@@ -1106,23 +1106,78 @@ function timeAgo(ms) {
     return new Date(ms).toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
-function toggleNotifications() {
+function toggleNotifications(forceOpen = null) {
     const dropdown = document.getElementById("notificationDropdown");
+    const overlay = document.getElementById("notifOverlay");
     if (!dropdown) return;
 
+    const isMobile = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
     const isVisible = dropdown.classList.contains("active");
+    const shouldOpen = (forceOpen === null) ? !isVisible : !!forceOpen;
 
-    if (!isVisible) {
-        __notifFilter = 'ALL';
-        dropdown.style.display = "flex";
-        setTimeout(() => dropdown.classList.add("active"), 10);
-        renderSharedNotifications();
-    } else {
+    const close = (silent = false) => {
         dropdown.classList.remove("active");
+        if (overlay) { overlay.classList.remove("active"); overlay.setAttribute("aria-hidden","true"); }
+        document.body.classList.remove("modal-open");
+        document.body.style.overflow = "";
         setTimeout(() => {
             if(!dropdown.classList.contains("active")) dropdown.style.display = "none";
-        }, 300);
-    }
+        }, 250);
+
+        if (!silent && window.history.state && window.history.state.__stallzNotifOpen) {
+            // Go back one entry so gestures/back behave naturally
+            history.back();
+        }
+        document.removeEventListener("keydown", window.__stallzNotifKeyHandler, true);
+        document.removeEventListener("click", window.__stallzNotifOutsideHandler, true);
+        window.removeEventListener("popstate", window.__stallzNotifPopHandler, true);
+    };
+
+    const open = () => {
+        __notifFilter = 'ALL';
+        dropdown.style.display = "flex";
+        if (overlay && isMobile) { overlay.classList.add("active"); overlay.setAttribute("aria-hidden","false"); }
+        document.body.style.overflow = isMobile ? "hidden" : "";
+        setTimeout(() => dropdown.classList.add("active"), 10);
+        renderSharedNotifications();
+
+        // Back/gesture close support
+        if (isMobile) {
+            try {
+                const st = window.history.state || {};
+                if (!st.__stallzNotifOpen) history.pushState({ ...st, __stallzNotifOpen: true }, "");
+            } catch(e){}
+        }
+
+        // Close on outside click
+        window.__stallzNotifOutsideHandler = (ev) => {
+            if (!dropdown.classList.contains("active")) return;
+            const hitDropdown = dropdown.contains(ev.target);
+            const hitBell = (ev.target && (ev.target.closest && ev.target.closest(".notification-btn")));
+            if (!hitDropdown && !hitBell) close(true);
+        };
+        document.addEventListener("click", window.__stallzNotifOutsideHandler, true);
+
+        // Close on ESC
+        window.__stallzNotifKeyHandler = (ev) => {
+            if (ev.key === "Escape") close(true);
+        };
+        document.addEventListener("keydown", window.__stallzNotifKeyHandler, true);
+
+        // Close on back/gesture
+        window.__stallzNotifPopHandler = () => {
+            if (dropdown.classList.contains("active")) close(true);
+        };
+        window.addEventListener("popstate", window.__stallzNotifPopHandler, true);
+
+        // Close when overlay clicked
+        if (overlay) {
+            overlay.onclick = () => close(true);
+        }
+    };
+
+    if (shouldOpen) open();
+    else close(true);
 }
 
 function setNotifFilter(filter, event) {

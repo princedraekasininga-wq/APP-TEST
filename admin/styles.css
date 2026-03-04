@@ -1138,6 +1138,41 @@ html:not([data-theme="light"]) .menu-item {
     border-color: #16a34a;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
+/* ===== Notifications menu item (admin sidebar) ===== */
+button.menu-item.menu-item--action{
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: transparent; /* base, theme variants below still apply */
+  border: none;
+  padding: 0;
+}
+button.menu-item.menu-item--action .menu-icon-wrapper,
+button.menu-item.menu-item--action .menu-text{
+  pointer-events: none; /* keep whole row clickable */
+}
+.menu-pill{
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.10);
+  color: #e5e7eb;
+  letter-spacing: 0.2px;
+}
+html:not([data-theme="light"]) .menu-pill{
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.08);
+}
+html[data-theme="light"] .menu-pill{
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(15,23,42,0.06);
+  color: #0f172a;
+}
+
 
 .menu-icon-wrapper {
     color: #16a34a;
@@ -1680,4 +1715,14 @@ html:not([data-theme="light"]) .sketch-btn:not(.active):hover {
   .card { padding: 14px !important; }
   .modal, .modal-glass { max-width: 96vw !important; }
   .sidebar { width: 92% !important; }
+}
+
+
+.menu-pill.on{
+  border-color: rgba(34,197,94,0.35);
+  background: rgba(34,197,94,0.14);
+  color: #22c55e;
+}
+html:not([data-theme="light"]) .menu-pill.on{
+  color: #86efac;
 }

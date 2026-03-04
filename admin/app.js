@@ -3368,8 +3368,10 @@ function init() {
     const paint = (on) => {
       if (!pill) return;
       pill.textContent = on ? 'On' : 'Off';
-      pill.style.background = on ? 'rgba(34,197,94,0.18)' : 'rgba(255,255,255,0.10)';
-      pill.style.color = on ? '#86efac' : '#e5e7eb';
+      pill.classList.toggle('on', !!on);
+      pill.classList.toggle('off', !on);
+      const sub = document.getElementById('adminNotifSub');
+      if (sub) sub.textContent = on ? 'Device alerts are enabled' : 'Tap to enable device alerts';
     };
 
     paint(typeof Notification !== 'undefined' && Notification.permission === 'granted');
@@ -3381,7 +3383,14 @@ function init() {
 
     if (btn && !btn.__stallzBound) {
       btn.__stallzBound = true;
-      btn.addEventListener('click', async () => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        // If already enabled, do nothing
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+          paint(true);
+          return;
+        }
+
         const ok = await window.StallzPush?.initPushNotifications?.({ forcePrompt: true });
         paint(!!ok);
         if (ok) showToast('Notifications enabled on this device', 'success');
