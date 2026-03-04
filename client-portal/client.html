@@ -37,7 +37,7 @@
                 <div class="notification-wrapper">
                     <button class="icon-btn notification-btn" onclick="toggleNotifications()">
                         <i class="fas fa-bell"></i>
-                        <span class="notification-dot"></span>
+                        <span id="clientBellBadge" class="notification-badge" aria-label="Unread notifications" style="display:none;">0</span>
                     </button>
                     <div id="notificationDropdown" class="notification-dropdown">
                         <div class="dropdown-header">Recent Activity</div>
@@ -193,6 +193,9 @@
         </div>
 
     </div>
+
+    <!-- Shared push glue (FCM web push) -->
+    <script src="../shared/push.js"></script>
 
     <nav class="mobile-bottom-nav">
         <a href="#" class="nav-item" onclick="openRequestModal()">
@@ -1066,10 +1069,10 @@
                                     };
                                 }
 
-                                // 3. Show the Green In-App Popup Alert on the screen
-                                if (typeof showCustomAlert === 'function') {
-                                    showCustomAlert(notif.body, true, notif.title);
-                                }
+                                // 3. Dropdown-only UX (no popups)
+                                try {
+                                    if (typeof renderSharedNotifications === 'function') renderSharedNotifications();
+                                } catch(e) {}
                             }
                         });
 

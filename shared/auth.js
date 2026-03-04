@@ -59,26 +59,39 @@
           return;
         }
 
-        const tokensRef = firebase.database().ref(`clients/${uid}/fcmTokens`);
+        // Store tokens under the correct user root.
+        // - Clients: clients/{uid}/fcmTokens
+        // - Admins:  admins/{uid}/fcmTokens
+        const sessRole = (this.getSession && this.getSession()?.role) || null;
+        const rootPath = (sessRole === 'admin') ? `admins/${uid}/fcmTokens` : `clients/${uid}/fcmTokens`;
 
-        // Avoid duplicates (small per-user list, safe to scan once)
-        let alreadyThere = false;
+        const tokensRef = firebase.database().ref(rootPath);
+
+        // Deterministic key = stable per token (prevents duplicates + multi-tabs spam)
+        const tokenKey = (function fnv1a(str){
+          let h = 2166136261;
+          for (let i = 0; i < str.length; i++) {
+            h ^= str.charCodeAt(i);
+            h = (h + (h<<1) + (h<<4) + (h<<7) + (h<<8) + (h<<24)) >>> 0;
+          }
+          return 't_' + h.toString(16);
+        })(token);
+
+        const meta = {
+          token: token,
+          updatedAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          appVersion: (window.STALLZ_APP_VERSION || window.STALLZ_APP_CONFIG?.version || null),
+          ua: (typeof navigator !== "undefined" ? navigator.userAgent : null)
+        };
+
+        // Preserve original createdAt if this token already exists
         try {
-          const snap = await tokensRef.get();
-          const obj = snap.val() || {};
-          alreadyThere = Object.values(obj).some(v => v && typeof v === "object" && v.token === token);
-        } catch(_) {}
+          const existing = await tokensRef.child(tokenKey).get();
+          if (existing.exists() && existing.val()?.createdAt) meta.createdAt = existing.val().createdAt;
+        } catch (_) {}
 
-        if (!alreadyThere) {
-          const key = tokensRef.push().key;
-          const meta = {
-            token: token,
-            createdAt: new Date().toISOString(),
-            appVersion: (window.STALLZ_APP_VERSION || window.STALLZ_APP_CONFIG?.version || null),
-            ua: (typeof navigator !== "undefined" ? navigator.userAgent : null)
-          };
-          await tokensRef.child(key).set(meta);
-        }
+        await tokensRef.child(tokenKey).set(meta);
 
         // Move it to 'active' storage so this device remembers its own token
         localStorage.setItem("stallz_active_fcm_token", token);
@@ -258,7 +271,19 @@
           // Security: Only remove THIS specific device's token from the database list
           const activeToken = localStorage.getItem("stallz_active_fcm_token");
           if (activeToken) {
-              await firebase.database().ref(`clients/${user.uid}/fcmTokens/${activeToken}`).remove();
+            const sessRole = (this.getSession && this.getSession()?.role) || null;
+            const rootPath = (sessRole === 'admin') ? `admins/${user.uid}/fcmTokens` : `clients/${user.uid}/fcmTokens`;
+
+            const tokenKey = (function fnv1a(str){
+              let h = 2166136261;
+              for (let i = 0; i < str.length; i++) {
+                h ^= str.charCodeAt(i);
+                h = (h + (h<<1) + (h<<4) + (h<<7) + (h<<8) + (h<<24)) >>> 0;
+              }
+              return 't_' + h.toString(16);
+            })(String(activeToken));
+
+            try { await firebase.database().ref(`${rootPath}/${tokenKey}`).remove(); } catch (_) {}
           }
         }
         await firebase.auth().signOut();

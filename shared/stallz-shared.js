@@ -330,14 +330,40 @@
     if (!uid) return [];
     if (isTestMode()) {
       const db = loadTestDB();
-      const notifs = Object.values(db?.notifications?.users?.[uid] || {}).filter(Boolean);
-      return notifs.filter((n) => !n.read).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      const raw = db?.notifications?.users?.[uid] || {};
+      const notifs = Object.entries(raw)
+        .map(([id, n]) => (n ? { id: n.id || id, ...n } : null))
+        .filter(Boolean);
+      // Return ALL (read + unread). UI decides what to show.
+      return notifs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     }
 
     // Client reads only their own cache; admin typically doesn't need to read user notifs (rules block it)
     if (uid !== _uid) return [];
-    const notifs = Object.values(_clientNotifs || {}).filter(Boolean);
-    return notifs.filter((n) => !n.read).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    // Merge BOTH sources:
+    // 1) stallzShared_v1/notifications/users/{uid}
+    // 2) clients/{uid}/notifications (legacy/direct writes from admin portal)
+    const mergedMap = {};
+    const putAll = (obj) => {
+      Object.entries(obj || {}).forEach(([id, n]) => {
+        if (!n) return;
+        const nid = n.id || id;
+        // Prefer the newest copy if duplicates exist
+        const prev = mergedMap[nid];
+        if (!prev) mergedMap[nid] = { id: nid, ...n };
+        else {
+          const tPrev = new Date(prev.createdAt || 0).getTime();
+          const tNext = new Date(n.createdAt || 0).getTime();
+          mergedMap[nid] = (tNext >= tPrev) ? { id: nid, ...n } : prev;
+        }
+      });
+    };
+    putAll(_clientNotifs);
+    putAll(_clientNotifsClients);
+
+    const notifs = Object.values(mergedMap).filter(Boolean);
+    // Return ALL (read + unread). UI decides what to show.
+    return notifs.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   }
 
   function listMessages(clientUid) {
@@ -852,23 +878,37 @@
        const reconcileOnVisible = () => {
            if (isTestMode()) return;
            if (document.hidden) return;
-           // Re-evaluate quickly on return
+           // When the app returns from background, RTDB may briefly report
+           // disconnected even though the internet is fine. Give it a short grace
+           // window to reconnect before showing any banner (prevents "fake offline").
+
            if (!navigator.onLine) {
+             _isOffline = true;
+             showBanner('offline', "You are offline. Reconnect to sync with Stallz Cloud.");
+             return;
+           }
+
+           // Always hide immediately on return, then re-check after a tiny delay.
+           hideAllSilent();
+
+           setTimeout(() => {
+             if (document.hidden) return;
+             if (!navigator.onLine) {
                _isOffline = true;
                showBanner('offline', "You are offline. Reconnect to sync with Stallz Cloud.");
                return;
-           }
-           if (_firebaseLastConnected === false) {
+             }
+
+             if (_firebaseLastConnected === false) {
                _isOffline = false;
-               showBanner('connecting', "Reconnecting to Stallz Cloud...");
+               showConnectingIfStillDown(_firebaseConnectedOnce ? 1200 : 4000, "Reconnecting to Stallz Cloud...");
                escalateToOfflineIfStillDown(_firebaseConnectedOnce ? 18000 : 26000, "Connection lost. Please check your internet.");
                return;
-           }
-           // Online
-           const _shouldPulse = (banner.classList && banner.classList.contains('show')) && banner.dataset.state !== 'online';
-           _isOffline = false;
-           hideAllSilent();
-           if (_shouldPulse) showBackOnlinePulse("Back online — syncing...");
+             }
+
+             // Online
+             _isOffline = false;
+           }, 1200);
        };
 
        document.addEventListener('visibilitychange', () => {

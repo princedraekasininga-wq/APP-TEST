@@ -1102,11 +1102,18 @@ function refreshUI() {
     return true;
   });
 
-  const hasAny = (sharedNotifs.length + overdueLoans.length) > 0;
-  if (bellBadge) bellBadge.classList.toggle("show", hasAny);
+  const unreadCount = (sharedNotifs.length + overdueLoans.length);
+  if (bellBadge) {
+    if (unreadCount > 0) {
+      bellBadge.textContent = String(unreadCount > 99 ? '99+' : unreadCount);
+      bellBadge.style.display = 'inline-flex';
+    } else {
+      bellBadge.style.display = 'none';
+    }
+  }
 
   if (notifList) {
-    if (!hasAny) {
+    if (unreadCount === 0) {
         notifList.innerHTML = `<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">All caught up! No alerts.</div>`;
     } else {
         const sharedHtml = sharedNotifs.map(n => {
@@ -3352,6 +3359,36 @@ function init() {
       search.addEventListener("input", (e) => { state.loanHistorySearch = String(e.target.value || ""); renderLoanHistory(); });
     }
   } catch(e){}
+
+  // Push Notifications (Admin)
+  try {
+    const btn = document.getElementById('enableAdminPushBtn');
+    const pill = document.getElementById('adminPushStatePill');
+
+    const paint = (on) => {
+      if (!pill) return;
+      pill.textContent = on ? 'On' : 'Off';
+      pill.style.background = on ? 'rgba(34,197,94,0.18)' : 'rgba(255,255,255,0.10)';
+      pill.style.color = on ? '#86efac' : '#e5e7eb';
+    };
+
+    paint(typeof Notification !== 'undefined' && Notification.permission === 'granted');
+
+    // If permission is already granted, silently ensure token exists
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      window.StallzPush?.initPushNotifications?.({ forcePrompt: false }).then((ok) => paint(!!ok));
+    }
+
+    if (btn && !btn.__stallzBound) {
+      btn.__stallzBound = true;
+      btn.addEventListener('click', async () => {
+        const ok = await window.StallzPush?.initPushNotifications?.({ forcePrompt: true });
+        paint(!!ok);
+        if (ok) showToast('Notifications enabled on this device', 'success');
+        else showToast('Notifications not enabled', 'error');
+      });
+    }
+  } catch(e) {}
 
   setTimeout(() => { if (typeof runSmartEngagementEngine === 'function') runSmartEngagementEngine(); }, 8000);
 }

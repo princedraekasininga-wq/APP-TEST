@@ -15,7 +15,7 @@ exports.sendPushFromQueue = functions.database
     const job = snap.val() || {};
     const title = String(job.title || "Stallz Loans");
     const body = String(job.body || "You have a new update.");
-    const clickAction = String(job.click_action || "client-portal/client.html");
+    const clickAction = String(job.click_action || "/client-portal/client.html");
 
     const tokensSnap = await admin.database().ref(`/clients/${uid}/fcmTokens`).once("value");
     const tokensObj = tokensSnap.val() || {};
@@ -37,6 +37,7 @@ exports.sendPushFromQueue = functions.database
         title: title,
         body: body,
         click_action: clickAction,
+        portal: "client",
         source: String(job.source || "STALLZ"),
         pushId: String(pushId)
       },
@@ -73,7 +74,7 @@ exports.enqueuePushOnClientNotification = functions.database
     const n = snap.val() || {};
     const title = String(n.title || "Stallz Loans");
     const body = String(n.body || "You have a new update.");
-    const clickAction = String(n.click_action || "client-portal/client.html");
+    const clickAction = String(n.click_action || "/client-portal/client.html");
     const source = String(n.type || "CLIENT_NOTIFICATION");
 
     try {
@@ -81,6 +82,7 @@ exports.enqueuePushOnClientNotification = functions.database
         title,
         body,
         click_action: clickAction,
+        portal: "client",
         createdAt: new Date().toISOString(),
         source,
         notifId
@@ -107,7 +109,7 @@ exports.notifyAdminsOnLoanRequest = functions.database
 
     const title = "New Loan Request";
     const body = `${clientName} has requested K${amount}.`;
-    const clickAction = "admin/admin.html";
+    const clickAction = "/admin/admin.html";
 
     const adminsSnap = await admin.database().ref("/admins").once("value");
     const adminsObj = adminsSnap.val() || {};
@@ -128,6 +130,7 @@ exports.notifyAdminsOnLoanRequest = functions.database
         title: title,
         body: body,
         click_action: clickAction,
+        portal: "admin",
         source: "ADMIN_ALERT",
         pushId: "req_" + context.params.reqId
       },

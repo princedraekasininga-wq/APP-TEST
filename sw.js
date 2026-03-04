@@ -28,14 +28,18 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage(function(payload) {
     console.log('[sw.js] Received background message: ', payload);
 
-    const notificationTitle = payload.notification?.title || 'Stallz Loans';
+    // NOTE: We intentionally send **data-only** payloads from Cloud Functions
+    // to prevent duplicate notifications across browsers.
+    const data = payload && payload.data ? payload.data : {};
+    const notificationTitle = data.title || payload.notification?.title || 'Stallz Loans';
     const notificationOptions = {
-        body: payload.notification?.body || 'You have a new alert from Stallz.',
+        body: data.body || payload.notification?.body || 'You have a new alert from Stallz.',
         icon: '/assets/logo_images/icon-192.png',
         badge: '/assets/logo_images/myfavicon.png',
         vibrate: [200, 100, 200, 100, 200, 100, 200],
         data: {
-            click_action: payload.data?.click_action || '/client-portal/client.html'
+            click_action: data.click_action || payload.data?.click_action || '/client-portal/client.html',
+            portal: data.portal || payload.data?.portal || 'client'
         }
     };
 
@@ -45,9 +49,18 @@ messaging.onBackgroundMessage(function(payload) {
 // 4. Handle Notification Clicks (When user taps the notification)
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
-    event.waitUntil(
-        clients.openWindow(event.notification.data.click_action || '/client-portal/client.html')
-    );
+
+    const url = (event.notification && event.notification.data && event.notification.data.click_action)
+      ? event.notification.data.click_action
+      : '/client-portal/client.html';
+
+    event.waitUntil((async () => {
+      // Prefer focusing an existing tab if it's already open.
+      const allClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const target = allClients.find(c => c && c.url && c.url.includes(url));
+      if (target && 'focus' in target) return target.focus();
+      return clients.openWindow(url);
+    })());
 });
 
 // ==========================================

@@ -176,7 +176,7 @@
             <div class="notification-wrapper" style="position: relative;">
               <button id="notifBtn" class="icon-btn notification-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                <span id="bellBadge" class="notification-dot"></span>
+                <span id="bellBadge" class="notification-badge" aria-label="Unread notifications" style="display:none;">0</span>
               </button>
               <div id="notifDropdown" class="notification-dropdown">
                 <div class="dropdown-header">Needs Attention</div>
@@ -207,6 +207,14 @@
             <button id="closeProfileBtn" class="icon-btn-plain close-btn">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
+        </div>
+
+        <!-- Push notifications (Admin) -->
+        <div style="padding: 0 18px 14px 18px;">
+          <button id="enableAdminPushBtn" class="btn-primary" style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px;">
+            <span style="font-weight:900;">Enable Notifications</span>
+            <span id="adminPushStatePill" style="font-size:12px; font-weight:900; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,0.10);">Off</span>
+          </button>
         </div>
 
         <div class="sidebar-content-scroll">
@@ -894,4 +902,7 @@
     document.getElementById('adminAppVersion').textContent = 'v' + (window.STALLZ_APP_VERSION || '?.?');
   } catch(e) {}
 </script>
+
+  <!-- Shared push glue (FCM web push) -->
+  <script src="../shared/push.js"></script>
 </html>

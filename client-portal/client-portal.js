@@ -1178,7 +1178,7 @@ async function markAllNotificationsRead(event) {
 
 function renderSharedNotifications() {
     const list = document.getElementById("notificationList");
-    const dot = document.querySelector(".notification-dot");
+    const badge = document.getElementById("clientBellBadge");
     if (!list) return;
 
     const uid = currentUserUid || window.StallzAuth?.getSession?.()?.uid;
@@ -1196,7 +1196,14 @@ function renderSharedNotifications() {
     } catch (e) { console.error("Notif Error", e); }
 
     const unreadCount = pendingReqs.length + notifs.filter(n => !n.read).length;
-    if (dot) dot.style.display = unreadCount > 0 ? "block" : "none";
+    if (badge) {
+        if (unreadCount > 0) {
+            badge.textContent = String(unreadCount > 99 ? '99+' : unreadCount);
+            badge.style.display = 'inline-flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
 
     const dropdownHeader = document.querySelector(".dropdown-header");
 
@@ -2606,12 +2613,8 @@ async function initPushNotifications(forcePrompt = false) {
                 // Haptics
                 if (typeof __haptic === 'function') __haptic('success');
 
-                // In-app popup
-                const title = payload.notification?.title || "Stallz Loans";
-                const body = payload.notification?.body || "You have a new update.";
-                showCustomAlert(`${title}: ${body}`, true);
-
-                // Refresh the notification dropdown
+                // NO in-app popup — user requested dropdown-only experience
+                // Refresh the notification dropdown + badge
                 if (typeof renderSharedNotifications === 'function') {
                     renderSharedNotifications();
                 }
