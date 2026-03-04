@@ -1145,21 +1145,19 @@ function refreshUI() {
     }
   }
 
-  // ✅ SIDEBAR UPDATE: Render Clickable Admin Rows for Profiles
-  const tbody = document.getElementById("sidebarAdminsBody");
-  if (tbody) {
-    tbody.innerHTML = (state.admins || []).map(a => `
-        <tr onclick="openAdminProfile('${a.uid || a.email}')" style="cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
-            <td style="font-weight:600; padding:12px;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div class="avatar avatar-${(a.name.length)%5}" style="width:28px; height:28px; font-size:0.75rem;">${getInitials(a.name)}</div>
-                    <div>${escapeHTML(a.name)}</div>
-                </div>
-            </td>
-            <td style="font-size:0.75rem; opacity:0.7; text-align:right; padding:12px;">
-                <span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">${(a.role||"Admin").toUpperCase()}</span>
-            </td>
-        </tr>`).join("");
+  // ✅ SIDEBAR UPDATE: Render Clickable Admin Cards (Spaced out)
+  const sidebarAdminsBody = document.getElementById("sidebarAdminsBody");
+  if (sidebarAdminsBody) {
+    sidebarAdminsBody.innerHTML = (state.admins || []).map(a => `
+        <div onclick="openAdminProfile('${a.uid || a.email}')" style="display: flex; align-items: center; justify-content: space-between; padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.15)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.transform='translateY(0)';">
+            <div style="display:flex; align-items:center; gap:12px; font-weight:600;">
+                <div class="avatar avatar-${(a.name?.length || 0)%5}" style="width:34px; height:34px; font-size:0.85rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">${getInitials(a.name)}</div>
+                <div style="font-size:0.95rem; color:var(--text-main);">${escapeHTML(a.name)}</div>
+            </div>
+            <div style="font-size:0.7rem; font-weight:700; letter-spacing:0.5px; opacity:0.9;">
+                <span style="background:rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; border: 1px solid rgba(255,255,255,0.05);">${(a.role||"Admin").toUpperCase()}</span>
+            </div>
+        </div>`).join("");
   }
 
   try { renderDashboard(); } catch (e) { console.error("Dash Error:", e); }
@@ -1971,25 +1969,42 @@ function renderAdminsTable() {
   const tbody = el("adminsTableBody");
   if (!tbody) return;
 
-  // 🚨 FIX: Check if current user is the Owner to show delete button
+  // Hide the old table header to support the new card layout
+  const thead = tbody.previousElementSibling;
+  if (thead && thead.tagName === 'THEAD') thead.style.display = 'none';
+
   const currentRole = state.currentUserProfile?.role || localStorage.getItem('stallz_offline_role') || '';
   const isOwner = currentRole.toLowerCase() === 'owner';
 
   tbody.innerHTML = (state.admins || []).map(a => {
-    let actionHtml = '-';
-    if (isOwner && a.role.toLowerCase() !== 'owner') {
-        actionHtml = `<button class="btn-icon" style="color:#ef4444; background:rgba(239, 68, 68, 0.1); padding:4px 8px; border-radius:6px; font-size: 0.7rem; font-weight: 700;" onclick="revokeAdminAccess('${a.uid}')">Revoke Access</button>`;
-    } else if (a.role.toLowerCase() === 'owner') {
-        actionHtml = `<span style="font-size:0.75rem; color:var(--primary); font-weight:700;">Owner</span>`;
+    let actionHtml = '';
+    if (isOwner && (a.role || '').toLowerCase() !== 'owner') {
+        actionHtml = `<button class="btn-icon" style="color:#ef4444; background:rgba(239, 68, 68, 0.1); padding:8px 14px; border-radius:8px; font-size: 0.75rem; font-weight: 700; border: 1px solid rgba(239, 68, 68, 0.2); margin-right: 8px;" onclick="event.stopPropagation(); window.revokeAdminAccess && window.revokeAdminAccess('${a.uid}')">Revoke Access</button>`;
+    } else if ((a.role || '').toLowerCase() === 'owner') {
+        actionHtml = `<span style="font-size:0.7rem; color:var(--primary); font-weight:800; background: rgba(74, 222, 128, 0.1); padding: 4px 8px; border-radius: 6px; margin-right: 8px;">OWNER</span>`;
     }
 
+    const nameLen = a.name ? a.name.length : 0;
+
     return `
-      <tr>
-        <td data-label="ID">#${a.id}</td>
-        <td data-label="Name">${a.name}</td>
-        <td data-label="Role">${a.role}</td>
-        <td data-label="Phone">${a.phone || '-'}</td>
-        ${isOwner ? `<td data-label="Action" style="text-align:right;">${actionHtml}</td>` : ''}
+      <tr onclick="openAdminProfile('${a.uid || a.email}')" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; background: var(--card-bg); border: 1px solid var(--divider); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)';">
+        <td style="padding: 0; border: none; display: flex; align-items: center; gap: 14px; flex: 1; min-width: 200px; background: transparent;">
+            <div class="avatar avatar-${nameLen%5}" style="width: 48px; height: 48px; font-size: 1.1rem; flex-shrink:0; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">${getInitials(a.name)}</div>
+            <div style="text-align: left;">
+                <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-main); margin-bottom: 2px;">${escapeHTML(a.name)}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); display:flex; gap:8px; align-items:center;">
+                    <span>${escapeHTML(a.phone || a.email || '-')}</span>
+                    <span style="opacity:0.5;">•</span>
+                    <span style="font-family: monospace; opacity:0.8;">#${a.id || (a.uid ? a.uid.substring(0,5) : 'ADM')}</span>
+                </div>
+            </div>
+        </td>
+        <td style="padding: 0; border: none; display: flex; align-items: center; justify-content: flex-end; flex: 1; min-width: 150px; background: transparent;">
+            ${actionHtml}
+            <button class="btn-icon" style="background: rgba(255,255,255,0.05); border: 1px solid var(--divider); padding: 8px; border-radius: 8px; color: var(--text-main);" onclick="event.stopPropagation(); openAdminProfile('${a.uid || a.email}')">
+                View Profile <svg style="margin-left: 6px;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+        </td>
       </tr>
     `;
   }).join("");
@@ -3744,6 +3759,149 @@ function distributeLoansToClients(allLoans, force = false) {
 }
 
 /* ============================================================================
+   13.0 | ADMIN PROFILE & COMMISSION LOGIC (Restored from Old Folder)
+   ============================================================================ */
+
+function calculateLoanCommission(loan) {
+    const stdRate = INTEREST_BY_PLAN[loan.plan] || 0.40;
+    const actualRate = (loan.customInterest !== undefined && loan.customInterest !== null)
+                        ? (Number(loan.customInterest) / 100)
+                        : stdRate;
+
+    const principal = Number(loan.amount || 0);
+    const totalDue = Number(loan.totalDue || 0);
+    const profit = Math.max(0, totalDue - principal);
+
+    let reductionFactor = 0;
+    if (actualRate < (stdRate - 0.01) && stdRate > 0) {
+        reductionFactor = (stdRate - actualRate) / stdRate;
+    }
+
+    const BASE_COMMISSION = 0.25; // 25% Standard
+    let finalCommRate = BASE_COMMISSION * (1 - reductionFactor);
+    finalCommRate = Math.max(0, Math.min(BASE_COMMISSION, finalCommRate));
+
+    return {
+        profit: profit,
+        stdRate: stdRate,
+        actualRate: actualRate,
+        commRate: finalCommRate,
+        amount: profit * finalCommRate,
+        isPenalized: reductionFactor > 0.01
+    };
+}
+
+window.openAdminProfile = function(identifier) {
+    const sidebar = document.getElementById("profileSidebar");
+    const overlay = document.getElementById("profileOverlay");
+    if (sidebar) sidebar.classList.remove("open");
+    if (overlay) overlay.classList.add("hidden");
+
+    const admin = state.admins.find(a => String(a.uid) === String(identifier) || String(a.email) === String(identifier));
+    if (!admin) return showToast("Admin profile not found", "error");
+
+    const nameLower = (admin.name || "").toLowerCase();
+    const isOwner = nameLower.includes("prince") || nameLower.includes("kasininga");
+
+    const elAvatar = document.getElementById("apAvatar");
+    if(elAvatar) {
+        elAvatar.textContent = getInitials(admin.name);
+        elAvatar.className = `avatar avatar-${(admin.name.length) % 5}`;
+    }
+
+    if(document.getElementById("apName")) document.getElementById("apName").textContent = admin.name;
+    if(document.getElementById("apRole")) document.getElementById("apRole").textContent = (admin.role || "Admin").toUpperCase();
+    if(document.getElementById("apContact")) document.getElementById("apContact").textContent = admin.email || admin.phone || "";
+
+    const adminLoans = state.loans.filter(l => {
+        const creator = (l.createdBy || "").toLowerCase();
+        return creator === nameLower || (nameLower.includes("nyambi") && creator === "nyambi sitaleka");
+    });
+
+    if(document.getElementById("apLoansCount")) document.getElementById("apLoansCount").textContent = adminLoans.length;
+    const recentDiv = document.getElementById("apRecentList");
+    const sortedLoans = [...adminLoans].sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+
+    if (recentDiv) {
+        if (sortedLoans.length === 0) {
+            recentDiv.innerHTML = `<div style="text-align:center; opacity:0.5; padding:20px;">No loans recorded yet.</div>`;
+        } else {
+            recentDiv.innerHTML = sortedLoans.slice(0, 10).map(l => `
+                <div style="display:flex; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.03); border-radius:10px; border:1px solid rgba(255,255,255,0.05); align-items:center; margin-bottom:6px;">
+                    <div>
+                        <div style="font-size:0.9rem; font-weight:600;">${escapeHTML(l.clientName)}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${formatDate(l.startDate)}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:0.9rem; font-weight:700;">${formatMoney(l.amount)}</div>
+                        <span class="status-pill status-${l.status.toLowerCase()}" style="font-size:0.65rem; padding:2px 8px; margin-top:4px; display:inline-block;">${l.status}</span>
+                    </div>
+                </div>`).join("");
+        }
+    }
+
+    const tabBtn = document.getElementById("tabBtnCommissions");
+    const tabContent = document.getElementById("ap-tab-commissions");
+
+    if (isOwner) {
+        if(tabBtn) tabBtn.style.display = "none";
+        if(tabContent) tabContent.style.display = "none";
+        switchProfileTab('activity');
+    } else {
+        if(tabBtn) tabBtn.style.display = "block";
+        let totalEarned = 0, weightedRateSum = 0;
+        const commissionRows = adminLoans.map(l => {
+            const c = calculateLoanCommission(l);
+            totalEarned += c.amount;
+            weightedRateSum += c.commRate;
+            return { loan: l, ...c };
+        });
+
+        const paidComm = (state.expenses || []).filter(e => e.category === 'Commission' && e.note.toLowerCase().includes(nameLower)).reduce((s, e) => s + e.amount, 0);
+        const pendingComm = Math.max(0, totalEarned - paidComm);
+
+        if (tabContent) {
+            let html = `
+                <div style="background:linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)); padding:20px; border-radius:16px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.1);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:15px;">
+                        <div><div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">Total Earned</div><div style="font-size:1.1rem; font-weight:700; color:#34d399;">${formatMoney(totalEarned)}</div></div>
+                        <div style="text-align:right;"><div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">Total Paid</div><div style="font-size:1.1rem; font-weight:700; color:#93c5fd;">${formatMoney(paidComm)}</div></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <div><div style="font-size:0.8rem; font-weight:600; color:#fff;">Pending Payout</div></div>
+                        <div style="font-size:1.4rem; font-weight:800; color:#facc15;">${formatMoney(pendingComm)}</div>
+                    </div>
+                    <button onclick="openExpenseModal('Commission', 'Commission Payment for ${escapeHTML(admin.name)}')" style="width:100%; background:#facc15; color:#000; border:none; padding:12px; border-radius:10px; font-weight:700;">Pay Commission</button>
+                </div>
+                <div style="background:rgba(59, 130, 246, 0.1); border:1px solid rgba(59, 130, 246, 0.2); padding:12px; border-radius:12px; font-size:0.75rem; color:#93c5fd; margin-bottom:20px;">
+                    <strong>ℹ️ Policy:</strong> Standard commission is 25% of profit. If the loan interest rate is discounted, the commission % is reduced by the same proportion.
+                </div>
+                <div class="table-wrapper"><table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+                    <thead><tr style="background:rgba(255,255,255,0.05); text-align:left;"><th style="padding:12px 15px; color:#94a3b8;">Loan Details</th><th style="padding:12px 10px; text-align:right; color:#94a3b8;">Profit</th><th style="padding:12px 10px; text-align:left; color:#94a3b8;">Your Cut</th></tr></thead>
+                    <tbody>${commissionRows.map(row => `
+                        <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:12px 15px;"><div>${escapeHTML(row.loan.clientName)}</div><div style="font-size:0.7rem; color:var(--text-muted);">${formatDate(row.loan.startDate)}</div></td>
+                            <td style="padding:12px 10px; text-align:right;"><div>${formatMoney(row.profit)}</div></td>
+                            <td style="padding:12px 10px; text-align:left;"><div style="font-weight:800; color:#34d399;">+${formatMoney(row.amount)}</div>
+                                <span style="font-size:0.65rem; color:#94a3b8;">${row.isPenalized ? '⚠️ Interest Cut' : '✔️ 25% Std'}</span></td>
+                        </tr>`).join("") || '<tr><td colspan="3" style="text-align:center; padding:20px;">No history</td></tr>'}</tbody>
+                </table></div>`;
+            tabContent.innerHTML = html;
+        }
+    }
+    openPopup("adminProfileModal");
+};
+
+window.switchProfileTab = function(tabName, btn) {
+    const parent = btn ? btn.parentElement : document.querySelector("#adminProfileModal .sketch-tabs");
+    if(parent) parent.querySelectorAll(".sketch-btn").forEach(b => b.classList.remove("active"));
+    if(btn) btn.classList.add("active");
+    document.querySelectorAll("#adminProfileModal .profile-tab-content").forEach(d => d.style.display = "none");
+    const target = document.getElementById("ap-tab-" + tabName);
+    if(target) target.style.display = "block";
+};
+
+/* ============================================================================
    14.0 | EXPENSE & COMMISSION MANAGEMENT (NEW)
    ============================================================================ */
 
@@ -3793,6 +3951,44 @@ window.saveExpense = async function() {
     showToast("Expense Recorded!", "success");
     closePopup("expenseModal");
     refreshUI();
+};
+
+// 5. Open Expense History Modal
+window.openExpenseHistoryModal = function() {
+    openPopup('expenseHistoryModal');
+    renderExpenseHistory();
+};
+
+// 6. Render the Expense Ledger
+window.renderExpenseHistory = function() {
+    const tbody = document.getElementById("expenseHistoryBody");
+    if (!tbody) return;
+
+    if (!state.expenses || state.expenses.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted); font-style:italic;">No expenses recorded yet.</td></tr>`;
+        return;
+    }
+
+    // Sort newest first
+    const sorted = [...state.expenses].sort((a, b) => new Date(b.date || b.id) - new Date(a.date || a.id));
+
+    tbody.innerHTML = sorted.map(e => {
+        const dateStr = e.date ? new Date(e.date).toLocaleDateString("en-ZM", { day: 'numeric', month: 'short', year: '2-digit' }) : "-";
+
+        return `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="font-size:0.8rem; color:var(--text-muted); vertical-align:top; padding-top:12px;">${dateStr}</td>
+            <td style="vertical-align:top; padding-top:12px;">
+                <div style="font-weight:700; color:var(--text-main); font-size: 0.9rem; text-transform:uppercase;">${escapeHTML(e.category || 'General')}</div>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${escapeHTML(e.note || '-')}</div>
+                <div style="font-size:0.65rem; color:var(--primary); margin-top:4px; opacity:0.8; font-family:monospace;">Recorded by: ${escapeHTML(e.recordedBy || 'Admin')}</div>
+            </td>
+            <td style="font-weight:800; color:#ef4444; font-size:1rem; text-align:right; vertical-align:top; padding-top:12px;">
+                -${formatMoney(e.amount)}
+            </td>
+        </tr>
+        `;
+    }).join("");
 };
 
 // ============================================================================

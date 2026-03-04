@@ -15,7 +15,7 @@ exports.sendPushFromQueue = functions.database
     const job = snap.val() || {};
     const title = String(job.title || "Stallz Loans");
     const body = String(job.body || "");
-    const clickAction = String(job.click_action || "/client-portal/client.html");
+    const clickAction = String(job.click_action || "client-portal/client.html");
 
     // Load all registered FCM tokens for this client
     const tokensSnap = await admin.database().ref(`/clients/${uid}/fcmTokens`).once("value");
@@ -81,7 +81,11 @@ exports.enqueuePushOnClientNotification = functions.database
     const n = snap.val() || {};
     const title = String(n.title || "Stallz Loans");
     const body = String(n.body || "You have a new update.");
+<<<<<<< HEAD
+    const clickAction = String(n.click_action || "client-portal/client.html");
+=======
     const clickAction = String(n.click_action || "/client-portal/client.html");
+>>>>>>> 1f8df7882dec299b3c2d648decfa7f2610a74a4e
     const source = String(n.type || n.source || "CLIENT_NOTIFICATION");
 
     try {
