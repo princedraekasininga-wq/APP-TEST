@@ -2103,18 +2103,11 @@ window.closeAnimatedModal = function(modalId, onCompleteCallback) {
 };
 
 // 1. Profile Drawer
-window.openProfileModal = function() {
-    openAnimatedModal('profileModal');
-    try { window.updatePushPermissionUI && window.updatePushPermissionUI(); } catch(_) {}
-};
-
-window.closeProfileModal = function() {
-    closeAnimatedModal('profileModal');
-};
-
+window.openProfileModal = function() { openAnimatedModal('profileModal'); try{ updatePushPermissionUI(); }catch(_){} };
+window.closeProfileModal = function() { closeAnimatedModal('profileModal');
 // 1b. Push Permission UI (Profile Drawer)
 window.handleEnablePushClick = async function() {
-    try { if (typeof __haptic === 'function') __haptic('tap'); } catch(_) {}
+    try { __haptic('tap'); } catch(_) {}
     await initPushNotifications(true);
 };
 
@@ -2137,6 +2130,7 @@ window.updatePushPermissionUI = function() {
         }
     } catch(_) {}
 };
+ };
 
 // 2. Notification History
 window.openNotificationHistoryModal = function() {
@@ -2559,28 +2553,10 @@ async function initPushNotifications(forcePrompt = false) {
         try {
             if ('serviceWorker' in navigator) {
                 // If SW is not registered yet (deep link), register it now
-const isTest = !!(window.STALLZ_APP_CONFIG && window.STALLZ_APP_CONFIG.firebase && window.STALLZ_APP_CONFIG.firebase.testMode);
-const mode = isTest ? 'test' : 'main';
-const baseSwPath = (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/')) ? '../sw.js' : 'sw.js';
-const v = encodeURIComponent(window.STALLZ_APP_VERSION || window.STALLZ_APP_CONFIG?.version || '');
-const regPath = baseSwPath + `?db=${mode}` + (v ? `&v=${v}` : '');
-
-// Ensure we are registered on the correct SW (MAIN vs TEST), otherwise unregister and re-register.
-const desiredAbs = new URL(regPath, location.href).href;
-
-swReg = await navigator.serviceWorker.getRegistration();
-try {
-    const currentAbs = swReg && swReg.active && swReg.active.scriptURL ? swReg.active.scriptURL : (swReg && swReg.installing && swReg.installing.scriptURL ? swReg.installing.scriptURL : '');
-    if (swReg && currentAbs && currentAbs !== desiredAbs) {
-        await swReg.unregister();
-        swReg = null;
-    }
-} catch (_) {}
-
-if (!swReg) {
-    swReg = await navigator.serviceWorker.register(regPath, { updateViaCache: 'none' });
-}
-swReg = await navigator.serviceWorker.ready;
+                const regPath = (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/')) ? '../sw.js' : 'sw.js';
+                swReg = await navigator.serviceWorker.getRegistration();
+                if (!swReg) swReg = await navigator.serviceWorker.register(regPath);
+                swReg = await navigator.serviceWorker.ready;
             }
         } catch (e) {
             console.warn("Service worker not ready for messaging:", e);

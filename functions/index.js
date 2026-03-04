@@ -1,10 +1,10 @@
 /* eslint-disable */
-const functions = require("firebase-functions");
+const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
 
-// Trigger: when an admin enqueues a push job for a client
+// 1. Trigger: Actually Send the Push from the Queue
 // Path: /clients/{uid}/pushQueue/{pushId}
 exports.sendPushFromQueue = functions.database
   .ref("/clients/{uid}/pushQueue/{pushId}")
@@ -14,10 +14,9 @@ exports.sendPushFromQueue = functions.database
 
     const job = snap.val() || {};
     const title = String(job.title || "Stallz Loans");
-    const body = String(job.body || "");
+    const body = String(job.body || "You have a new update.");
     const clickAction = String(job.click_action || "client-portal/client.html");
 
-    // Load all registered FCM tokens for this client
     const tokensSnap = await admin.database().ref(`/clients/${uid}/fcmTokens`).once("value");
     const tokensObj = tokensSnap.val() || {};
 
@@ -26,34 +25,30 @@ exports.sendPushFromQueue = functions.database
       .filter(x => typeof x.token === "string" && x.token.length > 0);
 
     if (tokenEntries.length === 0) {
-      // No tokens: just delete the queue job
       await snap.ref.remove();
       return null;
     }
 
     const tokens = tokenEntries.map(x => x.token);
 
+    // MUST use data-only payload for sw.js to catch it properly
     const message = {
-      notification: { title, body },
       data: {
+        title: title,
+        body: body,
         click_action: clickAction,
         source: String(job.source || "STALLZ"),
         pushId: String(pushId)
       },
-      tokens
+      tokens: tokens
     };
 
     const res = await admin.messaging().sendEachForMulticast(message);
 
-    // Clean up invalid tokens
+    // Cleanup bad tokens
     const badKeys = [];
     res.responses.forEach((r, i) => {
-      if (!r.success) {
-        const code = r.error && r.error.code ? String(r.error.code) : "";
-        if (code.includes("registration-token-not-registered") || code.includes("invalid-argument")) {
-          badKeys.push(tokenEntries[i].key);
-        }
-      }
+      if (!r.success) badKeys.push(tokenEntries[i].key);
     });
 
     if (badKeys.length) {
@@ -62,18 +57,15 @@ exports.sendPushFromQueue = functions.database
       await admin.database().ref().update(updates);
     }
 
-    // Remove the job (prevents duplicates)
     await snap.ref.remove();
-
     return null;
   });
 
 
-
-// Trigger: when ANY client notification is created, enqueue an FCM push job
-// Path: /clients/{uid}/notifications/{notifId}
+// 2. Trigger: Listen to the NEW Shared Notifications Path for Clients
+// Path: /stallzShared_v1/notifications/users/{uid}/{notifId}
 exports.enqueuePushOnClientNotification = functions.database
-  .ref("/clients/{uid}/notifications/{notifId}")
+  .ref("/stallzShared_v1/notifications/users/{uid}/{notifId}")
   .onCreate(async (snap, context) => {
     const uid = context.params.uid;
     const notifId = context.params.notifId;
@@ -81,16 +73,11 @@ exports.enqueuePushOnClientNotification = functions.database
     const n = snap.val() || {};
     const title = String(n.title || "Stallz Loans");
     const body = String(n.body || "You have a new update.");
-<<<<<<< HEAD
     const clickAction = String(n.click_action || "client-portal/client.html");
-=======
-    const clickAction = String(n.click_action || "/client-portal/client.html");
->>>>>>> 1f8df7882dec299b3c2d648decfa7f2610a74a4e
-    const source = String(n.type || n.source || "CLIENT_NOTIFICATION");
+    const source = String(n.type || "CLIENT_NOTIFICATION");
 
     try {
-      const qRef = admin.database().ref(`/clients/${uid}/pushQueue`).push();
-      await qRef.set({
+      await admin.database().ref(`/clients/${uid}/pushQueue`).push().set({
         title,
         body,
         click_action: clickAction,
@@ -99,9 +86,54 @@ exports.enqueuePushOnClientNotification = functions.database
         notifId
       });
     } catch (e) {
-      console.warn("Failed to enqueue pushQueue for notification:", e);
+      console.warn("Failed to enqueue pushQueue:", e);
     }
-
     return null;
   });
 
+
+// 3. Trigger: Listen to the NEW Client Requests Path to Notify Admins
+// Path: /clients/{clientUid}/requests/{reqId}
+exports.notifyAdminsOnLoanRequest = functions.database
+  .ref("/clients/{clientUid}/requests/{reqId}")
+  .onCreate(async (snap, context) => {
+    const req = snap.val() || {};
+
+    // Only fire for brand new pending requests
+    if (String(req.status).toUpperCase() !== "PENDING") return null;
+
+    const clientName = String(req.clientName || "A client");
+    const amount = String(req.amount || "0");
+
+    const title = "New Loan Request";
+    const body = `${clientName} has requested K${amount}.`;
+    const clickAction = "admin/admin.html";
+
+    const adminsSnap = await admin.database().ref("/admins").once("value");
+    const adminsObj = adminsSnap.val() || {};
+
+    const tokens = [];
+    Object.values(adminsObj).forEach(adminUser => {
+        if (adminUser.fcmTokens) {
+            Object.values(adminUser.fcmTokens).forEach(td => {
+                if (td && td.token) tokens.push(td.token);
+            });
+        }
+    });
+
+    if (tokens.length === 0) return null;
+
+    const message = {
+      data: {
+        title: title,
+        body: body,
+        click_action: clickAction,
+        source: "ADMIN_ALERT",
+        pushId: "req_" + context.params.reqId
+      },
+      tokens: tokens
+    };
+
+    await admin.messaging().sendEachForMulticast(message);
+    return null;
+  });

@@ -7,7 +7,7 @@
 
   // 1) APP VERSION (single source of truth: shared/app-config.js)
   const CFG = window.STALLZ_APP_CONFIG || {};
-  const APP_VERSION = window.STALLZ_APP_VERSION || CFG.version || "2.9";
+  const APP_VERSION = window.STALLZ_APP_VERSION || CFG.version || "2.6.1";
 
   // 2) Firebase Mode (single source of truth: shared/app-config.js)
   const TEST_MODE = !!(CFG.firebase && CFG.firebase.testMode);
