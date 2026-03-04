@@ -1,6 +1,6 @@
 {
   "name": "Stallz Loans",
-  "short_name": "Stallz APP TEST",
+  "short_name": "Stallz Test App",
   "description": "Secure loan management and tracking for admins.",
   "id": "./",
   "start_url": "./index.html",
@@ -54,5 +54,6 @@
         }
       ]
     }
-  ]
+  ],
+  "gcm_sender_id": "103953800507"
 }
