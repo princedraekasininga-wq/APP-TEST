@@ -5,20 +5,46 @@
   // 🎛️ MASTER CONFIGURATION (Edit this section ONLY)
   // ============================================================================
 
-  // 1) APP VERSION (single source of truth: shared/app-config.js)
-  const CFG = window.STALLZ_APP_CONFIG || {};
-  const APP_VERSION = window.STALLZ_APP_VERSION || CFG.version || "2.9";
+  // 1. APP VERSION
+  const APP_VERSION = "2.1.1";
 
-  // 2) Firebase Mode (single source of truth: shared/app-config.js)
-  const TEST_MODE = !!(CFG.firebase && CFG.firebase.testMode);
-  const firebaseConfig = (CFG.firebase && CFG.firebase.active) ? CFG.firebase.active : null;
+  // 2. DATA MODE
+  // FIX: Set to FALSE to connect to your MAIN database (stallz-loans)
+  const TEST_MODE = true;
 
-  if (!firebaseConfig) {
-    console.error("STALLZ firebase-init: Missing firebase config. Check shared/app-config.js");
-  }
+  // ============================================================================
+  // Firebase Configs (Do not edit unless changing projects)
+  // ============================================================================
+  const FIRST_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBRMITHX8gm0jKpEXuC4iePGWoYON85BDU",
+    authDomain: "stallz-loans.firebaseapp.com",
+    databaseURL: "https://stallz-loans-default-rtdb.firebaseio.com",
+    projectId: "stallz-loans",
+    storageBucket: "stallz-loans.firebasestorage.app",
+    messagingSenderId: "496528682",
+    appId: "1:496528682:web:26066f0ca7d440fb854253",
+    measurementId: "G-ZELECKK94M"
+  };
+
+  const SECOND_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyDEtUyZdmwIvPMewuF9giOcEzXGzbPVNQA",
+    authDomain: "answers-8cc49.firebaseapp.com",
+    databaseURL: "https://answers-8cc49-default-rtdb.firebaseio.com",
+    projectId: "answers-8cc49",
+    storageBucket: "answers-8cc49.firebasestorage.app",
+    messagingSenderId: "193637729462",
+    appId: "1:193637729462:web:ecb256ab87b334fd7c5217",
+    measurementId: "G-ZGDSQ62X4R"
+  };
+
+  // Pick active config
+  const firebaseConfig = TEST_MODE ? SECOND_FIREBASE_CONFIG : FIRST_FIREBASE_CONFIG;
 
   // Global Exports
-  window.STALLZ_APP_VERSION = window.STALLZ_APP_VERSION || APP_VERSION;
+  window.STALLZ_APP_VERSION = APP_VERSION;
+  window.STALLZ_TEST_MODE = TEST_MODE;
+  window.STALLZ_ENV = TEST_MODE ? 'TEST_FIREBASE' : 'LIVE_FIREBASE';
+
   window.STALLZ_FIREBASE_ENV = TEST_MODE ? "TEST DB" : "MAIN DB";
 
   // ... (Rest of the file stays exactly the same) ...
@@ -155,25 +181,12 @@ document.head.appendChild(style);
       badge.innerHTML = `<span style="opacity:0.8">v${APP_VERSION}</span> • <span style="font-weight:700; color:${color}">${envLabel}</span>`;
 
       Object.assign(badge.style, {
-        position: "fixed", left: "10px", bottom: "10px", zIndex: "2147483647",
+        position: "fixed", top: "10px", right: "10px", zIndex: "2147483647",
         fontFamily: "system-ui, sans-serif", fontSize: "11px", padding: "6px 10px",
         borderRadius: "20px", background: "rgba(15, 23, 42, 0.85)", color: "#e2e8f0",
         border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(4px)",
         boxShadow: "0 4px 12px rgba(0,0,0,0.2)", pointerEvents: "none", userSelect: "none"
       });
-
-      // Responsive tweaks: slightly smaller on small screens (phones)
-      if (!document.getElementById('stallzEnvBadgeStyles')) {
-        const s = document.createElement('style');
-        s.id = 'stallzEnvBadgeStyles';
-        s.textContent = `
-          #stallzEnvBadge { transition: transform .18s ease, opacity .18s ease; }
-          @media (max-width:520px) {
-            #stallzEnvBadge { font-size:10px !important; padding:4px 8px !important; border-radius:14px !important; }
-          }
-        `;
-        document.head.appendChild(s);
-      }
 
       const add = () => {
         if (!document.body) return setTimeout(add, 10);
