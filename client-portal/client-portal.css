@@ -134,12 +134,12 @@ body {
 /* 2. The Dropdown Window (Less transparent, smooth animation) */
 .notification-dropdown {
     position: absolute !important;
-    top: 100% !important;
-    right: -10px !important; /* Aligns perfectly under the bell icon */
+    top: 120% !important;
+    right: 0 !important; /* Align under bell like admin */
     left: auto !important;
-    margin-top: 15px !important;
-    width: 320px !important;
-    max-width: calc(100vw - 20px) !important; /* Prevents edge-clipping on tiny phones */
+    margin-top: 10px !important;
+    width: 300px !important;
+    max-width: calc(100vw - 24px) !important; /* Prevents edge-clipping on tiny phones */
 
     /* Less transparent, darker background */
     background: rgba(15, 23, 42, 0.98) !important;
@@ -1707,8 +1707,8 @@ body.day-mode .drawer-item.is-enabled .stallz-mini-badge {
         top: 65px !important;
 
         /* THE FIX: Center relative to the header, no negative margins! */
-        left: 50% !important;
-        right: auto !important;
+        left: 60%;
+        right: 20%;
         margin: 0 !important;
 
         width: min(92vw, 420px) !important;

@@ -31,8 +31,11 @@ exports.sendPushFromQueue = functions.database
 
     const tokens = tokenEntries.map(x => x.token);
 
-    // MUST use data-only payload for sw.js to catch it properly
+    // Send webpush with BOTH data + notification for maximum reliability (especially on mobile/PWA)
+    // - data: consumed by the app UI + sw.js click routing
+    // - notification/webpush.notification: ensures background notifications display even if the browser throttles data-only pushes
     const message = {
+      notification: { title: title, body: body },
       data: {
         title: title,
         body: body,
@@ -40,6 +43,16 @@ exports.sendPushFromQueue = functions.database
         portal: "client",
         source: String(job.source || "STALLZ"),
         pushId: String(pushId)
+      },
+      webpush: {
+        headers: { Urgency: "high" },
+        notification: {
+          title: title,
+          body: body,
+          icon: "/assets/logo_images/icon-192.png",
+          badge: "/assets/logo_images/myfavicon.png"
+        },
+        fcmOptions: { link: clickAction }
       },
       tokens: tokens
     };
@@ -126,6 +139,7 @@ exports.notifyAdminsOnLoanRequest = functions.database
     if (tokens.length === 0) return null;
 
     const message = {
+      notification: { title: title, body: body },
       data: {
         title: title,
         body: body,
@@ -133,6 +147,16 @@ exports.notifyAdminsOnLoanRequest = functions.database
         portal: "admin",
         source: "ADMIN_ALERT",
         pushId: "req_" + context.params.reqId
+      },
+      webpush: {
+        headers: { Urgency: "high" },
+        notification: {
+          title: title,
+          body: body,
+          icon: "/assets/logo_images/icon-192.png",
+          badge: "/assets/logo_images/myfavicon.png"
+        },
+        fcmOptions: { link: clickAction }
       },
       tokens: tokens
     };

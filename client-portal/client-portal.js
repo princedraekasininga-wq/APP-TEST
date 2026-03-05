@@ -1204,6 +1204,17 @@ async function markNotificationRead(notifId, event) {
         });
 
         renderSharedNotifications();
+
+        // ✅ If a notif was tapped in the dropdown, hide it immediately for a clean UX
+        try {
+            const dd = document.getElementById('notificationDropdown');
+            if (dd && dd.classList.contains('active')) {
+                // keep the dropdown open on desktop, but on mobile it feels better to close
+                const isMobile = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+                if (isMobile) toggleNotifications(false);
+            }
+        } catch(_) {}
+
     } catch(e) { console.error(e); }
 }
 
@@ -1312,9 +1323,10 @@ function renderSharedNotifications() {
         });
 
         notifs.forEach(n => {
+            // ✅ Dropdown should show ONLY unread (history modal shows everything)
             const age = NOW - new Date(n.createdAt).getTime();
-            const isRead = n.read;
-            if ((isRead && age < THIRTY_TWO_HOURS) || (!isRead && age < SEVEN_DAYS)) {
+            const isRead = !!n.read;
+            if (!isRead && age < SEVEN_DAYS) {
                 displayList.push(n);
             }
         });
@@ -1324,8 +1336,8 @@ function renderSharedNotifications() {
         notifs.forEach(n => {
             if (criticalTypes.includes(n.type)) {
                 const age = NOW - new Date(n.createdAt).getTime();
-                const isRead = n.read;
-                if ((isRead && age < THIRTY_TWO_HOURS) || (!isRead && age < SEVEN_DAYS)) {
+                const isRead = !!n.read;
+                if (!isRead && age < SEVEN_DAYS) {
                     displayList.push(n);
                 }
             }

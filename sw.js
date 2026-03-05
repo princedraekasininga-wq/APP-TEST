@@ -24,6 +24,34 @@ firebase.initializeApp(ACTIVE_FIREBASE_CONFIG || {});
 const messaging = firebase.messaging();
 
 
+// ----------------------------------------------------------------------------
+// GitHub Pages / subpath-safe URL helper
+// ----------------------------------------------------------------------------
+const __SCOPE = (self.registration && self.registration.scope) ? self.registration.scope : (self.location && self.location.origin ? (self.location.origin + "/") : "/");
+const __BASE = __SCOPE.replace(/\/$/, ""); // e.g. https://host/APP-TEST
+
+function toAbsoluteUrl(maybePath) {
+  try {
+    if (!maybePath) return __SCOPE;
+    const s = String(maybePath);
+
+    // already absolute
+    if (/^https?:\/\//i.test(s)) return s;
+
+    // already includes our base path
+    if (__BASE && s.startsWith(__BASE)) return s;
+
+    // root-relative -> prefix with base (important for GitHub Pages)
+    if (s.startsWith("/")) return __BASE + s;
+
+    // relative -> resolve under scope
+    return __BASE + "/" + s.replace(/^\.\//, "");
+  } catch (_) {
+    return maybePath;
+  }
+}
+
+
 // 3. Handle Background Messages (When app is closed)
 messaging.onBackgroundMessage(function(payload) {
     console.log('[sw.js] Received background message: ', payload);
@@ -34,11 +62,11 @@ messaging.onBackgroundMessage(function(payload) {
     const notificationTitle = data.title || payload.notification?.title || 'Stallz Loans';
     const notificationOptions = {
         body: data.body || payload.notification?.body || 'You have a new alert from Stallz.',
-        icon: '/assets/logo_images/icon-192.png',
-        badge: '/assets/logo_images/myfavicon.png',
+        icon: toAbsoluteUrl('/assets/logo_images/icon-192.png'),
+        badge: toAbsoluteUrl('/assets/logo_images/myfavicon.png'),
         vibrate: [200, 100, 200, 100, 200, 100, 200],
         data: {
-            click_action: data.click_action || payload.data?.click_action || '/client-portal/client.html',
+            click_action: toAbsoluteUrl(data.click_action || payload.data?.click_action || '/client-portal/client.html'),
             portal: data.portal || payload.data?.portal || 'client'
         }
     };
@@ -57,9 +85,9 @@ self.addEventListener('notificationclick', function(event) {
     event.waitUntil((async () => {
       // Prefer focusing an existing tab if it's already open.
       const allClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-      const target = allClients.find(c => c && c.url && c.url.includes(url));
+      const target = allClients.find(c => c && c.url && (c.url === targetUrl || c.url.includes(url) || c.url.includes(targetUrl)));
       if (target && 'focus' in target) return target.focus();
-      return clients.openWindow(url);
+      return clients.openWindow(targetUrl);
     })());
 });
 
