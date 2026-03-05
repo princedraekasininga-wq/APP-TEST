@@ -789,7 +789,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 .notification-wrapper .notification-dropdown { position: absolute !important; top: 100% !important; right: -10px !important; margin-top: 15px !important; width: 320px !important; max-width: calc(100vw - 32px) !important; background: rgba(30, 41, 59, 0.85) !important; backdrop-filter: blur(var(--stallz-glass-blur)) !important; -webkit-backdrop-filter: blur(var(--stallz-glass-blur)) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; border-radius: 20px !important; display: none; flex-direction: column; z-index: 1001 !important; box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important; overflow: hidden; transform-origin: top right;  }
 .dropdown-header { padding: 15px 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); background: rgba(0,0,0,0.2); }
-.dropdown-body { max-height: 340px; overflow-y: auto; }
+.dropdown-body { max-height: 250px; overflow-y: auto; }
 .dropdown-body::-webkit-scrollbar { width: 6px; }
 .dropdown-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
 
@@ -1305,7 +1305,7 @@ html[data-theme="light"] .menu-pill{
    MOBILE NOTIFICATION POPUP FIXES
    ========================================= */
 @media (max-width: 768px) {
-  #notifDropdown.notification-dropdown { position: fixed !important; top: calc(45px + env(safe-area-inset-top)) !important; left: 50% !important; right: auto !important; transform: translateX(-50%); width: 80% !important; max-width: 300px !important; max-height: 60vh !important; border-radius: 18px !important; overflow-y: auto !important; display: none !important; z-index: 20005 !important; background: rgba(15, 23, 42, 0.98) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; box-shadow: 0 20px 60px rgba(0,0,0,0.6) !important; backdrop-filter: blur(20px) !important; }
+  #notifDropdown.notification-dropdown { position: fixed !important; top: calc(45px + env(safe-area-inset-top)) !important; left: 50% !important; right: auto !important; transform: translateX(-50%); width: 80% !important; max-width: 300px !important; max-height: 45vh !important; border-radius: 18px !important; overflow-y: auto !important; display: none !important; z-index: 20005 !important; background: rgba(15, 23, 42, 0.98) !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; box-shadow: 0 20px 60px rgba(0,0,0,0.6) !important; backdrop-filter: blur(20px) !important; }
   #notifDropdown.notification-dropdown.show { display: flex !important; }
   #notifDropdown .dropdown-header { background: rgba(255, 255, 255, 0.03) !important; color: #94a3b8 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; }
   #notifDropdown .notif-item { color: #f8fafc !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; }
