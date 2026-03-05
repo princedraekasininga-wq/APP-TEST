@@ -1708,7 +1708,11 @@ body.day-mode .drawer-item.is-enabled .stallz-mini-badge {
 
         /* THE FIX: Center relative to the header, no negative margins! */
         left: 60%;
+<<<<<<< HEAD
         right: 20%;
+=======
+        right: auto !important;
+>>>>>>> 846dee3 ( updated push notifications functionality)
         margin: 0 !important;
 
         width: min(92vw, 420px) !important;

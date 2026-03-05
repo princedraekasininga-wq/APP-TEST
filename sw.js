@@ -25,6 +25,7 @@ const messaging = firebase.messaging();
 
 
 // ----------------------------------------------------------------------------
+<<<<<<< HEAD
 // GitHub Pages / subpath-safe URL helper
 // ----------------------------------------------------------------------------
 const __SCOPE = (self.registration && self.registration.scope) ? self.registration.scope : (self.location && self.location.origin ? (self.location.origin + "/") : "/");
@@ -51,45 +52,106 @@ function toAbsoluteUrl(maybePath) {
   }
 }
 
+=======
+// GitHub Pages / subpath-safe URL helpers
+// ----------------------------------------------------------------------------
+function toAbsoluteUrl(maybeUrl, fallbackRel) {
+  try {
+    const scope = (self.registration && self.registration.scope) ? self.registration.scope : self.location.origin + "/";
+    if (typeof maybeUrl === "string" && maybeUrl.trim()) {
+      const u = maybeUrl.trim();
+      // Absolute already
+      if (/^https?:\/\//i.test(u)) return u;
+      // Leading slash -> treat as app-scope root (NOT origin root)
+      if (u.startsWith("/")) return new URL(u.replace(/^\/+/, ""), scope).href;
+      // Relative
+      return new URL(u.replace(/^\.\/+/, ""), scope).href;
+    }
+    return new URL(String(fallbackRel || ""), scope).href;
+  } catch (_) {
+    return maybeUrl || fallbackRel || "/";
+  }
+}
+
+const DEFAULT_CLIENT_URL = toAbsoluteUrl(null, "client-portal/client.html");
+const DEFAULT_ADMIN_URL  = toAbsoluteUrl(null, "admin/admin.html");
+const ICON_URL  = toAbsoluteUrl(null, "assets/logo_images/icon-192.png");
+const BADGE_URL = toAbsoluteUrl(null, "assets/logo_images/myfavicon.png");
+
+
+>>>>>>> 846dee3 ( updated push notifications functionality)
 
 // 3. Handle Background Messages (When app is closed)
 messaging.onBackgroundMessage(function(payload) {
     console.log('[sw.js] Received background message: ', payload);
 
-    // NOTE: We intentionally send **data-only** payloads from Cloud Functions
-    // to prevent duplicate notifications across browsers.
-    const data = payload && payload.data ? payload.data : {};
+    // We send data-only payloads from Cloud Functions
+    const data = (payload && payload.data) ? payload.data : {};
+    const portal = String(data.portal || 'client');
+
     const notificationTitle = data.title || payload.notification?.title || 'Stallz Loans';
+
+    const clickFallback = (portal === 'admin') ? DEFAULT_ADMIN_URL : DEFAULT_CLIENT_URL;
+    const click_action = toAbsoluteUrl(data.click_action || clickFallback, clickFallback);
+
     const notificationOptions = {
         body: data.body || payload.notification?.body || 'You have a new alert from Stallz.',
+<<<<<<< HEAD
         icon: toAbsoluteUrl('/assets/logo_images/icon-192.png'),
         badge: toAbsoluteUrl('/assets/logo_images/myfavicon.png'),
         vibrate: [200, 100, 200, 100, 200, 100, 200],
         data: {
             click_action: toAbsoluteUrl(data.click_action || payload.data?.click_action || '/client-portal/client.html'),
             portal: data.portal || payload.data?.portal || 'client'
+=======
+        icon: ICON_URL,
+        badge: BADGE_URL,
+        vibrate: [200, 100, 200, 100, 200, 100, 200],
+        data: {
+            click_action: click_action,
+            portal: portal
+>>>>>>> 846dee3 ( updated push notifications functionality)
         }
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
+
+
 // 4. Handle Notification Clicks (When user taps the notification)
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
 
-    const url = (event.notification && event.notification.data && event.notification.data.click_action)
+    const raw = (event.notification && event.notification.data && event.notification.data.click_action)
       ? event.notification.data.click_action
-      : '/client-portal/client.html';
+      : DEFAULT_CLIENT_URL;
+
+    const url = toAbsoluteUrl(raw, DEFAULT_CLIENT_URL);
 
     event.waitUntil((async () => {
-      // Prefer focusing an existing tab if it's already open.
       const allClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+<<<<<<< HEAD
       const target = allClients.find(c => c && c.url && (c.url === targetUrl || c.url.includes(url) || c.url.includes(targetUrl)));
+=======
+      let target = null;
+
+      try {
+        const want = new URL(url);
+        target = allClients.find((c) => {
+          try {
+            const cu = new URL(c.url);
+            return cu.origin === want.origin && cu.pathname === want.pathname;
+          } catch (_) { return false; }
+        });
+      } catch (_) {}
+
+>>>>>>> 846dee3 ( updated push notifications functionality)
       if (target && 'focus' in target) return target.focus();
       return clients.openWindow(targetUrl);
     })());
 });
+
 
 // ==========================================
 // 5. EXISTING AGGRESSIVE CACHE LOGIC

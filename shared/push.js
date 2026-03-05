@@ -162,11 +162,7 @@
             if (entity) localStorage.setItem('stallz_last_push_entity', String(entity));
           } catch (_) {}
 
-          // sound/haptics are optional; never block if browser prevents them
-          try {
-            const audio = document.getElementById('pushTone');
-            if (audio) audio.play().catch(() => {});
-          } catch (_) {}
+          // No sound (user request). Optional haptics only.
           try { if (typeof __haptic === 'function') __haptic('success'); } catch (_) {}
 
           // Refresh dropdown + badges
@@ -182,6 +178,31 @@
 
             if (shouldPopup) await showForegroundSystemPopup(payload);
           } catch (_) {}
+
+
+// ✅ Optional: show a native OS popup (banner) on phones and when tab isn't visible
+try {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+  const shouldPopup = (document.visibilityState !== 'visible') || isMobile;
+
+  if (shouldPopup && typeof Notification !== "undefined" && Notification.permission === "granted") {
+    const data = payload && payload.data ? payload.data : {};
+    const title = data.title || "Stallz Loans";
+    const body = data.body || "You have a new update.";
+    const click_action = data.click_action || "/client-portal/client.html";
+
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (!reg) return;
+      reg.showNotification(title, {
+                  body,
+                  icon: (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/')) ? '../assets/logo_images/icon-192.png' : 'assets/logo_images/icon-192.png',
+                  badge: (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/')) ? '../assets/logo_images/myfavicon.png' : 'assets/logo_images/myfavicon.png',
+        tag: data.pushId || String(Date.now()),
+        data: { click_action }
+      }).catch(() => {});
+    }).catch(() => {});
+  }
+} catch (_) {}
         });
       } else {
         // If already bound, just update the cfg

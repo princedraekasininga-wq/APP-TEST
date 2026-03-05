@@ -370,8 +370,11 @@ function bootstrapSharedSession() {
             // --- PUSH NOTIFICATION AUTO-START ---
             // If the user already granted permission, start listening for foreground messages
             if ('Notification' in window && Notification.permission === 'granted') {
-                if (typeof initPushNotifications === 'function') {
-                    initPushNotifications();
+                // Prefer shared push glue (shared/push.js)
+                if (window.StallzPush?.initPushNotifications) {
+                    window.StallzPush.initPushNotifications({ forcePrompt: false });
+                } else if (typeof initPushNotifications === 'function') {
+                    initPushNotifications(false);
                 }
             }
             // ------------------------------------
@@ -2182,7 +2185,11 @@ window.closeProfileModal = function() { closeAnimatedModal('profileModal');
 // 1b. Push Permission UI (Profile Drawer)
 window.handleEnablePushClick = async function() {
     try { __haptic('tap'); } catch(_) {}
-    await initPushNotifications(true);
+    if (window.StallzPush?.initPushNotifications) {
+        await window.StallzPush.initPushNotifications({ forcePrompt: true });
+    } else {
+        await initPushNotifications(true);
+    }
 };
 
 window.updatePushPermissionUI = function() {
@@ -2673,9 +2680,7 @@ async function initPushNotifications(forcePrompt = false) {
             messaging.onMessage((payload) => {
                 console.log('[Foreground] Push received: ', payload);
 
-                // Play tone
-                const audio = document.getElementById('pushTone');
-                if (audio) audio.play().catch(e => console.log('Audio blocked by browser:', e));
+                // No sound (user request)
 
                 // Haptics
                 if (typeof __haptic === 'function') __haptic('success');
