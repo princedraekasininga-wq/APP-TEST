@@ -55,7 +55,7 @@ body {
 .glass-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 15px;
-    position: sticky; top: 10px; z-index: 100;
+    position: sticky; top: 10px; z-index: 1002;
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
     border: var(--glass-border); border-radius: 20px;
@@ -1900,11 +1900,37 @@ body.day-mode #historyModal .statements-glass {
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     transform: translateY(10px);
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1005; /* Keeps it above the dark mobile overlay blur */
 }
 
-.notification-dropdown.active {
-    transform: translateY(0);
-    opacity: 1;
+/* Desktop Animation */
+@media (min-width: 641px) {
+    .notification-dropdown.active {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Mobile Centering Override */
+@media (max-width: 640px) {
+    .notification-wrapper {
+        position: static;
+    }
+    .notification-dropdown {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        width: min(92vw, 420px);
+        margin-top: 0;
+        /* Start slightly smaller for pop animation */
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+    .notification-dropdown.active {
+        opacity: 1;
+        /* Perfectly locks to the center of the screen */
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
 
 .notif-filters {
@@ -1973,12 +1999,7 @@ img, svg { max-width: 100%; height: auto; }
     margin-left: 0; margin-right: 0;
   }
 
-  .notification-dropdown{
-    right: -10 !important;
-    left: auto !important;
-    width: min(340px, calc(100vw - 24px)) !important;
-    max-width: calc(100vw - 24px) !important;
-  }
+
 
   .modal-glass,
   .statements-glass,
@@ -2579,4 +2600,33 @@ body.day-mode .drawer-item.is-enabled .stallz-mini-badge {
   background: rgba(22, 163, 74, 0.15);
   color: #15803d; /* Darker green for visibility */
   border-color: rgba(22, 163, 74, 0.3);
+}
+
+/* ==========================================================================
+   BULLETPROOF MOBILE NOTIFICATION CENTERING
+   ========================================================================== */
+/* Mobile Centering Override (Fixes Blur and Off-Screen Traps) */
+@media (max-width: 640px) {
+    .notification-wrapper { position: static !important; }
+    .header-right { position: static !important; }
+
+    .notification-dropdown {
+        position: absolute !important; /* Avoids the 'fixed' bug caused by the header's blur */
+        top: 65px !important; /* Drops it neatly just below the header */
+        left: -100vw !important;
+        right: -100vw !important;
+        margin: 0 auto !important; /* Centers it perfectly horizontally */
+        width: min(92vw, 420px) !important;
+        transform: scale(0.95) !important;
+        z-index: 9999 !important;
+    }
+
+    .notification-dropdown.active {
+        transform: scale(1) !important;
+        opacity: 1 !important;
+    }
+
+    .notif-overlay {
+        z-index: 100 !important; /* Tucks the blur EXACTLY under the header (1002) */
+    }
 }
