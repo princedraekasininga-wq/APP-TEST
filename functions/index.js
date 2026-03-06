@@ -4,7 +4,6 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 
-
 // ----------------------------------------------------------------------------
 // Helpers
 // ----------------------------------------------------------------------------
@@ -20,33 +19,93 @@ function collectTokenEntries(tokensObj) {
     else if (v && typeof v === "object" && typeof v.token === "string") token = v.token;
     else if (v === true && typeof k === "string") token = k;
 
-    if (typeof token === "string" && token.length > 0) {
-      entries.push({ key: k, token });
+    if (typeof token === "string" && token.trim().length > 0) {
+      entries.push({ key: k, token: token.trim() });
     }
   });
   return entries;
 }
 
-function buildDataMessage({ title, body, clickAction, portal, source, pushId, extraData }) {
+function buildMulticastMessage({ title, body, clickAction, portal, source, pushId, extraData }) {
+  const t = String(title || "Stallz Loans");
+  const b = String(body || "You have a new update.");
+  const click = String(clickAction || (portal === "admin" ? "admin/admin.html" : "client-portal/client.html"));
+
+  // Keep URLs subpath-safe for GitHub Pages: avoid leading "/" defaults.
+  const cleanClick = click.startsWith("/") ? click.slice(1) : click;
+
   const data = {
-    title: String(title || "Stallz Loans"),
-    body: String(body || "You have a new update."),
-    click_action: String(clickAction || (portal === "admin" ? "/admin/admin.html" : "/client-portal/client.html")),
+    title: t,
+    body: b,
+    click_action: cleanClick,
     portal: String(portal || "client"),
     source: String(source || "STALLZ"),
     pushId: String(pushId || Date.now())
   };
+
   if (extraData && typeof extraData === "object") {
     Object.entries(extraData).forEach(([k, v]) => {
       if (v === undefined || v === null) return;
       data[String(k)] = String(v);
     });
   }
-  return { data };
+
+  // Provide BOTH:
+  // - data: consumed by app + service worker routing
+  // - notification/webpush.notification: boosts reliability for background display on mobile/PWA
+  return {
+    notification: { title: t, body: b },
+    data,
+    webpush: {
+      headers: { Urgency: "high" },
+      notification: {
+        title: t,
+        body: b,
+        // subpath-safe (no leading slash)
+        icon: "icon-192.png",
+        badge: "myfavicon.png",
+        // Vibrate is respected by some platforms; harmless elsewhere
+        vibrate: [60, 30, 60],
+        tag: String(extraData?.dedupeKey || pushId || Date.now())
+      },
+      fcmOptions: { link: cleanClick }
+    }
+  };
 }
 
-// 1. Trigger: Actually Send the Push from the Queue
+async function cleanupBadTokens({ basePath, uid, tokenEntries, multicastResponse }) {
+  const badKeys = [];
+  multicastResponse.responses.forEach((r, i) => {
+    if (!r.success) {
+      badKeys.push(tokenEntries[i]?.key);
+    }
+  });
+
+  if (!badKeys.length) return;
+
+  const updates = {};
+  badKeys.forEach((k) => {
+    if (!k) return;
+    updates[`${basePath}/${uid}/fcmTokens/${k}`] = null;
+  });
+  await admin.database().ref().update(updates);
+}
+
+async function collectAllAdminTokens() {
+  const adminsSnap = await admin.database().ref("/admins").once("value");
+  const adminsObj = adminsSnap.val() || {};
+  const out = [];
+  Object.entries(adminsObj).forEach(([adminUid, adminUser]) => {
+    const entries = collectTokenEntries(adminUser?.fcmTokens || {});
+    entries.forEach((e) => out.push({ adminUid, tokenKey: e.key, token: e.token }));
+  });
+  return out;
+}
+
+// ----------------------------------------------------------------------------
+// 1) SEND: Client push queue -> FCM multicast
 // Path: /clients/{uid}/pushQueue/{pushId}
+// ----------------------------------------------------------------------------
 exports.sendPushFromQueue = functions.database
   .ref("/clients/{uid}/pushQueue/{pushId}")
   .onCreate(async (snap, context) => {
@@ -56,84 +115,47 @@ exports.sendPushFromQueue = functions.database
     const job = snap.val() || {};
     const title = String(job.title || "Stallz Loans");
     const body = String(job.body || "You have a new update.");
-    const clickAction = String(job.click_action || "/client-portal/client.html");
+    const clickAction = String(job.click_action || "client-portal/client.html");
 
     const tokensSnap = await admin.database().ref(`/clients/${uid}/fcmTokens`).once("value");
     const tokensObj = tokensSnap.val() || {};
-
     const tokenEntries = collectTokenEntries(tokensObj);
-if (tokenEntries.length === 0) {
+
+    if (!tokenEntries.length) {
       await snap.ref.remove();
       return null;
     }
 
-    const tokens = tokenEntries.map(x => x.token);
-
-<<<<<<< HEAD
-    // Send webpush with BOTH data + notification for maximum reliability (especially on mobile/PWA)
-    // - data: consumed by the app UI + sw.js click routing
-    // - notification/webpush.notification: ensures background notifications display even if the browser throttles data-only pushes
-    const message = {
-      notification: { title: title, body: body },
-      data: {
-        title: title,
-        body: body,
-        click_action: clickAction,
-        portal: "client",
-        source: String(job.source || "STALLZ"),
-        pushId: String(pushId)
-      },
-      webpush: {
-        headers: { Urgency: "high" },
-        notification: {
-          title: title,
-          body: body,
-          icon: "/assets/logo_images/icon-192.png",
-          badge: "/assets/logo_images/myfavicon.png"
-        },
-        fcmOptions: { link: clickAction }
-      },
-      tokens: tokens
-    };
-=======
-    // MUST use data-only payload for sw.js to catch it properly
-const payload = buildDataMessage({
-  title,
-  body,
-  clickAction,
-  portal: "client",
-  source: String(job.source || "STALLZ"),
-  pushId: String(pushId),
-  extraData: {
-    notifId: job.notifId || "",
-    type: job.source || ""
-  }
-});
-
-const message = { ...payload, tokens };
->>>>>>> 846dee3 ( updated push notifications functionality)
-
-    const res = await admin.messaging().sendEachForMulticast(message);
-
-    // Cleanup bad tokens
-    const badKeys = [];
-    res.responses.forEach((r, i) => {
-      if (!r.success) badKeys.push(tokenEntries[i].key);
+    const message = buildMulticastMessage({
+      title,
+      body,
+      clickAction,
+      portal: "client",
+      source: String(job.source || "CLIENT"),
+      pushId: String(job.pushId || pushId),
+      extraData: {
+        notifId: job.notifId || "",
+        type: job.source || "",
+        dedupeKey: job.dedupeKey || `client_${uid}_${job.notifId || pushId}`
+      }
     });
 
-    if (badKeys.length) {
-      const updates = {};
-      badKeys.forEach(k => updates[`/clients/${uid}/fcmTokens/${k}`] = null);
-      await admin.database().ref().update(updates);
-    }
+    const res = await admin.messaging().sendEachForMulticast({
+      ...message,
+      tokens: tokenEntries.map((e) => e.token)
+    });
 
+    await cleanupBadTokens({ basePath: "/clients", uid, tokenEntries, multicastResponse: res });
+
+    // Remove queue job after sending
     await snap.ref.remove();
     return null;
   });
 
-
-// 2. Trigger: Listen to the NEW Shared Notifications Path for Clients
+// ----------------------------------------------------------------------------
+// 2) ENQUEUE: Shared notifications for clients -> client pushQueue
 // Path: /stallzShared_v1/notifications/users/{uid}/{notifId}
+// ----------------------------------------------------------------------------
 exports.enqueuePushOnClientNotification = functions.database
   .ref("/stallzShared_v1/notifications/users/{uid}/{notifId}")
   .onCreate(async (snap, context) => {
@@ -141,31 +163,25 @@ exports.enqueuePushOnClientNotification = functions.database
     const notifId = context.params.notifId;
 
     const n = snap.val() || {};
-    const title = String(n.title || "Stallz Loans");
-    const body = String(n.body || "You have a new update.");
-    const clickAction = String(n.click_action || "/client-portal/client.html");
-    const source = String(n.type || "CLIENT_NOTIFICATION");
+    if (n && n.read === true) return null;
 
-    try {
-      await admin.database().ref(`/clients/${uid}/pushQueue`).push().set({
-        title,
-        body,
-        click_action: clickAction,
-        portal: "client",
-        createdAt: new Date().toISOString(),
-        source,
-        notifId
-      });
-    } catch (e) {
-      console.warn("Failed to enqueue pushQueue:", e);
-    }
+    await admin.database().ref(`/clients/${uid}/pushQueue`).push().set({
+      title: String(n.title || "Stallz Loans"),
+      body: String(n.body || "You have a new update."),
+      click_action: String(n.click_action || "client-portal/client.html"),
+      portal: "client",
+      createdAt: new Date().toISOString(),
+      source: String(n.type || "CLIENT_NOTIFICATION"),
+      notifId
+    });
+
     return null;
   });
 
-
-// 2B. Trigger: Listen to LEGACY Client Notifications (Admin portal writes here)
+// ----------------------------------------------------------------------------
+// 2B) ENQUEUE: Legacy client notifications -> client pushQueue
 // Path: /clients/{uid}/notifications/{notifId}
-// NOTE: onCreate only -> marking read will NOT trigger a push
+// ----------------------------------------------------------------------------
 exports.enqueuePushOnLegacyClientNotification = functions.database
   .ref("/clients/{uid}/notifications/{notifId}")
   .onCreate(async (snap, context) => {
@@ -175,95 +191,60 @@ exports.enqueuePushOnLegacyClientNotification = functions.database
     const n = snap.val() || {};
     if (n && n.read === true) return null;
 
-    const title = String(n.title || "Stallz Loans");
-    const body = String(n.body || "You have a new update.");
-    const clickAction = String(n.click_action || "/client-portal/client.html");
-    const source = String(n.type || "CLIENT_NOTIFICATION");
+    await admin.database().ref(`/clients/${uid}/pushQueue`).push().set({
+      title: String(n.title || "Stallz Loans"),
+      body: String(n.body || "You have a new update."),
+      click_action: String(n.click_action || "client-portal/client.html"),
+      portal: "client",
+      createdAt: new Date().toISOString(),
+      source: String(n.type || "CLIENT_NOTIFICATION"),
+      notifId
+    });
 
-    try {
-      await admin.database().ref(`/clients/${uid}/pushQueue`).push().set({
-        title,
-        body,
-        click_action: clickAction,
-        portal: "client",
-        createdAt: new Date().toISOString(),
-        source,
-        notifId
-      });
-    } catch (e) {
-      console.warn("Failed to enqueue legacy client pushQueue:", e);
-    }
     return null;
   });
 
-
-
-// 3. Trigger: Listen to the NEW Client Requests Path to Notify Admins
+// ----------------------------------------------------------------------------
+// 3) ADMIN: Notify admins on NEW pending loan request
 // Path: /clients/{clientUid}/requests/{reqId}
+// ----------------------------------------------------------------------------
 exports.notifyAdminsOnLoanRequest = functions.database
   .ref("/clients/{clientUid}/requests/{reqId}")
   .onCreate(async (snap, context) => {
     const req = snap.val() || {};
-
-    // Only fire for brand new pending requests
-    if (String(req.status).toUpperCase() !== "PENDING") return null;
+    if (String(req.status || "").toUpperCase() !== "PENDING") return null;
 
     const clientName = String(req.clientName || "A client");
     const amount = String(req.amount || "0");
 
     const title = "New Loan Request";
     const body = `${clientName} has requested K${amount}.`;
-    const clickAction = "/admin/admin.html";
+    const clickAction = "admin/admin.html";
 
-    const adminsSnap = await admin.database().ref("/admins").once("value");
-    const adminsObj = adminsSnap.val() || {};
-
-    const tokens = [];
-    Object.values(adminsObj).forEach((adminUser) => {
-      const entries = collectTokenEntries(adminUser?.fcmTokens || {});
-      entries.forEach((e) => tokens.push(e.token));
-    });
-
-// 2C. Trigger: Admin shared notifications -> push to ALL admins
-// Path: /stallzShared_v1/notifications/admin/{notifId}
-// NOTE: onCreate only -> marking read will NOT trigger a push
-exports.sendPushOnAdminSharedNotification = functions.database
-  .ref("/stallzShared_v1/notifications/admin/{notifId}")
-  .onCreate(async (snap, context) => {
-    const notifId = context.params.notifId;
-    const n = snap.val() || {};
-    if (n && n.read === true) return null;
-
-    const title = String(n.title || "Stallz Loans");
-    const body = String(n.body || "You have a new admin alert.");
-    const clickAction = String(n.click_action || "/admin/admin.html");
-    const source = String(n.type || "ADMIN_NOTIFICATION");
-
-    const adminsSnap = await admin.database().ref("/admins").once("value");
-    const adminsObj = adminsSnap.val() || {};
-
-    const tokenEntries = [];
-    Object.entries(adminsObj).forEach(([adminUid, adminUser]) => {
-      const entries = collectTokenEntries(adminUser?.fcmTokens || {});
-      entries.forEach((e) => tokenEntries.push({ adminUid, tokenKey: e.key, token: e.token }));
-    });
-
+    const tokenEntries = await collectAllAdminTokens();
     if (!tokenEntries.length) return null;
 
-    const tokens = tokenEntries.map((e) => e.token);
-
-    const payload = buildDataMessage({
+    const message = buildMulticastMessage({
       title,
       body,
       clickAction,
       portal: "admin",
-      source,
-      pushId: `admin_${notifId || Date.now()}`
+      source: "ADMIN_ALERT",
+      pushId: `req_${context.params.reqId}`,
+      extraData: {
+        type: "NEW_LOAN_REQUEST",
+        requestId: context.params.reqId,
+        clientUid: context.params.clientUid,
+        dedupeKey: `req_${context.params.reqId}`
+      }
     });
 
-    const res = await admin.messaging().sendEachForMulticast({ ...payload, tokens });
+    const res = await admin.messaging().sendEachForMulticast({
+      ...message,
+      tokens: tokenEntries.map((e) => e.token)
+    });
 
-    // Cleanup bad tokens
+    // Cleanup bad admin tokens
     const bad = [];
     res.responses.forEach((r, i) => {
       if (!r.success) bad.push(tokenEntries[i]);
@@ -272,6 +253,7 @@ exports.sendPushOnAdminSharedNotification = functions.database
     if (bad.length) {
       const updates = {};
       bad.forEach((e) => {
+        if (!e) return;
         updates[`/admins/${e.adminUid}/fcmTokens/${e.tokenKey}`] = null;
       });
       await admin.database().ref().update(updates);
@@ -280,32 +262,94 @@ exports.sendPushOnAdminSharedNotification = functions.database
     return null;
   });
 
+// ----------------------------------------------------------------------------
+// 4) ADMIN: Shared admin notifications -> push to ALL admins
+// Path: /stallzShared_v1/notifications/admin/{notifId}
+// ----------------------------------------------------------------------------
+exports.sendPushOnAdminSharedNotification = functions.database
+  .ref("/stallzShared_v1/notifications/admin/{notifId}")
+  .onCreate(async (snap, context) => {
+    const notifId = context.params.notifId;
+    const n = snap.val() || {};
+    if (n && n.read === true) return null;
 
-    if (tokens.length === 0) return null;
+    const tokenEntries = await collectAllAdminTokens();
+    if (!tokenEntries.length) return null;
 
-    const message = {
-      notification: { title: title, body: body },
-      data: {
-        title: title,
-        body: body,
-        click_action: clickAction,
-        portal: "admin",
-        source: "ADMIN_ALERT",
-        pushId: "req_" + context.params.reqId
-      },
-      webpush: {
-        headers: { Urgency: "high" },
-        notification: {
-          title: title,
-          body: body,
-          icon: "/assets/logo_images/icon-192.png",
-          badge: "/assets/logo_images/myfavicon.png"
-        },
-        fcmOptions: { link: clickAction }
-      },
-      tokens: tokens
-    };
+    const message = buildMulticastMessage({
+      title: String(n.title || "Stallz Loans"),
+      body: String(n.body || "You have a new admin alert."),
+      clickAction: String(n.click_action || "admin/admin.html"),
+      portal: "admin",
+      source: String(n.type || "ADMIN_NOTIFICATION"),
+      pushId: `admin_${notifId}`,
+      extraData: {
+        notifId,
+        type: String(n.type || "ADMIN_NOTIFICATION"),
+        dedupeKey: `admin_${notifId}`
+      }
+    });
 
-    await admin.messaging().sendEachForMulticast(message);
+    const res = await admin.messaging().sendEachForMulticast({
+      ...message,
+      tokens: tokenEntries.map((e) => e.token)
+    });
+
+    // Cleanup bad admin tokens
+    const bad = [];
+    res.responses.forEach((r, i) => {
+      if (!r.success) bad.push(tokenEntries[i]);
+    });
+
+    if (bad.length) {
+      const updates = {};
+      bad.forEach((e) => {
+        if (!e) return;
+        updates[`/admins/${e.adminUid}/fcmTokens/${e.tokenKey}`] = null;
+      });
+      await admin.database().ref().update(updates);
+    }
+
+    return null;
+  });
+
+// ----------------------------------------------------------------------------
+// 5) ADMIN: Legacy admin notifications -> push to that admin
+// Path: /admins/{uid}/notifications/{notifId}
+// ----------------------------------------------------------------------------
+exports.sendPushOnLegacyAdminNotification = functions.database
+  .ref("/admins/{uid}/notifications/{notifId}")
+  .onCreate(async (snap, context) => {
+    const uid = context.params.uid;
+    const notifId = context.params.notifId;
+
+    const n = snap.val() || {};
+    if (n && n.read === true) return null;
+
+    const tokensSnap = await admin.database().ref(`/admins/${uid}/fcmTokens`).once("value");
+    const tokensObj = tokensSnap.val() || {};
+    const tokenEntries = collectTokenEntries(tokensObj);
+    if (!tokenEntries.length) return null;
+
+    const message = buildMulticastMessage({
+      title: String(n.title || "Stallz Loans"),
+      body: String(n.body || "You have a new alert."),
+      clickAction: String(n.click_action || "admin/admin.html"),
+      portal: "admin",
+      source: String(n.type || "ADMIN_NOTIFICATION"),
+      pushId: `admin_${uid}_${notifId}`,
+      extraData: {
+        notifId,
+        type: String(n.type || "ADMIN_NOTIFICATION"),
+        dedupeKey: `admin_${uid}_${notifId}`
+      }
+    });
+
+    const res = await admin.messaging().sendEachForMulticast({
+      ...message,
+      tokens: tokenEntries.map((e) => e.token)
+    });
+
+    await cleanupBadTokens({ basePath: "/admins", uid, tokenEntries, multicastResponse: res });
     return null;
   });
