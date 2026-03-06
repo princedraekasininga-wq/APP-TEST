@@ -5,6 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Stallz Loans - Client Portal</title>
 
+    <style id="antiFlash">
+        html, body {
+            background: #020617; /* Original Deep Navy */
+            margin: 0; padding: 0;
+            overflow-x: hidden;
+        }
+        /* Keep app content hidden until initialization is complete */
+        .portal-shell { opacity: 0; visibility: hidden; position: relative; z-index: 10; }
+
+        /* Professional Loader Overlay */
+        .portal-loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #020617;
+            z-index: 999999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 0.4s ease;
+        }
+        .portal-spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(22, 163, 74, 0.1);
+            border-top: 4px solid #16a34a; border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-brand { color: #fff; font-weight: 800; letter-spacing: 2px; font-size: 0.9rem; }
+    </style>
+
     <link rel="manifest" href="/manifest.json">
     <script src="../shared/app-config.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,17 +39,24 @@
     <link rel="apple-touch-icon" href="../apple-touch.png">
 
     <link rel="icon" type="image/png" href="../assets/logo_images/myfavicon.png">
-    
-    <style>
-        html, body { margin:0; background:#020617; color:#e5e7eb; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    </style>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700;800;900&display=swap" rel="stylesheet">
-    <link id="clientStylesheet" rel="stylesheet" href="client-portal.css">
+
+    <script>
+        /* Synchronous CSS Loader: Forces the browser to wait for the CSS before drawing the HTML, completely preventing the "broken page" flash */
+        document.write('<link rel="stylesheet" href="client-portal.css?v=' + encodeURIComponent(window.STALLZ_APP_VERSION || Date.now()) + '">');
+    </script>
 </head>
 <body>
 
-    <div class="portal-shell">
+    <div id="portalLoader" class="portal-loader-overlay">
+        <div class="portal-spinner"></div>
+        <div class="loader-brand">STALLZ SECURE</div>
+        <div id="clientBootHint" style="margin-top:10px;font-size:12px;opacity:.75;letter-spacing:.2px;">Securing session…</div>
+    </div>
+
+    <div class="portal-shell" style="visibility:hidden;opacity:0;">
 
         <header class="glass-header fade-in">
             <div class="header-left">
@@ -51,7 +84,6 @@
             </div>
         </header>
 
-        <!-- Notifications overlay (mobile modal) -->
         <div id="notifOverlay" class="notif-overlay" aria-hidden="true"></div>
 
 
@@ -198,7 +230,6 @@
 
     </div>
 
-    <!-- Shared push glue (FCM web push) -->
     <script src="../shared/push.js"></script>
 
     <nav class="mobile-bottom-nav">
@@ -863,18 +894,25 @@
 
     return loadScript("../shared/stallz-shared.js?v=" + encodeURIComponent(v))
       .then(function(){ return loadScript("../shared/auth.js?v=" + encodeURIComponent(v)); })
-      .then(function(){ return loadScript("client-portal.js?v=" + encodeURIComponent(v)); });
+      .then(function(){ return loadScript("client-portal.js?v=" + encodeURIComponent(v)); })
+      .then(function(){
+          // --- REVEAL PORTAL ---
+          // Hide loader and show body once all scripts are loaded
+          const loader = document.getElementById('portalLoader');
+          if(loader) {
+              loader.style.opacity = '0';
+              setTimeout(() => {
+                  loader.style.display = 'none';
+                  document.body.style.visibility = 'visible';
+                  document.body.style.opacity = '1';
+              }, 500);
+          }
+      });
   }).catch(function(err){
     console.error("STALLZ Client boot failed:", err);
   });
 })();
 
-/* ==========================================================================
-   DYNAMIC STALLZ ADVICE GENERATOR (LOADS AUTOMATICALLY)
-   ========================================================================== */
-/* ==========================================================================
-   SMART STALLZ ADVICE GENERATOR (SEQUENTIAL MEMORY)
-   ========================================================================== */
 /* ==========================================================================
    ENHANCED STALLZ ADVICE — SWIPEABLE STORY CARD (WITH MEMORY)
    ========================================================================== */
@@ -919,7 +957,6 @@
         if (!t) return;
         t.classList.remove('tip-in-left','tip-in-right','tip-out-left','tip-out-right');
 
-        // Two-phase: out, swap text, in
         const outClass = dir === 'prev' ? 'tip-out-right' : 'tip-out-left';
         const inClass  = dir === 'prev' ? 'tip-in-left'  : 'tip-in-right';
 
@@ -946,7 +983,6 @@
         const t = elAdvice();
         if (!t) return;
 
-        // Sequential memory: show next tip on every new session
         const last = localStorage.getItem('stallz_last_tip_index');
         let showIdx = 0;
         if (last !== null) {
@@ -966,13 +1002,13 @@
                 const target = parseInt(btn.getAttribute('data-tip-idx'), 10);
                 if (isNaN(target)) return;
                 setTip(target, target < idx ? 'prev' : 'next');
+                if ('vibrate' in navigator) navigator.vibrate(15);
             });
         }
 
         const car = elCarousel();
         if (!car) return;
 
-        // Swipe gestures
         let startX = 0;
         let deltaX = 0;
         let tracking = false;
@@ -1002,8 +1038,8 @@
             car.classList.remove('dragging');
             car.style.transform = '';
 
-            if (deltaX <= -threshold) next();
-            else if (deltaX >= threshold) prev();
+            if (deltaX <= -threshold) { next(); if ('vibrate' in navigator) navigator.vibrate(15); }
+            else if (deltaX >= threshold) { prev(); if ('vibrate' in navigator) navigator.vibrate(15); }
         };
 
         if (window.PointerEvent) {
@@ -1027,7 +1063,6 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Wait for Firebase to load and authenticate the user
         const checkAuth = setInterval(() => {
             if (typeof firebase !== 'undefined' && firebase.auth) {
                 clearInterval(checkAuth);
@@ -1037,29 +1072,23 @@
                         const uid = user.uid;
                         let initialLoad = true;
 
-                        // Listen to this specific client's notification folder in the DB
                         const notifRef = firebase.database().ref(`clients/${uid}/notifications`);
 
                         notifRef.on('child_added', (snapshot) => {
-                            if (initialLoad) return; // Skip old notifications so their phone doesn't get spammed on login
+                            if (initialLoad) return;
 
                             const notif = snapshot.val();
 
-                            // Only trigger if it is a brand new, unread notification
                             if (notif && notif.read === false) {
-
-                                // No sound + no duplicate OS popups here (FCM handles real push)
-                                // Dropdown refresh only
-try {
+                                if ('vibrate' in navigator) navigator.vibrate([40, 60, 40]);
+                                try {
                                     if (typeof renderSharedNotifications === 'function') renderSharedNotifications();
                                 } catch(e) {}
                             }
                         });
 
-                        // Firebase guarantees 'value' fires after all initial database checks are done
                         notifRef.once('value', () => {
                             initialLoad = false;
-                            console.log("🟢 Local Real-time Push Listener Active! (No FCM Needed)");
                         });
                     }
                 });

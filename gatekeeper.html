@@ -32,7 +32,8 @@
     .bg-layer {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=2564&auto=format&fit=crop') no-repeat center center fixed;
+      /* Updated to local background image */
+      background: url('assets/images/background.jpg') no-repeat center center fixed;
       background-size: cover;
       z-index: -2;
       animation: breath 20s infinite alternate ease-in-out;
@@ -43,7 +44,7 @@
       100% { transform: scale(1.08); }
     }
 
-    /* Protective Dark Overlay */
+    /* Protective Dark/Green Overlay */
     body::before {
       content: '';
       position: absolute;
@@ -52,21 +53,23 @@
       z-index: -1;
     }
 
-    /* --- 3D FROSTED GLASS CARD --- */
+    /* --- 3D ULTRA-CLEAR GLASS CARD --- */
     .glass-container {
-      width: 90%;
+      width: 100%;
       max-width: 380px;
       padding: 50px 30px;
       border-radius: 36px;
       margin-top: -12vh;
 
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(22, 163, 74, 0.05) 100%);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.5);
+      /* Lowered opacity and blur for clearer glass */
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(22, 163, 74, 0.02) 100%);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
 
+      /* Refined Shadows */
       box-shadow:
-        inset 0 1px 2px rgba(255, 255, 255, 0.8),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5),
         0 25px 50px -12px rgba(0, 0, 0, 0.3),
         0 10px 30px rgba(22, 163, 74, 0.2);
 
@@ -84,18 +87,23 @@
       100% { opacity: 1; transform: scale(1); }
     }
 
-    /* --- CIRCULAR PULSING LOGO --- */
+    /* --- FROSTED CIRCULAR LOGO RING --- */
     .logo-ring {
       width: 130px;
       height: 130px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.85);
-      padding: 8px;
+
+      /* Glass effect for the ring itself */
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+
+      padding: 12px;
       margin-bottom: 24px;
       display: flex;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 0 30px rgba(22, 163, 74, 0.2), inset 0 0 15px rgba(255, 255, 255, 1);
       animation: pulseGlow 2s infinite alternate ease-in-out;
     }
 
@@ -106,9 +114,16 @@
       object-fit: contain;
     }
 
+    /* Subdued animation to match the login screen */
     @keyframes pulseGlow {
-      0% { transform: scale(1) translateY(0); box-shadow: 0 0 20px rgba(22, 163, 74, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.8); }
-      100% { transform: scale(1.05) translateY(-4px); box-shadow: 0 10px 40px rgba(22, 163, 74, 0.4), inset 0 0 20px rgba(255, 255, 255, 1); }
+      0% {
+        transform: scale(1) translateY(0);
+        box-shadow: 0 4px 8px rgba(22, 163, 74, 0.1), inset 0 0 10px rgba(255, 255, 255, 0.3);
+      }
+      100% {
+        transform: scale(1.04) translateY(-4px);
+        box-shadow: 0 6px 12px rgba(22, 163, 74, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.5);
+      }
     }
 
     /* --- TYPOGRAPHY --- */
@@ -122,25 +137,25 @@
     }
 
     .loader-status {
-      color: var(--text-muted);
+      color: var(--accent-glow);
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       font-weight: 800;
       margin-top: 15px;
       margin-bottom: 25px;
-      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
       min-height: 16px;
     }
 
     /* --- SHIMMERING COMET LOADING BAR --- */
     .progress-track {
       width: 100%;
-      height: 12px;
+      height: 10px;
       background: rgba(15, 23, 42, 0.3);
       border-radius: 12px;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
       position: relative;
     }
@@ -151,13 +166,12 @@
       border-radius: 12px;
       background: linear-gradient(90deg, #16a34a, #4ade80, #86efac, #16a34a);
       background-size: 200% 100%;
-      box-shadow: 0 0 15px rgba(22, 163, 74, 0.6);
+      box-shadow: 0 0 15px rgba(22, 163, 74, 0.4);
       transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
       animation: shimmerBar 1.5s infinite linear;
       position: relative;
     }
 
-    /* The glowing 'Comet' tip */
     .progress-bar::after {
       content: '';
       position: absolute;
@@ -176,7 +190,7 @@
     /* --- HANG RETRY BUTTON --- */
     .retry-btn {
       margin-top: 20px;
-      padding: 10px 24px;
+      padding: 12px 24px;
       border-radius: 50px;
       background: rgba(239, 68, 68, 0.15);
       border: 1px solid rgba(239, 68, 68, 0.5);
@@ -185,7 +199,7 @@
       font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.3s;
-      display: none; /* Hidden by default */
+      display: none;
       box-shadow: 0 4px 10px rgba(239, 68, 68, 0.1);
     }
 
@@ -193,6 +207,23 @@
       background: rgba(239, 68, 68, 0.3);
       color: #ffffff;
       transform: translateY(-2px);
+    }
+
+    /* --- MOBILE RESPONSIVENESS (ZOOM OUT EFFECT) --- */
+    @media (max-width: 480px) {
+      .glass-container {
+        width: 88%;
+        padding: 40px 20px;
+      }
+      .logo-ring {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 20px;
+        padding: 8px;
+      }
+      .splash-title { font-size: 1.35rem; }
+      .loader-status { font-size: 0.65rem; margin-top: 10px; margin-bottom: 20px; }
+      .progress-track { height: 8px; }
     }
   </style>
 </head>
@@ -223,6 +254,13 @@
   <script src="shared/firebase-init.js"></script>
 
   <script>
+  function smoothNav(url){
+    try{
+      document.body.classList.add("stallz-fadeout");
+    }catch(_){ }
+    setTimeout(()=>{ window.location.replace(url); }, 220);
+  }
+
     const bar = document.getElementById('splashProgress');
     const statusText = document.getElementById('loaderStatus');
     const retryBtn = document.getElementById('retryBtn');
@@ -259,10 +297,10 @@
     // Direct Cut to App
     function executeRouting(finalRole) {
       if ('vibrate' in navigator) navigator.vibrate([30, 50, 30]);
-      window.location.replace(finalRole === 'admin' ? 'admin/admin.html' : 'client-portal/client.html');
+      smoothNav(finalRole === 'admin' ? 'admin/admin.html' : 'client-portal/client.html');
     }
 
-    // Build Personalized Greeting
+    // Build Personalized Greeting (Using Time-Based System)
     function getPersonalizedGreeting() {
       const nm = localStorage.getItem('stallz_offline_name') || '';
       const firstName = nm.split(' ')[0].replace(/[^a-zA-Z]/g, '');
@@ -278,7 +316,7 @@
       // Step 1: TTL Check
       if (!isSessionValid()) {
         if (typeof firebase !== 'undefined' && firebase.auth) firebase.auth().signOut();
-        window.location.replace('index.html');
+        smoothNav('index.html');
         return;
       }
 
@@ -353,7 +391,7 @@
                   })();
                 });
               } else {
-                window.location.replace('index.html');
+                smoothNav('index.html');
               }
             });
         } catch (error) {

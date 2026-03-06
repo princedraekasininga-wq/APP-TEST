@@ -4,7 +4,7 @@
 :root {
   --stallz-glass-blur: 18px;
 
-    --bg-color: #0f172a;           /* Deep Navy Background */
+    --bg-color: #02180b;           /* Ultra-Deep Forest Green */
     --primary: #4ade80;            /* Stallz Green */
     --primary-glow: rgba(74, 222, 128, 0.6);
     --accent-blue: #3b82f6;
@@ -22,7 +22,7 @@
 
 /* Light Mode Support */
 body.day-mode {
-    --bg-color: #f1f5f9;
+    --bg-color: #e2e8f0; /* Slightly deeper slate-grey for better contrast */
     --primary: #16a34a;
     --glass-bg: rgba(255, 255, 255, 0.9);
     --text-main: #0f172a;
@@ -47,7 +47,9 @@ body {
     transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-.portal-shell { max-width: 800px; margin: 0 auto; padding: 15px; }
+.portal-shell {
+  transition: opacity 0.6s ease-in-out;
+ max-width: 800px; margin: 0 auto; padding: 15px; }
 
 /* ==========================================================================
    3. COMPACT HEADER (Sticky)
@@ -249,9 +251,10 @@ body {
 .hero-split-layout {
     display: flex; align-items: center; justify-content: space-between;
     padding: 20px; gap: 10px;
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-    border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 20px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    /* Rich, dark emerald gradient with a heavy shadow */
+    background: linear-gradient(145deg, rgba(6, 46, 25, 0.9) 0%, rgba(2, 22, 11, 0.98) 100%);
+    border: 1px solid rgba(74, 222, 128, 0.25); border-radius: 20px;
+    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5);
     position: relative; overflow: hidden;
 }
 
@@ -485,7 +488,7 @@ body.day-mode .advice-text {
 
 /* Transparent Glass Modal */
 .modal-glass {
-    background: rgba(30, 41, 59, 0.85);
+    background: rgba(6, 30, 18, 0.85); /* Deep green tint */
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 20px; border-radius: 16px;
@@ -592,7 +595,7 @@ body.day-mode .advice-text {
 
 .drawer-glass {
     width: 85%; max-width: 320px; height: 100%;
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(4, 25, 12, 0.85); /* Deep green tint */
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     border-left: 1px solid rgba(255, 255, 255, 0.15);
     display: flex; flex-direction: column; padding: 25px;

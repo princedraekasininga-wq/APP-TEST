@@ -381,9 +381,17 @@ function bootstrapSharedSession() {
 
             __stallzFirstDataLoaded = false;
             __setSkeletonLoading(true);
-            // Fade out the full-screen loader early, skeletons will carry the wait.
-            setTimeout(hideAppLoader, 450);
             __updateRingGradientFromTheme();
+
+            // Check for Offline/Cache to reveal instantly, otherwise wait for Firebase
+            const isOffline = !navigator.onLine || (typeof window.isAppOffline === "function" && window.isAppOffline());
+            if (isOffline && __lastClientProfileCache) {
+                console.warn("Offline detected. Opening cached portal.");
+                hideAppLoader();
+            } else {
+                const hint = document.getElementById('clientBootHint');
+                if (hint) hint.textContent = "Syncing with database...";
+            }
 
             if (typeof firebase !== "undefined") {
                 const userRef = firebase.database().ref(`clients/${currentUserUid}`);
@@ -392,6 +400,7 @@ function bootstrapSharedSession() {
                     const val = snapshot.val() || {};
 
                     updateHeaderGreeting(val);
+                    try { window.__STALLZ_REVEAL_PORTAL && window.__STALLZ_REVEAL_PORTAL("profile"); } catch(_) {}
                     currentUserPhone = val.phone || "";
                     localStorage.setItem("stallz_client_profile", JSON.stringify(val));
                     __lastClientProfileCache = val;
@@ -438,13 +447,14 @@ function bootstrapSharedSession() {
                         __setSkeletonLoading(false);
                     }
                     hideAppLoader();
-                }, (error) => {
+                    try { window.__STALLZ_REVEAL_PORTAL && window.__STALLZ_REVEAL_PORTAL("fallback"); } catch(_) {}
+}, (error) => {
                     // Catch Permission Denied and network errors
                     console.error("Firebase read error:", error);
                     __setSkeletonLoading(false);
                     hideAppLoader();
-
-                    if (typeof showCustomAlert === "function") {
+                    try { window.__STALLZ_REVEAL_PORTAL && window.__STALLZ_REVEAL_PORTAL("fallback"); } catch(_) {}
+if (typeof showCustomAlert === "function") {
                         showCustomAlert("Access denied. Please check your connection or contact support.");
                     } else {
                         alert("Access denied. Please check your connection or contact support.");
@@ -463,10 +473,20 @@ function bootstrapSharedSession() {
         } catch (e) {
             console.error("Session Error:", e);
             hideAppLoader();
-        }
+                    try { window.__STALLZ_REVEAL_PORTAL && window.__STALLZ_REVEAL_PORTAL("fallback"); } catch(_) {}
+}
     })();
+    // Watchdog: keep loader visible if boot is slow; show a gentle hint instead of hiding.
+    setTimeout(() => {
+        try {
+            const loader = document.getElementById('appLoader');
+            const hint = document.getElementById('clientBootHint');
+            if (loader && !loader.classList.contains('hidden')) {
+                if (hint) hint.textContent = 'Still syncing… just a moment';
+            }
+        } catch (_) {}
+    }, 6000);
 
-    setTimeout(hideAppLoader, 5000);
 }
 
 
@@ -482,11 +502,9 @@ function initClientPortal() {
 
     // --- Hook up the Live Request Calculator ---
     const reqAmountInput = document.getElementById('reqAmount');
-if(reqAmountInput) {
-    // This triggers the calculator every time a character is typed
-    reqAmountInput.addEventListener('input', window.updateRequestCalculator);
-}
-    // -----------------------------------------------
+    if(reqAmountInput) {
+        reqAmountInput.addEventListener('input', window.updateRequestCalculator);
+    }
 
     const savedTheme = localStorage.getItem('stallz-theme');
     const currentHour = new Date().getHours();
@@ -503,7 +521,6 @@ if(reqAmountInput) {
     __bindContextBubble();
 
     // ====== INSTANT CACHE HYDRATION ======
-    // Instantly load the name from local memory before the internet connects
     try {
         const cachedProfile = localStorage.getItem("stallz_client_profile");
         if (cachedProfile) {
@@ -511,16 +528,20 @@ if(reqAmountInput) {
             __lastClientProfileCache = parsedProfile;
             if (typeof updateHeaderGreeting === 'function') {
                 updateHeaderGreeting(parsedProfile);
+                try { window.__STALLZ_REVEAL_PORTAL && window.__STALLZ_REVEAL_PORTAL("cache"); } catch(_) {}
             }
         }
     } catch(e) { console.warn("Cache hydration skipped", e); }
-    // =====================================
 
     bootstrapSharedSession();
 
+    // ====== FINAL REVEAL (Client) — Bridge for Firebase Data Sync ======
+    window.__STALLZ_REVEAL_PORTAL = hideAppLoader;
+
     window.onclick = function(event) {
-        // If they click the dark background behind ANY modal or drawer, close via the universal closer
+        // Vibrate and close modals when clicking the overlay
         if (event.target.classList.contains('modal-overlay') || event.target.classList.contains('drawer-overlay')) {
+            if ('vibrate' in navigator) navigator.vibrate(15);
             if (typeof closeAnimatedModal === 'function') {
                 closeAnimatedModal(event.target.id);
             } else {
@@ -528,29 +549,40 @@ if(reqAmountInput) {
             }
         }
 
-        // Close notification dropdown when clicking outside, but ensure active class is removed
+        // Close notification dropdown when clicking outside
         if (!event.target.closest('.notification-wrapper')) {
             const dropdown = document.getElementById('notificationDropdown');
-            if (dropdown) {
-                if (dropdown.classList.contains('active')) {
-                    dropdown.classList.remove('active');
-                    setTimeout(() => {
-                        if (!dropdown.classList.contains('active')) dropdown.style.display = 'none';
-                    }, 300);
-                } else {
-                    dropdown.style.display = 'none';
-                }
+            if (dropdown && dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+                setTimeout(() => {
+                    if (!dropdown.classList.contains('active')) dropdown.style.display = 'none';
+                }, 300);
             }
         }
     };
-} // <--- THIS BRACKET WAS MISSING!
+}
+
+window.__STALLZ_PORTAL_REVEALED = false;
 
 function hideAppLoader() {
-    const loader = document.getElementById("appLoader");
+    if (window.__STALLZ_PORTAL_REVEALED) return;
+    window.__STALLZ_PORTAL_REVEALED = true;
+
+    const loader = document.getElementById("portalLoader") || document.getElementById("appLoader");
+    const shell = document.querySelector(".portal-shell");
+
     if (loader) {
-        loader.classList.add("hidden");
-        setTimeout(() => { loader.style.display = 'none'; }, 700);
+        loader.style.transition = "opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+        loader.style.opacity = "0";
+        setTimeout(() => { loader.style.display = "none"; }, 400);
     }
+    if (shell) {
+        shell.style.visibility = "visible";
+        shell.style.opacity = "1";
+    }
+
+    // Ensure ring gradients look correct after the reveal
+    setTimeout(__updateRingGradientFromTheme, 50);
 }
 
 function runAllInit() {

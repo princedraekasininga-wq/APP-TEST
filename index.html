@@ -31,8 +31,8 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
 
     body {
-      /* Bright Green Tropical Foliage Background */
-      background: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=2564&auto=format&fit=crop') no-repeat center center fixed;
+      /* Updated Background Image */
+      background: url('assets/images/background.jpg') no-repeat center center fixed;
       background-size: cover;
       color: var(--text-main);
       min-height: 100dvh;
@@ -63,7 +63,7 @@
       align-items: center; z-index: 10; margin: auto;
     }
 
-    /* --- HIGHLY TRANSPARENT FROSTED GLASS --- */
+    /* --- HIGHLY TRANSPARENT CLEAR GLASS --- */
     .glass-card {
       width: 100%;
       min-height: 600px;
@@ -73,16 +73,19 @@
       padding: 40px 24px;
       border-radius: 36px;
 
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(22, 163, 74, 0.05) 100%);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      /* Lowered opacity for a clearer glass effect */
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(22, 163, 74, 0.02) 100%);
+
+      /* Reduced blur to make it less foggy */
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
 
       /* Crisp white border for edge definition */
-      border: 1px solid rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.3);
 
       /* Deep Multi-layered Shadows */
       box-shadow:
-        inset 0 1px 2px rgba(255, 255, 255, 0.8),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5),
         0 25px 50px -12px rgba(0, 0, 0, 0.3),
         0 10px 30px rgba(22, 163, 74, 0.2);
 
@@ -93,7 +96,7 @@
     .glass-card:hover {
       transform: translateY(-4px) scale(1.01);
       box-shadow:
-        inset 0 1px 2px rgba(255, 255, 255, 0.9),
+        inset 0 1px 2px rgba(255, 255, 255, 0.6),
         0 35px 60px -15px rgba(0, 0, 0, 0.35),
         0 15px 35px rgba(22, 163, 74, 0.25);
     }
@@ -113,40 +116,46 @@
       transition: all 0.3s ease;
     }
 
+    /* Subtler logo shadow */
     @keyframes gentleFloat {
-      0% { transform: translateY(-4px) scale(1.02); filter: drop-shadow(0 10px 20px rgba(22, 163, 74, 0.15)) drop-shadow(0 0 30px rgba(255, 255, 255, 0.8)); }
-      100% { transform: translateY(-8px) scale(1.04); filter: drop-shadow(0 15px 25px rgba(22, 163, 74, 0.2)) drop-shadow(0 0 35px rgba(255, 255, 255, 0.9)); }
+      0% {
+        transform: translateY(-4px) scale(1.02);
+        filter: drop-shadow(0 4px 8px rgba(22, 163, 74, 0.1)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+      }
+      100% {
+        transform: translateY(-8px) scale(1.04);
+        filter: drop-shadow(0 6px 12px rgba(22, 163, 74, 0.15)) drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+      }
     }
 
-    .welcome-title { font-size: 1.3rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.02em; margin-bottom: 2px; }
-    .tagline { font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .welcome-title { font-size: 1.3rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; margin-bottom: 2px; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); }
+    .tagline { font-size: 0.7rem; font-weight: 800; color: var(--accent-glow); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
 
     /* BRIGHTENED SUB-TITLE */
     .sub-text { font-size: 0.85rem; color: #ffffff; font-weight: 600; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); }
 
     /* --- WIZARD HEADER --- */
     .wizard-header { display: none; text-align: center; margin-bottom: 20px; position: relative; z-index: 1; }
-    .wizard-step-text { font-size: 0.7rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; }
-    .wizard-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-top: 4px; }
+    .wizard-step-text { font-size: 0.7rem; font-weight: 800; color: var(--accent-glow); text-transform: uppercase; letter-spacing: 0.1em; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .wizard-title { font-size: 1.1rem; font-weight: 700; color: #ffffff; margin-top: 4px; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); }
     .wizard-progress { display: flex; gap: 5px; justify-content: center; margin-top: 10px; }
 
-    .progress-dot { height: 6px; width: 25px; background: rgba(0,0,0,0.1); border-radius: 50px; transition: all 0.3s; }
-    .progress-dot.active { background: var(--primary); width: 40px; }
+    .progress-dot { height: 6px; width: 25px; background: rgba(255,255,255,0.3); border-radius: 50px; transition: all 0.3s; }
+    .progress-dot.active { background: var(--accent-glow); width: 40px; }
 
-    /* --- RATES WIDGET (SMALLER, WHOLE WIDGET POPS) --- */
+    /* --- RATES WIDGET --- */
     .rates-widget {
       position: relative; z-index: 1;
       background: rgba(255, 255, 255, 0.6);
       border: 1px solid rgba(255,255,255,0.8);
-      border-radius: 40px; /* Made slightly smaller */
-      padding: 8px 12px; /* Reduced padding */
+      border-radius: 40px;
+      padding: 8px 12px;
       margin-bottom: 25px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      cursor: pointer; /* Makes the whole widget clickable */
+      cursor: pointer;
       transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease;
     }
 
-    /* Pop effect when clicking the widget */
     .rates-widget:active {
       transform: scale(0.95);
       background: rgba(255, 255, 255, 0.8);
@@ -156,13 +165,13 @@
 
     .rate-item {
       display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1;
-      padding: 4px 2px; /* Reduced padding on individual items */
+      padding: 4px 2px;
     }
 
-    .rate-val { font-size: 0.75rem; font-weight: 800; color: var(--text-main); } /* Smaller font */
+    .rate-val { font-size: 0.75rem; font-weight: 800; color: var(--text-main); }
     .rate-key { font-size: 0.55rem; color: var(--text-muted); margin-top: 1px; font-weight: 700; text-transform: uppercase; }
 
-    /* --- MULTI-STEP SLIDER FIX --- */
+    /* --- MULTI-STEP SLIDER --- */
     .form-slider-container { display: flex; width: 300%; align-items: flex-start; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
     .form-step {
         width: 33.333%; padding: 0 5px; flex-shrink: 0;
@@ -173,7 +182,7 @@
         height: auto; overflow: visible; opacity: 1; visibility: visible;
     }
 
-    /* --- FORM STYLING (3D INSET PILL SHAPE) --- */
+    /* --- FORM STYLING --- */
     .input-wrapper { position: relative; z-index: 1; margin-bottom: 12px; }
     .input-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 0.9rem; transition: all 0.3s ease; z-index: 2; }
 
@@ -183,7 +192,7 @@
     .form-input {
       width: 100%;
       padding: 14px 14px 14px 44px;
-      background: rgba(241, 245, 249, 0.75);
+      background: rgba(241, 245, 249, 0.85);
       border: 1px solid rgba(148, 163, 184, 0.4);
       border-top-color: rgba(148, 163, 184, 0.6);
       border-radius: 50px;
@@ -195,7 +204,7 @@
       box-shadow:
         inset 0 4px 6px rgba(0, 0, 0, 0.08),
         inset 0 2px 4px rgba(0, 0, 0, 0.04),
-        0 1px 1px rgba(255, 255, 255, 0.9);
+        0 1px 1px rgba(255, 255, 255, 0.5);
     }
 
     .form-input.has-eye { padding-right: 48px; }
@@ -245,7 +254,7 @@
         40%, 60% { transform: translate3d(4px, 0, 0); }
     }
 
-    /* --- BUTTONS (PILL SHAPE) --- */
+    /* --- BUTTONS --- */
     .btn-group { display: flex; gap: 8px; margin-top: 15px; z-index: 1; position: relative;}
     .submit-btn {
       width: 100%; padding: 14px;
@@ -261,7 +270,7 @@
     .submit-btn:active { transform: translateY(0); }
     .submit-btn.loading { background: #cbd5e1; color: #475569; cursor: wait; box-shadow: none; }
 
-    /* --- FOOTER (BRIGHTENED TEXTS) --- */
+    /* --- FOOTER --- */
     .auth-switch { text-align: center; margin-top: 16px; font-size: 0.85rem; color: #ffffff; position: relative; z-index: 1; font-weight: 700; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); }
     .switch-link { color: var(--accent-glow); font-weight: 800; text-decoration: none; cursor: pointer; margin-left: 5px; transition: color 0.2s; }
     .switch-link:hover { color: #ffffff; text-decoration: underline; }
@@ -278,10 +287,10 @@
     }
 
     /* --- CHECKBOX --- */
-    .terms-wrapper { margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px; font-size: 0.75rem; color: var(--text-muted); text-align: left; line-height: 1.4; position: relative; z-index: 1; padding: 0 4px; font-weight: 600; }
+    .terms-wrapper { margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px; font-size: 0.75rem; color: #ffffff; text-align: left; line-height: 1.4; position: relative; z-index: 1; padding: 0 4px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
     .terms-wrapper input[type="checkbox"] { margin-top: 2px; min-width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; border-radius: 4px; }
-    .terms-wrapper a { color: var(--primary); text-decoration: none; font-weight: 800; }
-    .terms-wrapper a:hover { text-decoration: underline; }
+    .terms-wrapper a { color: var(--accent-glow); text-decoration: none; font-weight: 800; }
+    .terms-wrapper a:hover { text-decoration: underline; color: #ffffff; }
 
     .hidden { display: none; }
     .row { display: flex; gap: 8px; }
@@ -307,6 +316,35 @@
         z-index: 999999; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         transition: opacity 0.3s; opacity: 0;
         display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+
+    /* --- MOBILE RESPONSIVENESS (ZOOM OUT & SCALE DOWN EFFECT) --- */
+    @media (max-width: 480px) {
+      .login-wrapper { width: 88%; }
+      .glass-card { min-height: 520px; padding: 30px 20px; }
+      .brand-section { margin-bottom: 15px; }
+      .logo-img { height: 75px; width: 75px; }
+      .welcome-title { font-size: 1.15rem; }
+      .sub-text { font-size: 0.75rem; }
+      .form-input { padding: 12px 12px 12px 38px; font-size: 0.8rem; }
+      .form-input.has-eye { padding-right: 40px; }
+      .input-icon { left: 14px; font-size: 0.8rem; }
+      .password-toggle-icon { right: 14px; font-size: 0.9rem; }
+      .submit-btn { padding: 12px; font-size: 0.85rem; }
+      .rates-widget { margin-bottom: 20px; padding: 6px 10px; }
+      .auth-switch { font-size: 0.75rem; }
+
+      .wizard-header { margin-bottom: 15px; }
+      .wizard-step-text { font-size: 0.65rem; }
+      .wizard-title { font-size: 0.95rem; }
+      .wizard-progress { margin-top: 8px; }
+      .progress-dot { width: 20px; height: 5px; }
+      .progress-dot.active { width: 30px; }
+      .row { gap: 6px; }
+      .kyc-address-group { padding: 10px; border-radius: 16px; margin-bottom: 10px; }
+      .kyc-address-group label { font-size: 0.6rem; margin-bottom: 6px; }
+      .terms-wrapper { font-size: 0.7rem; gap: 6px; }
+      .terms-wrapper input[type="checkbox"] { min-width: 14px; height: 14px; margin-top: 1px; }
     }
   </style>
 </head>
@@ -567,6 +605,11 @@
 <script src="shared/auth.js"></script>
 
   <script>
+  function smoothNav(url){
+    try{ document.body.classList.add("stallz-fadeout"); }catch(_){ }
+    setTimeout(()=>{ window.location.replace(url); }, 220);
+  }
+
     const ENABLE_PHONE_OTP = false;
     let pendingRegistrationData = null;
     let deferredPrompt;
@@ -975,7 +1018,7 @@
           if (savedToken === inputToken) {
               const role = localStorage.getItem('stallz_offline_role') || 'client';
               setTimeout(() => {
-                  window.location.replace('gatekeeper.html');
+                  window.smoothNav('gatekeeper.html');
               }, 500);
               return;
           } else {
@@ -1000,7 +1043,7 @@
         }
 
         setTimeout(() => {
-            window.location.replace('gatekeeper.html');
+            window.smoothNav('gatekeeper.html');
         }, 500);
 
       } catch (err) {
@@ -1078,7 +1121,7 @@
         setLoading(btn, true, "Creating Account...");
         try {
             await window.StallzAuth.registerClient(data);
-            window.location.replace('gatekeeper.html');
+            window.smoothNav('gatekeeper.html');
         } catch (err) {
             let msg = "Registration failed. Please try again.";
             let code = err.code || "";
@@ -1116,7 +1159,7 @@
         setLoading(btn, true, "Verifying...");
         try {
             await window.StallzAuth.verifyOTPAndRegister(code, pendingRegistrationData);
-            window.location.replace('gatekeeper.html');
+            window.smoothNav('gatekeeper.html');
         } catch(err) {
             showGlobalToast("Invalid Code. Please try again.", "error");
             setLoading(btn, false, "Verify & Create Account");
