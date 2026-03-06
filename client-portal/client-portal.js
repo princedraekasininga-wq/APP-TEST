@@ -50,7 +50,10 @@ function __haptic(type = "tap") {
             tap: [8],
             soft: [6],
             success: [10, 18, 10],
-            warning: [18]
+            warning: [18],
+            modalOpen: [10],
+            modalClose: [6],
+            alert: [14, 18, 14]
         };
         navigator.vibrate(patterns[type] || patterns.tap);
     } catch(_) {}
@@ -1213,8 +1216,8 @@ function toggleNotifications(forceOpen = null) {
         }
     };
 
-    if (shouldOpen) open();
-    else close(true);
+    if (shouldOpen) { try { __haptic('soft'); } catch(_) {} open(); }
+    else { try { __haptic('soft'); } catch(_) {} close(true); }
 }
 
 function setNotifFilter(filter, event) {
@@ -2317,8 +2320,10 @@ window.submitFeedback = function() {
 window.openAnimatedModal = function(modalId) {
     const m = document.getElementById(modalId);
     if (!m) return;
+    try { __haptic('modalOpen'); } catch(_) {}
     m.classList.remove('closing');
     m.style.display = 'flex';
+    document.body.classList.add('modal-open');
     void m.offsetWidth; // Force a browser reflow
     m.classList.add('active');
 };
@@ -2326,11 +2331,14 @@ window.openAnimatedModal = function(modalId) {
 window.closeAnimatedModal = function(modalId, onCompleteCallback) {
     const m = document.getElementById(modalId);
     if (!m) return;
+    try { __haptic('modalClose'); } catch(_) {}
     m.classList.remove('active');
     m.classList.add('closing');
     setTimeout(() => {
         m.style.display = 'none';
         m.classList.remove('closing');
+        const hasOpenModal = !!document.querySelector('.modal-overlay.active, .drawer-overlay.active');
+        if (!hasOpenModal) document.body.classList.remove('modal-open');
         if (typeof onCompleteCallback === 'function') onCompleteCallback();
     }, 300);
 };
@@ -2603,6 +2611,7 @@ function toggleFabMenu(forceOpen) {
 
 // 12. Custom Alert
 window.showCustomAlert = function(message, isSuccess = false) {
+    try { __haptic(isSuccess ? 'success' : 'alert'); } catch(_) {}
     const iconEl = document.getElementById('customAlertIcon');
     const msgEl = document.getElementById('customAlertMessage');
     const titleEl = document.getElementById('customAlertTitle');
@@ -2621,6 +2630,7 @@ window.closeCustomAlert = function() { closeAnimatedModal('customAlertModal'); }
 
 // 13. Custom Confirm
 window.showCustomConfirm = function(message, callback) {
+    try { __haptic('warning'); } catch(_) {}
     document.getElementById('customConfirmMessage').textContent = message;
     __confirmCallback = callback;
     openAnimatedModal('customConfirmModal');

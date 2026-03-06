@@ -63,7 +63,13 @@
       flex-direction: column;
       align-items: center;
       z-index: 10;
-      max-height: calc(100dvh - 80px); /* Keeps it from overlapping the bottom text */
+
+      /* Shifts the box up slightly from the absolute center */
+      margin-top: -4vh;
+      /* Creates perfect spacing between the box and the text below it */
+      margin-bottom: 25px;
+
+      max-height: calc(100dvh - 100px);
     }
 
     /* --- HIGHLY TRANSPARENT CLEAR GLASS --- */
@@ -281,12 +287,9 @@
     .switch-link { color: var(--accent-glow); font-weight: 800; text-decoration: none; cursor: pointer; margin-left: 5px; transition: color 0.2s; }
     .switch-link:hover { color: #ffffff; text-decoration: underline; }
 
-    /* PINNED BOTTOM TEXT */
+    /* NOTICE TEXT (Now explicitly sits below the box in normal document flow) */
     .notice-text {
-      position: absolute;
-      bottom: 25px; /* Pinned exactly to the bottom */
-      left: 50%;
-      transform: translateX(-50%);
+      position: relative;
       width: 100%;
       font-size: 0.75rem;
       font-weight: 800;
@@ -332,7 +335,7 @@
 
     /* --- MOBILE RESPONSIVENESS (ZOOM OUT & SCALE DOWN EFFECT) --- */
     @media (max-width: 480px) {
-      .login-wrapper { width: 88%; max-height: calc(100dvh - 70px); }
+      .login-wrapper { width: 88%; max-height: calc(100dvh - 80px); margin-top: -3vh; margin-bottom: 20px; }
       .glass-card { padding: 30px 20px; }
       .brand-section { margin-bottom: 15px; }
       .logo-img { height: 75px; width: 75px; }
@@ -357,7 +360,6 @@
       .kyc-address-group label { font-size: 0.6rem; margin-bottom: 6px; }
       .terms-wrapper { font-size: 0.7rem; gap: 6px; }
       .terms-wrapper input[type="checkbox"] { min-width: 14px; height: 14px; margin-top: 1px; }
-      .notice-text { bottom: 15px; }
     }
   </style>
 </head>
@@ -570,7 +572,6 @@
       </form>
 
     </div>
-
   </div>
 
   <div class="notice-text">Strictly Collateral Based Loans</div>
