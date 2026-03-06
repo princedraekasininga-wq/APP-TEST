@@ -1698,40 +1698,38 @@ body.day-mode .drawer-item.is-enabled .stallz-mini-badge {
 /* ==========================================================================
    BULLETPROOF MOBILE NOTIFICATION CENTERING (STRETCH FIX)
    ========================================================================== */
-@media (max-width: 640px) {
-    .notification-wrapper { position: static !important; }
-    .header-right { position: static !important; }
 
-    .notification-dropdown {
-        position: absolute !important;
-        top: 65px !important;
+@media (max-width: 768px) {
+  .notification-wrapper { position: static !important; }
+  .header-right { position: static !important; }
 
-        /* THE FIX: Center relative to the header, no negative margins! */
-        left: 60%;
-<<<<<<< HEAD
-        right: 20%;
-=======
-        right: auto !important;
->>>>>>> 846dee3 ( updated push notifications functionality)
-        margin: 0 !important;
+  /* Match admin feel: centered, fixed, safe-area aware */
+  #notificationDropdown.notification-dropdown {
+    position: fixed !important;
+    top: calc(52px + env(safe-area-inset-top)) !important;
+    left: 50% !important;
+    right: auto !important;
+    width: min(92vw, 420px) !important;
+    max-height: 50vh !important;
+    overflow-y: auto !important;
+    z-index: 20005 !important;
 
-        width: min(92vw, 420px) !important;
-        z-index: 9999 !important;
-        transform-origin: top center !important;
+    transform-origin: top center !important;
+    transform: translateX(-50%) translateY(14px) scale(0.96) !important;
 
-        /* Set initial centered state */
-        transform: translateX(-50%) scale(0.95) !important;
-    }
+    /* use the same glass */
+    background: rgba(15, 23, 42, 0.98) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.60) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+  }
 
-    .notification-dropdown.active {
-        /* Triggers the updated smooth animation */
-        animation: mobilePopIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
-    }
-
-    .notif-overlay {
-        z-index: 100 !important;
-    }
+  #notificationDropdown.notification-dropdown.active {
+    transform: translateX(-50%) translateY(0) scale(1) !important;
+  }
 }
+
 
 /* Updated bouncy animation with the built-in centering (-50%) */
 @keyframes mobilePopIn {
@@ -1743,4 +1741,13 @@ body.day-mode .drawer-item.is-enabled .stallz-mini-badge {
         opacity: 1;
         transform: translateX(-50%) scale(1) translateY(0);
     }
+}
+
+/* Breathing attention animation for unread badge */
+@keyframes breatheBadge {
+  0%, 100% { transform: translateZ(0) scale(1); box-shadow: 0 0 0 0 rgba(239,68,68,0.45); }
+  50%      { transform: translateZ(0) scale(1.10); box-shadow: 0 0 0 7px rgba(239,68,68,0); }
+}
+.notification-badge.attn {
+  animation: breatheBadge 1.7s ease-in-out infinite;
 }

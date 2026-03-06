@@ -558,7 +558,9 @@ function runAllInit() {
 }
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', runAllInit);
+    try { window.StallzAuth?.enforceSessionTTL?.(); } catch(e) {}
+
+document.addEventListener('DOMContentLoaded', runAllInit);
 } else {
     runAllInit();
 }
@@ -1274,12 +1276,18 @@ function renderSharedNotifications() {
         }
     }
 
+    try {
+        const markAllBtn = document.getElementById('markAllBtn');
+        if (markAllBtn) markAllBtn.style.display = (unreadCount > 0 ? 'block' : 'none');
+    } catch(_) {}
+
     const dropdownHeader = document.querySelector(".dropdown-header");
 
     if (dropdownHeader && !dropdownHeader.querySelector('.notif-filters')) {
         dropdownHeader.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:12px;">
                 <span style="font-weight:900; font-size:1.1rem; letter-spacing:0.5px;">Activity</span>
+                <button id="viewAllNotifBtn" onclick="openNotificationHistoryModal()" style="background:none; border:none; color:rgba(226,232,240,0.75); font-size:0.75rem; font-weight:900; cursor:pointer; padding:0; margin-right:10px;">View all</button>
                 <button id="markAllBtn" onclick="markAllNotificationsRead(event)" style="background:none; border:none; color:var(--primary); font-size:0.75rem; font-weight:800; cursor:pointer; padding:0; display: ${unreadCount > 0 ? 'block' : 'none'};">Mark all read</button>
             </div>
             <div class="notif-filters" style="display:flex; background:rgba(255,255,255,0.05); padding:4px; border-radius:12px; width:100%; gap: 4px;">
@@ -1399,6 +1407,7 @@ window.openNotificationHistoryModal = function() {
     const modal = document.getElementById('notificationHistoryModal');
     if (modal) {
         modal.style.display = 'flex';
+        try { ensureHistoryControls(); } catch(_) {}
         const content = modal.querySelector('.modal-glass');
         if (content) content.style.animation = 'slideUp 0.3s ease forwards';
         renderNotificationHistoryArchive();
@@ -1418,6 +1427,82 @@ window.closeNotificationHistoryModal = function() {
     }
 };
 
+
+// ================================
+// Notification History Controls
+// ================================
+let __histTab = 'ALL';      // ALL | UNREAD
+let __histCat = 'ALL';      // ALL | LOANS | PAYMENTS | SYSTEM
+let __histQuery = '';
+
+function ensureHistoryControls() {
+    const modal = document.getElementById('notificationHistoryModal');
+    if (!modal) return;
+    const glass = modal.querySelector('.modal-glass');
+    if (!glass) return;
+
+    // already mounted
+    if (glass.querySelector('.hist-controls')) return;
+
+    const controls = document.createElement('div');
+    controls.className = 'hist-controls';
+    controls.style.cssText = 'display:flex;flex-direction:column;gap:10px;margin:0 0 12px;';
+
+    controls.innerHTML = `
+      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;">
+        <div style="display:flex;gap:6px;background:rgba(255,255,255,0.06);padding:4px;border-radius:12px;">
+          <button type="button" id="histTabAll" style="padding:8px 10px;border-radius:10px;border:none;font-weight:900;font-size:0.78rem;background:rgba(255,255,255,0.10);color:#e2e8f0;cursor:pointer;">All</button>
+          <button type="button" id="histTabUnread" style="padding:8px 10px;border-radius:10px;border:none;font-weight:900;font-size:0.78rem;background:transparent;color:rgba(226,232,240,0.75);cursor:pointer;">Unread</button>
+        </div>
+        <select id="histCat" style="padding:9px 10px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);background:rgba(2,6,23,0.45);color:#e2e8f0;font-weight:800;font-size:0.78rem;">
+          <option value="ALL">All types</option>
+          <option value="LOANS">Loans</option>
+          <option value="PAYMENTS">Payments</option>
+          <option value="SYSTEM">System</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="histSearch" type="search" placeholder="Search notifications…" style="flex:1;min-width:0;padding:11px 12px;border-radius:14px;border:1px solid rgba(255,255,255,0.12);background:rgba(2,6,23,0.45);color:#e2e8f0;outline:none;">
+        <button type="button" id="histMarkAllRead" style="padding:11px 12px;border-radius:14px;border:1px solid rgba(74,222,128,0.20);background:rgba(74,222,128,0.12);color:#bbf7d0;font-weight:900;font-size:0.78rem;cursor:pointer;white-space:nowrap;">Mark all read</button>
+      </div>
+    `;
+
+    const header = glass.querySelector('.modal-header');
+    if (header) header.insertAdjacentElement('afterend', controls);
+    else glass.insertAdjacentElement('afterbegin', controls);
+
+    function syncTabs() {
+        const allBtn = controls.querySelector('#histTabAll');
+        const unBtn  = controls.querySelector('#histTabUnread');
+        if (!allBtn || !unBtn) return;
+
+        if (__histTab === 'UNREAD') {
+            allBtn.style.background = 'transparent';
+            allBtn.style.color = 'rgba(226,232,240,0.75)';
+            unBtn.style.background = 'rgba(255,255,255,0.10)';
+            unBtn.style.color = '#e2e8f0';
+        } else {
+            unBtn.style.background = 'transparent';
+            unBtn.style.color = 'rgba(226,232,240,0.75)';
+            allBtn.style.background = 'rgba(255,255,255,0.10)';
+            allBtn.style.color = '#e2e8f0';
+        }
+    }
+
+    controls.querySelector('#histTabAll')?.addEventListener('click', () => { __histTab = 'ALL'; syncTabs(); renderNotificationHistoryArchive(); });
+    controls.querySelector('#histTabUnread')?.addEventListener('click', () => { __histTab = 'UNREAD'; syncTabs(); renderNotificationHistoryArchive(); });
+
+    controls.querySelector('#histCat')?.addEventListener('change', (e) => { __histCat = String(e.target.value || 'ALL'); renderNotificationHistoryArchive(); });
+    controls.querySelector('#histSearch')?.addEventListener('input', (e) => { __histQuery = String(e.target.value || ''); renderNotificationHistoryArchive(); });
+
+    controls.querySelector('#histMarkAllRead')?.addEventListener('click', async () => {
+        try { await markAllNotificationsRead(); } catch(_) {}
+        renderNotificationHistoryArchive();
+        renderSharedNotifications();
+    });
+
+    syncTabs();
+}
 function renderNotificationHistoryArchive() {
     const list = document.getElementById("historyNotificationList");
     if (!list) return;
@@ -1435,47 +1520,86 @@ function renderNotificationHistoryArchive() {
 
     notifs.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+    // Apply controls
+    const q = String(__histQuery || "").trim().toLowerCase();
+    const tab = String(__histTab || "ALL").toUpperCase();
+    const cat = String(__histCat || "ALL").toUpperCase();
+
+    const isLoanType = (t) => /LOAN|REQUEST|DUE|OVERDUE/i.test(String(t || ""));
+    const isPaymentType = (t) => /PAY|PAYMENT/i.test(String(t || ""));
+    const isSystemType = (t) => /SYSTEM|SECURITY|KYC|INFO/i.test(String(t || ""));
+
+    notifs = notifs.filter(n => {
+        if (tab === "UNREAD" && n.read) return false;
+
+        if (cat !== "ALL") {
+            const t = n.type || "";
+            if (cat === "LOANS" && !isLoanType(t)) return false;
+            if (cat === "PAYMENTS" && !isPaymentType(t)) return false;
+            if (cat === "SYSTEM" && !isSystemType(t)) return false;
+        }
+
+        if (q) {
+            const hay = `${n.title || ""} ${n.body || ""} ${n.type || ""}`.toLowerCase();
+            if (!hay.includes(q)) return false;
+        }
+        return true;
+    });
+
     if (notifs.length === 0) {
         list.innerHTML = `
-            <div style="text-align:center; padding: 40px 20px; color:var(--text-muted); background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
-                <div style="font-size:3rem; margin-bottom:15px; opacity:0.2;">📭</div>
-                <div style="font-size:1.1rem; font-weight:700; color:var(--text-main); margin-bottom:8px;">No history found</div>
-            </div>`;
+            <div style="text-align:center; padding: 30px 16px; color:var(--text-muted);">
+                <i class="fas fa-bell-slash" style="font-size: 2rem; opacity: 0.4;"></i>
+                <p style="margin-top: 15px; font-weight: 700;">No notifications found</p>
+                <p style="margin: 0; font-size: 0.9rem;">Try changing filters or search.</p>
+            </div>
+        `;
         return;
     }
 
-    list.innerHTML = notifs.map(n => {
-        let icon = '<i class="fas fa-bell"></i>';
-        let bg = 'rgba(255,255,255,0.05)';
-        let color = '#fff';
+    // Date grouping
+    const now = new Date();
+    function dayLabel(d) {
+        const dt = new Date(d);
+        const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const startThat = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+        const diffDays = Math.round((startToday - startThat) / 86400000);
+        if (diffDays === 0) return "Today";
+        if (diffDays === 1) return "Yesterday";
+        return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
 
-        if (n.type === 'REQUEST_APPROVED') { icon = '<i class="fas fa-check"></i>'; bg = 'rgba(16, 185, 129, 0.15)'; color = '#34d399'; }
-        else if (n.type === 'REQUEST_REJECTED') { icon = '<i class="fas fa-times"></i>'; bg = 'rgba(239, 68, 68, 0.15)'; color = '#f87171'; }
-        else if (n.type === 'DUE_SOON') { icon = '<i class="fas fa-exclamation-triangle"></i>'; bg = 'rgba(245, 158, 11, 0.15)'; color = '#fbbf24'; }
-        else if (n.type === 'MESSAGE' || n.type === 'ADMIN_MESSAGE') { icon = '<i class="fas fa-comment-dots"></i>'; bg = 'rgba(59, 130, 246, 0.15)'; color = '#60a5fa'; }
+    let html = '';
+    let lastGroup = '';
+    notifs.forEach((n, idx) => {
+        const grp = dayLabel(n.createdAt || Date.now());
+        if (grp !== lastGroup) {
+            lastGroup = grp;
+            html += `<div style="padding:10px 6px 6px; font-weight:900; font-size:0.82rem; opacity:0.85;">${escapeHTML(grp)}</div>`;
+        }
 
-        let cleanTitle = escapeHTML(n.title || '').replace(/[✅❌📝💬⏳🔔🎉]/g, '').trim();
-        let cleanBody = escapeHTML(n.body || '').replace(/[✅❌📝💬⏳🔔🎉]/g, '').trim();
+        const isUnread = !n.read;
+        const title = escapeHTML(n.title || "Notification");
+        const body = escapeHTML(n.body || "");
 
-        const dateObj = new Date(n.createdAt);
-        const dateStr = dateObj.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
-        const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
-
-        return `
-            <div style="padding: 12px 10px; display: flex; gap: 14px; border-bottom: 1px solid rgba(255,255,255,0.06);">
-                <div style="width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: ${bg}; color: ${color}; font-size: 1rem; flex-shrink: 0;">
-                    ${icon}
-                </div>
-                <div style="flex: 1;">
-                    <div style="font-weight: 800; font-size: 0.85rem; color: var(--text-main); margin-bottom: 2px;">${cleanTitle}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;">${cleanBody}</div>
-                    <div style="font-size: 0.7rem; color: #64748b; margin-top: 4px; font-weight: 600;">
-                        <i class="far fa-calendar-alt" style="margin-right:4px;"></i> ${dateStr} at ${timeStr}
-                    </div>
-                </div>
+        html += `
+          <div class="notify-item ${isUnread ? 'unread' : ''}" style="border-radius:14px; margin:6px 0; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); padding: 12px 12px;"
+               onclick="markNotificationRead('${n.id}', event)">
+            <div class="notif-icon-circle" style="width: 36px; height: 36px; font-size: 1rem;">
+              <i class="fas fa-bell"></i>
             </div>
+            <div class="notif-content">
+              <div class="notif-title" style="${isUnread ? 'color:#fff;' : 'color:#cbd5e1;'} font-size: 0.9rem;">${title}</div>
+              <div class="notif-body" style="font-size:0.82rem; opacity:0.9;">${body}</div>
+              <div class="notif-time" style="margin-top:6px; font-size:0.72rem; opacity:0.65;">
+                ${new Date(n.createdAt || Date.now()).toLocaleString()}
+              </div>
+            </div>
+          </div>
         `;
-    }).join("");
+    });
+
+    list.innerHTML = html;
 }
 
 function updateCalculator() {
@@ -2586,6 +2710,7 @@ window.openClientDetailsModal = function() {
     // Animate In
     modal.classList.remove('closing');
     modal.style.display = 'flex';
+        try { ensureHistoryControls(); } catch(_) {}
 
     // A tiny delay ensures the browser processes the display change before animating
     setTimeout(() => {

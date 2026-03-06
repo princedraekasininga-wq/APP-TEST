@@ -34,7 +34,8 @@
     changed = (prev !== APP_VERSION);
     if (changed) {
       localStorage.setItem(KEY, APP_VERSION);
-      localStorage.removeItem("stallz_test_session");
+      // NOTE: do NOT force-logout on version change (keeps session stable)
+      // localStorage.removeItem("stallz_test_session");
     }
   } catch(e) {}
 

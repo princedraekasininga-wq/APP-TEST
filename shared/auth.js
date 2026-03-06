@@ -6,6 +6,8 @@
  */
 
 (function() {
+  const SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
   const StallzAuth = {
 
     /* ==========================================
@@ -17,8 +19,22 @@
      */
     getSession() {
       try {
-        const sess = localStorage.getItem("stallz_test_session");
-        return sess ? JSON.parse(sess) : null;
+        const sessRaw = localStorage.getItem("stallz_test_session");
+        const sess = sessRaw ? JSON.parse(sessRaw) : null;
+        if (!sess) return null;
+
+        const now = Date.now();
+        const expiresAt = Number(sess.expiresAt || 0);
+        const loginTime = Number(sess.loginTime || 0);
+
+        const expired = (expiresAt && now > expiresAt) || (!expiresAt && loginTime && (now - loginTime > SESSION_TTL_MS));
+        if (expired) {
+          try { localStorage.removeItem("stallz_test_session"); } catch(e) {}
+          try { localStorage.removeItem("stallz_last_active"); } catch(e) {}
+          try { if (typeof firebase !== "undefined" && firebase.auth) firebase.auth().signOut(); } catch(e) {}
+          return null;
+        }
+        return sess;
       } catch (e) {
         console.error("Session retrieval error:", e);
         return null;
@@ -33,10 +49,50 @@
         uid: user.uid,
         email: user.email,
         role: role,
-        loginTime: Date.now()
+        loginTime: Date.now(),
+        expiresAt: Date.now() + SESSION_TTL_MS
       };
       localStorage.setItem("stallz_test_session", JSON.stringify(sess));
       localStorage.setItem("stallz_last_active", Date.now());
+    },
+
+    /**
+     * Arms an auto-logout timer to enforce the 30-minute session TTL.
+     */
+    armAutoLogout() {
+      try {
+        const sess = this.getSession();
+        if (!sess || !sess.expiresAt) return;
+
+        if (this.__logoutTimer) {
+          clearTimeout(this.__logoutTimer);
+          this.__logoutTimer = null;
+        }
+
+        const ms = Math.max(0, Number(sess.expiresAt) - Date.now());
+        this.__logoutTimer = setTimeout(async () => {
+          try { await this.signOut(); } catch(_) {}
+          try { localStorage.removeItem("stallz_test_session"); } catch(e) {}
+          try { localStorage.removeItem("stallz_last_active"); } catch(e) {}
+
+          try {
+            // redirect to login
+            const p = location.pathname || '';
+            const loginUrl = (p.includes('/client-portal/') || p.includes('/admin/')) ? '../index.html' : 'index.html';
+            location.replace(loginUrl);
+          } catch(_) {}
+        }, ms);
+      } catch(e) {}
+    },
+
+    /**
+     * Enforces session TTL on page load (call in portals).
+     */
+    enforceSessionTTL() {
+      const sess = this.getSession();
+      if (!sess) return false;
+      this.armAutoLogout();
+      return true;
     },
 
     /**

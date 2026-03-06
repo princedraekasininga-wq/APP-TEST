@@ -3020,13 +3020,17 @@ function init() {
     checkTimeBasedTheme();
   });
 
-  const lastActive = localStorage.getItem("stallz_last_active");
-  if (lastActive && (Date.now() - lastActive > 30 * 60 * 1000)) {
-    window.StallzAuth?.signOut?.();
-    localStorage.removeItem("stallz_last_active");
+  const sess = window.StallzAuth?.getSession?.();
+  if (sess && sess.expiresAt && (Date.now() > sess.expiresAt)) {
+    try { window.StallzAuth?.signOut?.(); } catch(e) {}
+    try { localStorage.removeItem("stallz_last_active"); } catch(e) {}
+    try { localStorage.removeItem("stallz_test_session"); } catch(e) {}
     location.replace("../index.html");
     return;
   }
+
+  // arm auto logout timer for this session
+  try { window.StallzAuth?.enforceSessionTTL?.(); } catch(e) {}
 
   document.getElementById("openLoanModalBtn")?.addEventListener("click", () => {
     if (!state.dataLoaded && !OFFLINE_TEST_MODE) return showToast("Please wait, loading data...", "error");

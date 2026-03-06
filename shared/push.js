@@ -50,7 +50,119 @@
     }
   }
 
-  async function ensureServiceWorker() {
+  
+  function vibrateNotice() {
+    try {
+      if (navigator.vibrate) navigator.vibrate([60, 30, 60]);
+    } catch (_) {}
+  }
+
+  function ensureLiveToastStyles() {
+    if (document.getElementById('stallzLiveToastStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'stallzLiveToastStyles';
+    style.textContent = `
+      #stallzLiveToastRoot{
+        position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+        z-index:2147483646; display:flex; flex-direction:column; gap:10px;
+        pointer-events:none; padding:0 12px;
+      }
+      .stallz-live-toast{
+        pointer-events:auto;
+        width:min(520px, calc(100vw - 24px));
+        background:rgba(15,23,42,0.92);
+        border:1px solid rgba(255,255,255,0.14);
+        box-shadow:0 20px 60px rgba(0,0,0,0.55);
+        border-radius:18px;
+        padding:12px 12px;
+        color:#e2e8f0;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        display:flex; gap:10px; align-items:flex-start;
+        animation: stallzToastIn .18s ease-out;
+      }
+      .stallz-live-toast .ticon{
+        width:36px; height:36px; border-radius:14px;
+        display:flex; align-items:center; justify-content:center;
+        background:rgba(59,130,246,0.14);
+        border:1px solid rgba(255,255,255,0.08);
+        flex:0 0 auto;
+      }
+      .stallz-live-toast .tmain{ flex:1; min-width:0; }
+      .stallz-live-toast .ttitle{ font-weight:900; font-size:0.92rem; margin:0 0 2px; }
+      .stallz-live-toast .tbody{ font-size:0.82rem; opacity:0.9; margin:0; }
+      .stallz-live-toast .tactions{
+        display:flex; gap:8px; align-items:center;
+        margin-left:6px; flex:0 0 auto;
+      }
+      .stallz-live-toast .tbtn{
+        border:none; cursor:pointer;
+        padding:8px 10px; border-radius:12px;
+        font-weight:900; font-size:0.75rem;
+        background:rgba(255,255,255,0.10);
+        color:#e2e8f0;
+      }
+      .stallz-live-toast .tbtn.primary{
+        background:rgba(74,222,128,0.16);
+        color:#bbf7d0;
+        border:1px solid rgba(74,222,128,0.22);
+      }
+      @keyframes stallzToastIn { from { transform: translateY(10px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function showLiveToast(title, body, clickAction) {
+    try {
+      ensureLiveToastStyles();
+      let root = document.getElementById('stallzLiveToastRoot');
+      if (!root) {
+        root = document.createElement('div');
+        root.id = 'stallzLiveToastRoot';
+        document.body.appendChild(root);
+      }
+
+      // If a toast is already present, replace it (keeps things clean)
+      root.innerHTML = '';
+
+      const toast = document.createElement('div');
+      toast.className = 'stallz-live-toast';
+      toast.innerHTML = `
+        <div class="ticon">🔔</div>
+        <div class="tmain">
+          <div class="ttitle"></div>
+          <div class="tbody"></div>
+        </div>
+        <div class="tactions">
+          <button class="tbtn" type="button">Dismiss</button>
+          <button class="tbtn primary" type="button">View</button>
+        </div>
+      `;
+      toast.querySelector('.ttitle').textContent = String(title || 'New update');
+      toast.querySelector('.tbody').textContent = String(body || 'Tap to view details');
+
+      const [dismissBtn, viewBtn] = toast.querySelectorAll('button');
+      dismissBtn.addEventListener('click', () => { root.innerHTML = ''; });
+      viewBtn.addEventListener('click', () => {
+        root.innerHTML = '';
+        try {
+          if (typeof window.openNotificationHistoryModal === 'function') {
+            window.openNotificationHistoryModal();
+            return;
+          }
+        } catch(_) {}
+        if (clickAction) {
+          try { window.location.href = clickAction; } catch(_) {}
+        }
+      });
+
+      root.appendChild(toast);
+
+      setTimeout(() => { try { root.innerHTML = ''; } catch(_) {} }, 6000);
+    } catch (_) {}
+  }
+
+async function ensureServiceWorker() {
     if (!('serviceWorker' in navigator)) return null;
 
     // Nested portal routes register from a subfolder
@@ -164,10 +276,20 @@
 
           // No sound (user request). Optional haptics only.
           try { if (typeof __haptic === 'function') __haptic('success'); } catch (_) {}
+          // Vibrate on phones (no sound)
+          try { if (isMobileUA()) vibrateNotice(); } catch (_) {}
 
           // Refresh dropdown + badges
           try { if (typeof renderSharedNotifications === 'function') renderSharedNotifications(); } catch (_) {}
           try { if (typeof refreshUI === 'function') refreshUI(); } catch (_) {}
+
+          // In-app live toast when visible
+          try {
+            if (document.visibilityState === 'visible') {
+              const data = payload?.data || {};
+              showLiveToast(data.title || payload?.notification?.title, data.body || payload?.notification?.body, data.click_action || data.url || '');
+            }
+          } catch (_) {}
 
           // ✅ Foreground popup (system banner) on phones (and optionally when tab hidden)
           try {
