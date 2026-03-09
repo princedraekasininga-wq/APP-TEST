@@ -5,6 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Stallz Loans - Client Portal</title>
 
+    <style id="antiFlash">
+        html, body {
+            background: radial-gradient(circle at top, #0f2a29 0%, #081319 42%, #050b10 100%);
+            margin: 0; padding: 0;
+            overflow-x: hidden;
+        }
+        /* Keep app content hidden until initialization is complete */
+        .portal-shell { opacity: 0; visibility: hidden; position: relative; z-index: 10; }
+
+        /* Professional Loader Overlay */
+        .portal-loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at top, #0f2a29 0%, #081319 42%, #050b10 100%);
+            z-index: 999999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 0.4s ease;
+        }
+        .portal-spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(22, 163, 74, 0.1);
+            border-top: 4px solid #16a34a; border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-brand { color: #fff; font-weight: 800; letter-spacing: 2px; font-size: 0.9rem; }
+    </style>
+
     <link rel="manifest" href="/manifest.json">
     <script src="../shared/app-config.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,25 +39,35 @@
     <link rel="apple-touch-icon" href="../apple-touch.png">
 
     <link rel="icon" type="image/png" href="../assets/logo_images/myfavicon.png">
-    
-    <style>
-        /* UPDATED: Deepest navy/black to match the dark theme */
-        html, body { margin:0; background:#030712; color:#e5e7eb; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700;800;900&display=swap" rel="stylesheet">
-    <link id="clientStylesheet" rel="stylesheet" href="client-portal.css">
-</head>
-<body>
 
-    <div class="portal-shell">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+
+    <script>
+        /* Synchronous CSS Loader: Forces the browser to wait for the CSS before drawing the HTML, completely preventing the "broken page" flash */
+        document.write('<link rel="stylesheet" href="client-portal.css?v=' + encodeURIComponent(window.STALLZ_APP_VERSION || Date.now()) + '">');
+    </script>
+</head>
+<body class="client-frosted-mobile">
+
+    <div id="portalLoader" class="portal-loader-overlay">
+        <div class="loader-glass-card">
+            <div class="portal-spinner"></div>
+            <div class="loader-brand">STALLZ SECURE</div>
+            <div id="clientBootHint" style="margin-top:10px;font-size:12px;opacity:.75;letter-spacing:.2px;">Securing session…</div>
+        </div>
+    </div>
+
+    <div class="portal-shell" style="visibility:hidden;opacity:0;">
 
         <header class="glass-header fade-in">
             <div class="header-left">
                 <div class="logo-box">
                     <img src="../assets/logo_images/my-logo.png" alt="Stallz Logo" class="portal-logo">
                 </div>
-                <h2 class="brand-title" id="headerGreeting">Hi, <span id="headerUserName">...</span></h2>
+                <div class="brand-copy">
+                                        <h2 class="brand-title" id="headerGreeting">Hi, <span id="headerUserName">...</span></h2>
+                </div>
             </div>
 
             <div class="header-right">
@@ -54,30 +90,10 @@
 
         <div id="notifOverlay" class="notif-overlay" aria-hidden="true"></div>
 
+
         <div class="welcome-banner fade-in">
-            <h1 class="welcome-text" id="dynamicWelcomeBanner">STALLZ LOANS</h1>
+            <h1 class="welcome-text">WELCOME TO STALLZ LOANS</h1>
         </div>
-
-        <script>
-            // Set a dynamic time-based greeting
-            function updateTimeGreeting() {
-                const banner = document.getElementById('dynamicWelcomeBanner');
-                if (!banner) return;
-
-                const hour = new Date().getHours();
-                let greeting = "GOOD EVENING";
-
-                if (hour >= 5 && hour < 12) {
-                    greeting = "GOOD MORNING";
-                } else if (hour >= 12 && hour < 18) {
-                    greeting = "GOOD AFTERNOON";
-                }
-
-                banner.textContent = greeting;
-            }
-
-            document.addEventListener('DOMContentLoaded', updateTimeGreeting);
-        </script>
 
         <div class="hero-section fade-in delay-1">
             <div class="hero-split-layout">
@@ -234,6 +250,22 @@
             <span class="nav-label">Proof</span>
         </a>
     </nav>
+
+    <div class="floating-support">
+        <button class="fab-main" onclick="toggleFabMenu()">
+            <i class="fas fa-comment-dots"></i>
+        </button>
+        <div class="fab-menu" id="fabMenu">
+            <a href="#" onclick="openAdminContactModal('whatsapp'); return false;" class="fab-item item-whatsapp">
+                <span class="fab-label">WhatsApp</span>
+                <div class="fab-icon"><i class="fab fa-whatsapp"></i></div>
+            </a>
+            <a href="#" onclick="openAdminContactModal('call'); return false;" class="fab-item item-call">
+                <span class="fab-label">Call Us</span>
+                <div class="fab-icon"><i class="fas fa-phone"></i></div>
+            </a>
+        </div>
+    </div>
 
 
     <div id="profileModal" class="drawer-overlay">
@@ -659,8 +691,8 @@
             <h3 style="margin-bottom: 10px; font-size: 1.3rem;">Confirm Action</h3>
             <p id="customConfirmMessage" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5;"></p>
             <div style="display: flex; gap: 10px; justify-content: center;">
-                <button class="btn-full" style="flex: 1; margin: 0; background: rgba(55,25,255,0.25);" onclick="closeCustomConfirm()">Cancel</button>
-                <button class="btn-full" style="flex: 1; margin: 0; background: #ef4444;" onclick="executeCustomConfirm()">Yes, Log out</button>
+                <button class="btn-full btn-ghost-action" style="flex: 1; margin: 0;" onclick="closeCustomConfirm()">Cancel</button>
+                <button class="btn-full btn-danger-action" style="flex: 1; margin: 0;" onclick="executeCustomConfirm()">Yes, Log out</button>
             </div>
         </div>
     </div>
@@ -764,11 +796,11 @@
             <button class="close-btn" onclick="closeFeedbackModal()">&times;</button>
         </div>
         <div style="display:flex; flex-direction:column; gap:8px;">
-            <input id="fbName" type="text" placeholder="Your name (optional)" />
-            <input id="fbContact" type="text" placeholder="Phone or email (optional)" />
-            <textarea id="fbMessage" placeholder="Tell us what's on your mind..." style="min-height:120px; padding:10px; border-radius:8px;"></textarea>
+            <input id="fbName" type="text" placeholder="Your name (optional)" class="feedback-input" />
+            <input id="fbContact" type="text" placeholder="Phone or email (optional)" class="feedback-input" />
+            <textarea id="fbMessage" placeholder="Tell us what's on your mind..." class="feedback-textarea" style="min-height:120px;"></textarea>
             <div style="display:flex; gap:8px; justify-content:flex-end;">
-                <button class="btn" onclick="closeFeedbackModal()">Cancel</button>
+                <button class="btn btn-ghost-action" onclick="closeFeedbackModal()">Cancel</button>
                 <button id="fbSubmitBtn" class="btn btn-primary" onclick="submitFeedback()">Send Feedback</button>
             </div>
             <div id="fbStatus" style="font-size:0.9rem; color:var(--text-muted);"></div>
@@ -866,18 +898,25 @@
 
     return loadScript("../shared/stallz-shared.js?v=" + encodeURIComponent(v))
       .then(function(){ return loadScript("../shared/auth.js?v=" + encodeURIComponent(v)); })
-      .then(function(){ return loadScript("client-portal.js?v=" + encodeURIComponent(v)); });
+      .then(function(){ return loadScript("client-portal.js?v=" + encodeURIComponent(v)); })
+      .then(function(){
+          // --- REVEAL PORTAL ---
+          // Hide loader and show body once all scripts are loaded
+          const loader = document.getElementById('portalLoader');
+          if(loader) {
+              loader.style.opacity = '0';
+              setTimeout(() => {
+                  loader.style.display = 'none';
+                  document.body.style.visibility = 'visible';
+                  document.body.style.opacity = '1';
+              }, 500);
+          }
+      });
   }).catch(function(err){
     console.error("STALLZ Client boot failed:", err);
   });
 })();
 
-/* ==========================================================================
-   DYNAMIC STALLZ ADVICE GENERATOR (LOADS AUTOMATICALLY)
-   ========================================================================== */
-/* ==========================================================================
-   SMART STALLZ ADVICE GENERATOR (SEQUENTIAL MEMORY)
-   ========================================================================== */
 /* ==========================================================================
    ENHANCED STALLZ ADVICE — SWIPEABLE STORY CARD (WITH MEMORY)
    ========================================================================== */
@@ -887,8 +926,7 @@
         "Stallz will never ask for your password via phone or WhatsApp. Keep your account secure.",
         "Repaying your loan on time increases your internal trust score for future, larger requests.",
         "Ensure your collateral details are accurate to speed up your approval process to under 30 minutes.",
-        "Quick. Easy. Reliable. That’s our promise to you. Need help? Use the chat icon below.",
-        "Borrow only what you need. Keeping your loan amounts manageable ensures stress-free repayments.",
+                "Borrow only what you need. Keeping your loan amounts manageable ensures stress-free repayments.",
         "Did you know? You can make partial payments anytime before your due date to reduce your final burden.",
         "Always verify you are communicating with an official Stallz Admin before making mobile money transfers.",
         "Keep your next of kin details updated so we can easily assist you in case of emergencies.",
@@ -922,7 +960,6 @@
         if (!t) return;
         t.classList.remove('tip-in-left','tip-in-right','tip-out-left','tip-out-right');
 
-        // Two-phase: out, swap text, in
         const outClass = dir === 'prev' ? 'tip-out-right' : 'tip-out-left';
         const inClass  = dir === 'prev' ? 'tip-in-left'  : 'tip-in-right';
 
@@ -949,7 +986,6 @@
         const t = elAdvice();
         if (!t) return;
 
-        // Sequential memory: show next tip on every new session
         const last = localStorage.getItem('stallz_last_tip_index');
         let showIdx = 0;
         if (last !== null) {
@@ -969,13 +1005,13 @@
                 const target = parseInt(btn.getAttribute('data-tip-idx'), 10);
                 if (isNaN(target)) return;
                 setTip(target, target < idx ? 'prev' : 'next');
+                if ('vibrate' in navigator) navigator.vibrate(15);
             });
         }
 
         const car = elCarousel();
         if (!car) return;
 
-        // Swipe gestures
         let startX = 0;
         let deltaX = 0;
         let tracking = false;
@@ -1005,8 +1041,8 @@
             car.classList.remove('dragging');
             car.style.transform = '';
 
-            if (deltaX <= -threshold) next();
-            else if (deltaX >= threshold) prev();
+            if (deltaX <= -threshold) { next(); if ('vibrate' in navigator) navigator.vibrate(15); }
+            else if (deltaX >= threshold) { prev(); if ('vibrate' in navigator) navigator.vibrate(15); }
         };
 
         if (window.PointerEvent) {
@@ -1030,7 +1066,6 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Wait for Firebase to load and authenticate the user
         const checkAuth = setInterval(() => {
             if (typeof firebase !== 'undefined' && firebase.auth) {
                 clearInterval(checkAuth);
@@ -1040,29 +1075,23 @@
                         const uid = user.uid;
                         let initialLoad = true;
 
-                        // Listen to this specific client's notification folder in the DB
                         const notifRef = firebase.database().ref(`clients/${uid}/notifications`);
 
                         notifRef.on('child_added', (snapshot) => {
-                            if (initialLoad) return; // Skip old notifications so their phone doesn't get spammed on login
+                            if (initialLoad) return;
 
                             const notif = snapshot.val();
 
-                            // Only trigger if it is a brand new, unread notification
                             if (notif && notif.read === false) {
-
-                                // No sound + no duplicate OS popups here (FCM handles real push)
-                                // Dropdown refresh only
-try {
+                                if ('vibrate' in navigator) navigator.vibrate([40, 60, 40]);
+                                try {
                                     if (typeof renderSharedNotifications === 'function') renderSharedNotifications();
                                 } catch(e) {}
                             }
                         });
 
-                        // Firebase guarantees 'value' fires after all initial database checks are done
                         notifRef.once('value', () => {
                             initialLoad = false;
-                            console.log("🟢 Local Real-time Push Listener Active! (No FCM Needed)");
                         });
                     }
                 });

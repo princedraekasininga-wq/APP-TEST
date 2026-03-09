@@ -50,7 +50,10 @@ function __haptic(type = "tap") {
             tap: [8],
             soft: [6],
             success: [10, 18, 10],
-            warning: [18]
+            warning: [12, 18],
+            modalOpen: [12, 12],
+            modalClose: [8],
+            alert: [16, 24, 16]
         };
         navigator.vibrate(patterns[type] || patterns.tap);
     } catch(_) {}
@@ -381,9 +384,17 @@ function bootstrapSharedSession() {
 
             __stallzFirstDataLoaded = false;
             __setSkeletonLoading(true);
-            // Fade out the full-screen loader early, skeletons will carry the wait.
-            setTimeout(hideAppLoader, 450);
             __updateRingGradientFromTheme();
+
+            // Check for Offline/Cache to reveal instantly, otherwise wait for Firebase
+            const isOffline = !navigator.onLine || (typeof window.isAppOffline === "function" && window.isAppOffline());
+            if (isOffline && __lastClientProfileCache) {
+                console.warn("Offline detected. Opening cached portal.");
+                hideAppLoader();
+            } else {
+                const hint = document.getElementById('clientBootHint');
+                if (hint) hint.textContent = "Syncing with database...";
+            }
 
             if (typeof firebase !== "undefined") {
                 const userRef = firebase.database().ref(`clients/${currentUserUid}`);
@@ -392,6 +403,7 @@ function bootstrapSharedSession() {
                     const val = snapshot.val() || {};
 
                     updateHeaderGreeting(val);
+                    try { window.__STALLZ_REVEAL_PORTAL && window.__STALLZ_REVEAL_PORTAL("profile"); } catch(_) {}
                     currentUserPhone = val.phone || "";
                     localStorage.setItem("stallz_client_profile", JSON.stringify(val));
                     __lastClientProfileCache = val;
@@ -438,13 +450,14 @@ function bootstrapSharedSession() {
                         __setSkeletonLoading(false);
                     }
                     hideAppLoader();
-                }, (error) => {
+                    try { window.__STALLZ_REVEAL_PORTAL && window.__STALLZ_REVEAL_PORTAL("fallback"); } catch(_) {}
+}, (error) => {
                     // Catch Permission Denied and network errors
                     console.error("Firebase read error:", error);
                     __setSkeletonLoading(false);
                     hideAppLoader();
-
-                    if (typeof showCustomAlert === "function") {
+                    try { window.__STALLZ_REVEAL_PORTAL && window.__STALLZ_REVEAL_PORTAL("fallback"); } catch(_) {}
+if (typeof showCustomAlert === "function") {
                         showCustomAlert("Access denied. Please check your connection or contact support.");
                     } else {
                         alert("Access denied. Please check your connection or contact support.");
@@ -463,10 +476,20 @@ function bootstrapSharedSession() {
         } catch (e) {
             console.error("Session Error:", e);
             hideAppLoader();
-        }
+                    try { window.__STALLZ_REVEAL_PORTAL && window.__STALLZ_REVEAL_PORTAL("fallback"); } catch(_) {}
+}
     })();
+    // Watchdog: keep loader visible if boot is slow; show a gentle hint instead of hiding.
+    setTimeout(() => {
+        try {
+            const loader = document.getElementById('appLoader');
+            const hint = document.getElementById('clientBootHint');
+            if (loader && !loader.classList.contains('hidden')) {
+                if (hint) hint.textContent = 'Still syncing… just a moment';
+            }
+        } catch (_) {}
+    }, 6000);
 
-    setTimeout(hideAppLoader, 5000);
 }
 
 
@@ -482,11 +505,9 @@ function initClientPortal() {
 
     // --- Hook up the Live Request Calculator ---
     const reqAmountInput = document.getElementById('reqAmount');
-if(reqAmountInput) {
-    // This triggers the calculator every time a character is typed
-    reqAmountInput.addEventListener('input', window.updateRequestCalculator);
-}
-    // -----------------------------------------------
+    if(reqAmountInput) {
+        reqAmountInput.addEventListener('input', window.updateRequestCalculator);
+    }
 
     const savedTheme = localStorage.getItem('stallz-theme');
     const currentHour = new Date().getHours();
@@ -503,7 +524,6 @@ if(reqAmountInput) {
     __bindContextBubble();
 
     // ====== INSTANT CACHE HYDRATION ======
-    // Instantly load the name from local memory before the internet connects
     try {
         const cachedProfile = localStorage.getItem("stallz_client_profile");
         if (cachedProfile) {
@@ -511,16 +531,20 @@ if(reqAmountInput) {
             __lastClientProfileCache = parsedProfile;
             if (typeof updateHeaderGreeting === 'function') {
                 updateHeaderGreeting(parsedProfile);
+                try { window.__STALLZ_REVEAL_PORTAL && window.__STALLZ_REVEAL_PORTAL("cache"); } catch(_) {}
             }
         }
     } catch(e) { console.warn("Cache hydration skipped", e); }
-    // =====================================
 
     bootstrapSharedSession();
 
+    // ====== FINAL REVEAL (Client) — Bridge for Firebase Data Sync ======
+    window.__STALLZ_REVEAL_PORTAL = hideAppLoader;
+
     window.onclick = function(event) {
-        // If they click the dark background behind ANY modal or drawer, close via the universal closer
+        // Vibrate and close modals when clicking the overlay
         if (event.target.classList.contains('modal-overlay') || event.target.classList.contains('drawer-overlay')) {
+            if ('vibrate' in navigator) navigator.vibrate(15);
             if (typeof closeAnimatedModal === 'function') {
                 closeAnimatedModal(event.target.id);
             } else {
@@ -528,29 +552,40 @@ if(reqAmountInput) {
             }
         }
 
-        // Close notification dropdown when clicking outside, but ensure active class is removed
+        // Close notification dropdown when clicking outside
         if (!event.target.closest('.notification-wrapper')) {
             const dropdown = document.getElementById('notificationDropdown');
-            if (dropdown) {
-                if (dropdown.classList.contains('active')) {
-                    dropdown.classList.remove('active');
-                    setTimeout(() => {
-                        if (!dropdown.classList.contains('active')) dropdown.style.display = 'none';
-                    }, 300);
-                } else {
-                    dropdown.style.display = 'none';
-                }
+            if (dropdown && dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+                setTimeout(() => {
+                    if (!dropdown.classList.contains('active')) dropdown.style.display = 'none';
+                }, 300);
             }
         }
     };
-} // <--- THIS BRACKET WAS MISSING!
+}
+
+window.__STALLZ_PORTAL_REVEALED = false;
 
 function hideAppLoader() {
-    const loader = document.getElementById("appLoader");
+    if (window.__STALLZ_PORTAL_REVEALED) return;
+    window.__STALLZ_PORTAL_REVEALED = true;
+
+    const loader = document.getElementById("portalLoader") || document.getElementById("appLoader");
+    const shell = document.querySelector(".portal-shell");
+
     if (loader) {
-        loader.classList.add("hidden");
-        setTimeout(() => { loader.style.display = 'none'; }, 700);
+        loader.style.transition = "opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+        loader.style.opacity = "0";
+        setTimeout(() => { loader.style.display = "none"; }, 400);
     }
+    if (shell) {
+        shell.style.visibility = "visible";
+        shell.style.opacity = "1";
+    }
+
+    // Ensure ring gradients look correct after the reveal
+    setTimeout(__updateRingGradientFromTheme, 50);
 }
 
 function runAllInit() {
@@ -598,7 +633,7 @@ function updateHeaderGreeting(profile) {
     const fullName = rawName.toUpperCase();
 
     if (headerTitle) {
-        headerTitle.innerHTML = `Hi, <span id="headerUserName" style="color:var(--primary); font-weight:bold; text-shadow: 0 0 10px rgba(74,222,128,0.2);">${firstName}</span>`;
+        headerTitle.innerHTML = `Hi, <span id="headerUserName" style="color:var(--primary); font-weight:bold;">${firstName}</span>`;
     }
     if (sidebarName) sidebarName.textContent = fullName;
 }
@@ -611,34 +646,33 @@ function renderLoansTable(loansData) {
         const style = document.createElement("style");
         style.id = "stallzPremiumLoanCardStyle";
         style.innerHTML = `
-            .p-loan-card { background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98)); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 24px; padding: 24px; margin-bottom: 20px; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
-            .p-loan-card:hover { transform: translateY(-3px); box-shadow: 0 25px 55px rgba(0, 0, 0, 0.75); }
-            .p-loan-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, var(--primary, #4ade80), #22c55e); box-shadow: 0 2px 10px rgba(74,222,128,0.5); }
-            .p-loan-card.is-overdue::before { background: linear-gradient(90deg, #f87171, #ef4444); box-shadow: 0 2px 10px rgba(239,68,68,0.5); }
+            .p-loan-card { background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98)); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 24px; margin-bottom: 20px; box-shadow: 0 16px 35px rgba(0, 0, 0, 0.25); position: relative; overflow: hidden; }
+            .p-loan-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, var(--primary, #4ade80), #22c55e); }
+            .p-loan-card.is-overdue::before { background: linear-gradient(90deg, #f87171, #ef4444); }
             .p-loan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-            .p-loan-id { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-            .p-loan-badge { padding: 6px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-            .p-loan-badge.active { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.4); }
-            .p-loan-badge.overdue { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); }
-            .p-loan-balance-label { font-size: 0.85rem; color: rgba(255,255,255,0.8); margin-bottom: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-            .p-loan-balance-val { font-size: 2.08rem; font-weight: 900; color: #ffffff; letter-spacing: -1px; display: flex; align-items: baseline; gap: 4px; line-height: 1.1; margin-bottom: 8px; text-shadow: 0 4px 15px rgba(0,0,0,0.6); }
-            .p-loan-balance-val small { font-size: 1.4rem; color: rgba(255,255,255,0.6); font-weight: 800; }
-            .p-loan-total { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 26px; font-weight: 600; line-height: 1.6; }
-            .p-loan-total-sub { font-size: 0.75rem; font-weight: 700; color: var(--primary, #4ade80); }
+            .p-loan-id { font-size: 0.85rem; color: rgba(255,255,255,0.6); font-weight: 700; letter-spacing: 0.5px; }
+            .p-loan-badge { padding: 6px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px; }
+            .p-loan-badge.active { background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+            .p-loan-badge.overdue { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+            .p-loan-balance-label { font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-bottom: 4px; font-weight: 600; }
+            .p-loan-balance-val { font-size: 2.08rem; font-weight: 800; color: #ffffff; letter-spacing: -1px; display: flex; align-items: baseline; gap: 4px; line-height: 1.1; margin-bottom: 8px; }
+            .p-loan-balance-val small { font-size: 1.4rem; color: rgba(255,255,255,0.5); font-weight: 700; }
+            .p-loan-total { font-size: 0.85rem; color: rgba(255,255,255,0.45); margin-bottom: 26px; font-weight: 500; line-height: 1.6; }
+            .p-loan-total-sub { font-size: 0.75rem; opacity: 0.8; font-weight: 600; color: var(--primary, #4ade80); }
             .p-loan-progress-wrap { margin-bottom: 24px; }
-            .p-loan-progress-labels { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 10px; font-weight: 800; color: rgba(255,255,255,0.9); }
-            .p-loan-progress-track { height: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; box-shadow: inset 0 4px 8px rgba(0,0,0,0.5); }
+            .p-loan-progress-labels { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 10px; font-weight: 700; color: rgba(255,255,255,0.85); }
+            .p-loan-progress-track { height: 10px; background: rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
             .p-loan-progress-fill { height: 100%; border-radius: 12px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-            .p-loan-progress-fill.active { background: linear-gradient(90deg, #4ade80, #22c55e); box-shadow: 0 0 15px rgba(74,222,128,0.6); }
-            .p-loan-progress-fill.overdue { background: linear-gradient(90deg, #f87171, #ef4444); box-shadow: 0 0 15px rgba(239,68,68,0.6); }
-            .p-loan-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 18px; }
+            .p-loan-progress-fill.active { background: linear-gradient(90deg, #4ade80, #22c55e); box-shadow: 0 0 12px rgba(74,222,128,0.5); }
+            .p-loan-progress-fill.overdue { background: linear-gradient(90deg, #f87171, #ef4444); box-shadow: 0 0 12px rgba(239,68,68,0.5); }
+            .p-loan-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 18px; }
             .p-loan-meta { display: flex; flex-direction: column; gap: 5px; }
-            .p-loan-meta-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800; }
-            .p-loan-meta-val { font-size: 1.05rem; color: rgba(255,255,255,0.95); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 145px; text-shadow: 0 2px 5px rgba(0,0,0,0.4); }
-            body.day-mode .p-loan-card { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 16px 45px rgba(0,0,0,0.1); }
+            .p-loan-meta-label { font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800; }
+            .p-loan-meta-val { font-size: 1rem; color: rgba(255,255,255,0.95); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 145px; }
+            body.day-mode .p-loan-card { background: #ffffff; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 16px 45px rgba(0,0,0,0.05); }
             body.day-mode .p-loan-id { color: #64748b; }
             body.day-mode .p-loan-balance-label { color: #64748b; }
-            body.day-mode .p-loan-balance-val { color: #0f172a; text-shadow: none; }
+            body.day-mode .p-loan-balance-val { color: #0f172a; }
             body.day-mode .p-loan-balance-val small { color: #94a3b8; }
             body.day-mode .p-loan-total { color: #64748b; }
             body.day-mode .p-loan-total-sub { color: #16a34a; }
@@ -646,7 +680,7 @@ function renderLoansTable(loansData) {
             body.day-mode .p-loan-progress-track { background: #f1f5f9; box-shadow: inset 0 1px 3px rgba(0,0,0,0.04); }
             body.day-mode .p-loan-footer { border-top: 1px solid rgba(0,0,0,0.06); }
             body.day-mode .p-loan-meta-label { color: #94a3b8; }
-            body.day-mode .p-loan-meta-val { color: #1e293b; text-shadow: none; }
+            body.day-mode .p-loan-meta-val { color: #1e293b; }
         `;
         document.head.appendChild(style);
     }
@@ -884,41 +918,41 @@ async function renderLoanRequestProgressPanel(force = false) {
 
     if (!document.getElementById("stallzLoanReqStatusStyle")) {
       const css = `
-#loanRequestProgressPanel.request-progress-panel{ background: rgba(10, 15, 28, 0.90); border: 1px solid rgba(255,255,255,0.20); border-radius: 22px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
-#loanRequestProgressPanel .rp-header{ padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.15); }
-#loanRequestProgressPanel .rp-icon{ background: rgba(74, 222, 128, 0.2); border: 1px solid rgba(74, 222, 128, 0.4); box-shadow: 0 4px 10px rgba(74,222,128,0.3); }
-#loanRequestProgressPanel .rp-title{ font-size: 1.05rem; font-weight: 900; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+#loanRequestProgressPanel.request-progress-panel{ background: rgba(30, 41, 59, 0.78); border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; box-shadow: 0 18px 40px rgba(0,0,0,0.22); }
+#loanRequestProgressPanel .rp-header{ padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+#loanRequestProgressPanel .rp-icon{ background: rgba(74, 222, 128, 0.14); border: 1px solid rgba(74, 222, 128, 0.28); }
+#loanRequestProgressPanel .rp-title{ font-size: 0.98rem; font-weight: 900; }
 #loanRequestProgressPanel .rp-meta{ font-weight: 800; }
 .lr-wrap{ display:flex; flex-direction:column; gap: 18px; margin-top: 12px; }
-.lr-amount-card{ background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 18px 16px; text-align: center; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3), 0 12px 28px rgba(0,0,0,0.4); }
-.lr-amount{ font-size: 2.2rem; font-weight: 900; letter-spacing: -0.9px; color: var(--primary, #4ade80); text-shadow: 0 4px 15px rgba(74,222,128,0.3); }
-.lr-item-pill{ display:inline-block; margin-top: 10px; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); font-weight: 900; font-size: .78rem; letter-spacing: .3px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.lr-amount-card{ background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 18px 16px; text-align: center; box-shadow: 0 12px 28px rgba(0,0,0,0.18); }
+.lr-amount{ font-size: 2.0rem; font-weight: 850; letter-spacing: -0.9px; color: var(--text-main, #f8fafc); }
+.lr-item-pill{ display:inline-block; margin-top: 10px; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); color: rgba(255,255,255,0.75); font-weight: 900; font-size: .78rem; letter-spacing: .3px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lr-timeline{ position: relative; padding-top: 6px; }
-.lr-bar{ position:absolute; left: 28px; right: 28px; top: 34px; height: 16px; border-radius: 999px; background: rgba(0,0,0,0.5); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+.lr-bar{ position:absolute; left: 28px; right: 28px; top: 34px; height: 16px; border-radius: 999px; background: rgba(74, 222, 128, 0.18); overflow: hidden; box-shadow: 0 10px 30px rgba(74, 222, 128, 0.10); }
 .lr-bar-fill{ height: 100%; width: 0%; border-radius: 999px; transition: width .45s ease; }
 .lr-steps{ display:flex; justify-content: space-between; align-items:flex-start; gap: 10px; position: relative; z-index: 2; }
 .lr-step{ width: 33.333%; display:flex; flex-direction: column; align-items:center; gap: 10px; }
-.lr-circle{ width: 58px; height: 58px; border-radius: 999px; display:flex; align-items:center; justify-content:center; font-size: 1.35rem; color: #fff; background: rgba(148,163,184,0.22); border: 6px solid #030712; box-shadow: 0 16px 40px rgba(0,0,0,0.5); transition: transform .25s ease, box-shadow .25s ease, background .25s ease; }
-.lr-label{ font-size: .78rem; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: rgba(255,255,255,0.8); }
-.lr-step.done .lr-circle{ background: var(--primary, #4ade80); box-shadow: 0 0 0 8px rgba(74,222,128,0.15), 0 20px 55px rgba(74,222,128,0.5); }
-.lr-step.current .lr-circle{ background: rgba(34,197,94,0.95); box-shadow: 0 0 0 10px rgba(74,222,128,0.2), 0 22px 60px rgba(74,222,128,0.6); transform: translateY(-1px); }
-.lr-step.rejected .lr-circle{ background: rgba(239,68,68,0.95); box-shadow: 0 0 0 10px rgba(239,68,68,0.2), 0 22px 60px rgba(239,68,68,0.6); }
-.lr-message{ background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 18px 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-.lr-msg-title{ font-size: 1.35rem; font-weight: 800; margin-bottom: 6px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-.lr-msg-body{ color: rgba(255,255,255,0.8); font-weight: 500; line-height: 1.3; }
-body.day-mode #loanRequestProgressPanel.request-progress-panel{ background: #ffffff; border: 1px solid rgba(0,0,0,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
-body.day-mode #loanRequestProgressPanel .rp-header{ border-bottom: 1px solid rgba(0,0,0,0.1); }
-body.day-mode #loanRequestProgressPanel .rp-title, body.day-mode #loanRequestProgressPanel .rp-meta{ color: #0f172a; text-shadow: none; }
-body.day-mode .lr-amount-card{ background: #ffffff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-body.day-mode .lr-amount{ color: #0f172a; text-shadow: none; }
-body.day-mode .lr-item-pill{ background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); color: #475569; box-shadow: none; }
-body.day-mode .lr-bar{ background: rgba(34,197,94,0.2); box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); border: none; }
-body.day-mode .lr-circle{ border: 6px solid #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-body.day-mode .lr-label{ color: #475569; }
-body.day-mode .lr-message{ background: #ffffff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-body.day-mode .lr-msg-body{ color: #475569; }
+.lr-circle{ width: 58px; height: 58px; border-radius: 999px; display:flex; align-items:center; justify-content:center; font-size: 1.35rem; color: #fff; background: rgba(148,163,184,0.22); border: 6px solid rgba(15, 23, 42, 0.9); box-shadow: 0 16px 40px rgba(0,0,0,0.22); transition: transform .25s ease, box-shadow .25s ease, background .25s ease; }
+.lr-label{ font-size: .78rem; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: rgba(255,255,255,0.78); }
+.lr-step.done .lr-circle{ background: var(--primary, #4ade80); box-shadow: 0 0 0 8px rgba(74,222,128,0.10), 0 20px 55px rgba(74,222,128,0.45); }
+.lr-step.current .lr-circle{ background: rgba(34,197,94,0.95); box-shadow: 0 0 0 10px rgba(74,222,128,0.14), 0 22px 60px rgba(74,222,128,0.55); transform: translateY(-1px); }
+.lr-step.rejected .lr-circle{ background: rgba(239,68,68,0.95); box-shadow: 0 0 0 10px rgba(239,68,68,0.14), 0 22px 60px rgba(239,68,68,0.45); }
+.lr-message{ background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 18px 16px; text-align: center; }
+.lr-msg-title{ font-size: 1.35rem; font-weight: 600; margin-bottom: 6px; }
+.lr-msg-body{ color: rgba(255,255,255,0.72); font-weight: 400; line-height: 1.0; }
+body.day-mode #loanRequestProgressPanel.request-progress-panel{ background: rgba(25,25,255,0.92); border: 20px solid rgba(2,6,23,0.10); box-shadow: 0 18px 45px rgba(2,6,23,0.10); }
+body.day-mode #loanRequestProgressPanel .rp-header{ border-bottom: 1px solid rgba(2,6,23,0.08); }
+body.day-mode #loanRequestProgressPanel .rp-title, body.day-mode #loanRequestProgressPanel .rp-meta{ color: rgba(2,6,23,0.88); }
+body.day-mode .lr-amount-card{ background: #ffffff; border: 1px solid rgba(2,6,23,0.10); box-shadow: 0 16px 45px rgba(2,6,23,0.08); }
+body.day-mode .lr-amount{ color: #0f172a; }
+body.day-mode .lr-item-pill{ background: rgba(2,6,23,0.04); border: 1px solid rgba(2,6,23,0.08); color: rgba(2,6,23,0.72); }
+body.day-mode .lr-bar{ background: rgba(34,197,94,0.22); box-shadow: 0 12px 40px rgba(34,197,94,0.18); }
+body.day-mode .lr-circle{ border: 6px solid #ffffff; box-shadow: 0 16px 45px rgba(2,6,23,0.10); }
+body.day-mode .lr-label{ color: rgba(2,6,23,0.70); }
+body.day-mode .lr-message{ background: #ffffff; border: 1px solid rgba(2,6,23,0.10); box-shadow: 0 10px 30px rgba(2,6,23,0.06); }
+body.day-mode .lr-msg-body{ color: rgba(2,6,23,0.62); }
 .rp-empty { text-align: center; padding: 20px 10px; }
-.rp-empty-icon { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.8; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+.rp-empty-icon { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.8; }
 .rp-empty-title { font-weight: 800; font-size: 1.1rem; color: var(--text-main); margin-bottom: 5px; }
 .rp-empty-sub { font-size: 0.85rem; color: var(--text-muted); }
 @media (max-width: 380px){
@@ -1122,7 +1156,9 @@ function toggleNotifications(forceOpen = null) {
     const shouldOpen = (forceOpen === null) ? !isVisible : !!forceOpen;
 
     const close = (silent = false) => {
+        try { __haptic('soft'); } catch(_) {}
         dropdown.classList.remove("active");
+        document.body.classList.remove("notif-open");
         if (overlay) { overlay.classList.remove("active"); overlay.setAttribute("aria-hidden","true"); }
         document.body.classList.remove("modal-open");
         document.body.style.overflow = "";
@@ -1131,7 +1167,6 @@ function toggleNotifications(forceOpen = null) {
         }, 250);
 
         if (!silent && window.history.state && window.history.state.__stallzNotifOpen) {
-            // Go back one entry so gestures/back behave naturally
             history.back();
         }
         document.removeEventListener("keydown", window.__stallzNotifKeyHandler, true);
@@ -1140,14 +1175,15 @@ function toggleNotifications(forceOpen = null) {
     };
 
     const open = () => {
+        try { __haptic('tap'); } catch(_) {}
         __notifFilter = 'ALL';
         dropdown.style.display = "flex";
+        document.body.classList.add("notif-open");
         if (overlay && isMobile) { overlay.classList.add("active"); overlay.setAttribute("aria-hidden","false"); }
         document.body.style.overflow = isMobile ? "hidden" : "";
-        setTimeout(() => dropdown.classList.add("active"), 10);
+        requestAnimationFrame(() => dropdown.classList.add("active"));
         renderSharedNotifications();
 
-        // Back/gesture close support
         if (isMobile) {
             try {
                 const st = window.history.state || {};
@@ -1155,7 +1191,6 @@ function toggleNotifications(forceOpen = null) {
             } catch(e){}
         }
 
-        // Close on outside click
         window.__stallzNotifOutsideHandler = (ev) => {
             if (!dropdown.classList.contains("active")) return;
             const hitDropdown = dropdown.contains(ev.target);
@@ -1164,7 +1199,6 @@ function toggleNotifications(forceOpen = null) {
         };
         document.addEventListener("click", window.__stallzNotifOutsideHandler, true);
 
-        // Close on ESC
         window.__stallzNotifKeyHandler = (ev) => {
             if (ev.key === "Escape") close(true);
         };
@@ -1182,8 +1216,8 @@ function toggleNotifications(forceOpen = null) {
         }
     };
 
-    if (shouldOpen) open();
-    else close(true);
+    if (shouldOpen) { try { __haptic('soft'); } catch(_) {} open(); }
+    else { try { __haptic('soft'); } catch(_) {} close(true); }
 }
 
 function setNotifFilter(filter, event) {
@@ -1272,27 +1306,28 @@ function renderSharedNotifications() {
         if (unreadCount > 0) {
             badge.textContent = String(unreadCount > 99 ? '99+' : unreadCount);
             badge.style.display = 'inline-flex';
-            badge.classList.add('attn'); // trigger pulse
         } else {
             badge.style.display = 'none';
-            badge.classList.remove('attn');
         }
     }
+
+    try {
+        const markAllBtn = document.getElementById('markAllBtn');
+        if (markAllBtn) markAllBtn.style.display = (unreadCount > 0 ? 'block' : 'none');
+    } catch(_) {}
 
     const dropdownHeader = document.querySelector(".dropdown-header");
 
     if (dropdownHeader && !dropdownHeader.querySelector('.notif-filters')) {
         dropdownHeader.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:12px;">
-                <span style="font-weight:900; font-size:1.15rem; letter-spacing:0.5px;">Activity</span>
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <button id="markAllBtn" onclick="markAllNotificationsRead(event)" style="background:none; border:none; color:var(--primary); font-size:0.75rem; font-weight:800; cursor:pointer; padding:0; display: ${unreadCount > 0 ? 'block' : 'none'}; text-shadow: 0 0 10px rgba(74,222,128,0.4);">Mark all read</button>
-                    <button id="viewAllNotifBtn" onclick="openNotificationHistoryModal()" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 8px; color:#fff; font-size:0.7rem; font-weight:800; cursor:pointer;">All History</button>
-                </div>
+                <span style="font-weight:900; font-size:1.1rem; letter-spacing:0.5px;">Activity</span>
+                <button id="viewAllNotifBtn" onclick="openNotificationHistoryModal()" style="background:none; border:none; color:rgba(226,232,240,0.75); font-size:0.75rem; font-weight:900; cursor:pointer; padding:0; margin-right:10px;">View all</button>
+                <button id="markAllBtn" onclick="markAllNotificationsRead(event)" style="background:none; border:none; color:var(--primary); font-size:0.75rem; font-weight:800; cursor:pointer; padding:0; display: ${unreadCount > 0 ? 'block' : 'none'};">Mark all read</button>
             </div>
-            <div class="notif-filters">
-                <button id="filterBtnAll" onclick="setNotifFilter('ALL', event)">All Updates</button>
-                <button id="filterBtnAlerts" onclick="setNotifFilter('ALERTS', event)">Alerts</button>
+            <div class="notif-filters" style="display:flex; background:rgba(255,255,255,0.05); padding:4px; border-radius:12px; width:100%; gap: 4px;">
+                <button id="filterBtnAll" style="flex:1; text-align:center; padding: 6px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.75rem; transition: all 0.2s;" onclick="setNotifFilter('ALL', event)">All</button>
+                <button id="filterBtnAlerts" style="flex:1; text-align:center; padding: 6px; border-radius: 8px; border: none; font-weight: 700; font-size: 0.75rem; transition: all 0.2s;" onclick="setNotifFilter('ALERTS', event)">Alerts</button>
             </div>
         `;
     }
@@ -1306,10 +1341,17 @@ function renderSharedNotifications() {
     if (btnAll && btnAlerts) {
         btnAll.className = __notifFilter === 'ALL' ? 'active' : '';
         btnAlerts.className = __notifFilter === 'ALERTS' ? 'active' : '';
+
+        btnAll.style.background = __notifFilter === 'ALL' ? 'rgba(255,255,255,0.1)' : 'transparent';
+        btnAll.style.color = __notifFilter === 'ALL' ? '#fff' : 'var(--text-muted)';
+
+        btnAlerts.style.background = __notifFilter === 'ALERTS' ? 'rgba(255,255,255,0.1)' : 'transparent';
+        btnAlerts.style.color = __notifFilter === 'ALERTS' ? '#fff' : 'var(--text-muted)';
     }
 
     let displayList = [];
     const NOW = Date.now();
+    const THIRTY_TWO_HOURS = 32 * 60 * 60 * 1000;
     const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
     if (__notifFilter === 'ALL') {
@@ -1320,14 +1362,19 @@ function renderSharedNotifications() {
                 title: 'Reviewing Request',
                 body: `Your K${Number(r.amount).toLocaleString()} request is pending.`,
                 createdAt: r.createdAt || Date.now(),
-                icon: '<i class="fas fa-circle-notch fa-spin"></i>'
+                icon: '<i class="fas fa-circle-notch fa-spin"></i>',
+                bg: 'rgba(59, 130, 246, 0.15)',
+                color: '#60a5fa'
             });
         });
 
         notifs.forEach(n => {
+            // ✅ Dropdown should show ONLY unread (history modal shows everything)
             const age = NOW - new Date(n.createdAt).getTime();
             const isRead = !!n.read;
-            if (!isRead && age < SEVEN_DAYS) displayList.push(n);
+            if (!isRead && age < SEVEN_DAYS) {
+                displayList.push(n);
+            }
         });
 
     } else if (__notifFilter === 'ALERTS') {
@@ -1336,7 +1383,9 @@ function renderSharedNotifications() {
             if (criticalTypes.includes(n.type)) {
                 const age = NOW - new Date(n.createdAt).getTime();
                 const isRead = !!n.read;
-                if (!isRead && age < SEVEN_DAYS) displayList.push(n);
+                if (!isRead && age < SEVEN_DAYS) {
+                    displayList.push(n);
+                }
             }
         });
     }
@@ -1345,36 +1394,24 @@ function renderSharedNotifications() {
 
     if (displayList.length === 0) {
         list.innerHTML = `
-            <div class="notify-empty">
-                <div style="font-size: 3rem; margin-bottom: 15px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); opacity: 0.8;">
-                    ${__notifFilter === 'ALERTS' ? '🛡️' : '🧘‍♂️'}
-                </div>
-                <div class="empty-text-title" style="color: var(--text-main); font-weight: 800; font-size: 1.05rem; margin-bottom: 5px;">
-                    ${__notifFilter === 'ALERTS' ? 'No Urgent Alerts' : 'You\'re all caught up!'}
-                </div>
-                <div style="font-size: 0.8rem; color: var(--text-muted); opacity: 0.8;">
-                    Nothing new to see here at the moment.
-                </div>
+            <div class="notify-empty" style="padding: 30px 10px;">
+                ${__notifFilter === 'ALERTS'
+                    ? '<i class="fas fa-check-circle" style="display:block; font-size:1.8rem; margin-bottom:12px; color: var(--primary); opacity:0.6;"></i>No urgent alerts. All good!'
+                    : '<i class="fas fa-bell-slash" style="display:block; font-size:1.8rem; margin-bottom:12px; opacity:0.2;"></i>You\'re all caught up!'}
             </div>`;
         return;
     }
 
     list.innerHTML = displayList.map((n, index) => {
-        let iconClass = 'icon-default';
-        let icon = n.icon || '<i class="fas fa-bell"></i>';
-        let quickAction = '';
+        let icon = '<i class="fas fa-bell"></i>';
+        let bg = 'rgba(255,255,255,0.05)';
+        let color = '#fff';
 
-        if (n.type === 'PENDING_UI') { iconClass = 'icon-pending'; }
-        else if (n.type === 'REQUEST_APPROVED') { iconClass = 'icon-success'; icon = '<i class="fas fa-check"></i>'; }
-        else if (n.type === 'REQUEST_REJECTED') { iconClass = 'icon-danger'; icon = '<i class="fas fa-times"></i>'; }
-        else if (n.type === 'DUE_SOON') {
-            iconClass = 'icon-warning'; icon = '<i class="fas fa-exclamation-triangle"></i>';
-            quickAction = `<button class="quick-action-btn warning-btn" onclick="event.stopPropagation(); markNotificationRead('${n.id}'); openPayModal();">Pay Now</button>`;
-        }
-        else if (n.type === 'MESSAGE' || n.type === 'ADMIN_MESSAGE') {
-            iconClass = 'icon-info'; icon = '<i class="fas fa-comment-dots"></i>';
-            quickAction = `<button class="quick-action-btn info-btn" onclick="event.stopPropagation(); markNotificationRead('${n.id}'); openAdminContactModal('whatsapp');">Reply via WhatsApp</button>`;
-        }
+        if (n.type === 'PENDING_UI') { icon = n.icon; bg = n.bg; color = n.color; }
+        else if (n.type === 'REQUEST_APPROVED') { icon = '<i class="fas fa-check"></i>'; bg = 'rgba(16, 185, 129, 0.15)'; color = '#34d399'; }
+        else if (n.type === 'REQUEST_REJECTED') { icon = '<i class="fas fa-times"></i>'; bg = 'rgba(239, 68, 68, 0.15)'; color = '#f87171'; }
+        else if (n.type === 'DUE_SOON') { icon = '<i class="fas fa-exclamation-triangle"></i>'; bg = 'rgba(245, 158, 11, 0.15)'; color = '#fbbf24'; }
+        else if (n.type === 'MESSAGE' || n.type === 'ADMIN_MESSAGE') { icon = '<i class="fas fa-comment-dots"></i>'; bg = 'rgba(59, 130, 246, 0.15)'; color = '#60a5fa'; }
 
         let cleanTitle = escapeHTML(n.title || '').replace(/[✅❌📝💬⏳🔔🎉]/g, '').trim();
         let cleanBody = escapeHTML(n.body || '').replace(/[✅❌📝💬⏳🔔🎉]/g, '').trim();
@@ -1385,22 +1422,20 @@ function renderSharedNotifications() {
         return `
             <div class="notify-item ${isUnread ? 'unread' : ''}"
                  onclick="markNotificationRead('${n.id}', event)"
-                 style="animation-delay: ${delay}s; animation: fadeInUp 0.4s ease both;">
-                <div class="notif-icon-circle ${iconClass}">
+                 style="animation-delay: ${delay}s; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 12px 10px; margin-bottom: 0; border-radius: 0;">
+                <div class="notif-icon-circle" style="background: ${bg}; color: ${color}; width: 36px; height: 36px; font-size: 1rem;">
                     ${icon}
                 </div>
                 <div class="notif-content">
-                    <div class="notif-title">${cleanTitle}</div>
-                    <div class="notif-body">${cleanBody}</div>
-                    ${quickAction}
-                    <div class="notif-time">${timeAgo(new Date(n.createdAt).getTime())}</div>
+                    <div class="notif-title" style="${isUnread ? 'color:#fff;' : 'color:#cbd5e1;'} font-size: 0.85rem;">${cleanTitle}</div>
+                    <div class="notif-body" style="font-size: 0.75rem;">${cleanBody}</div>
+                    <div class="notif-time" style="margin-top: 4px;">${timeAgo(new Date(n.createdAt).getTime())}</div>
                 </div>
-                ${isUnread ? '<div class="unread-indicator"></div>' : ''}
+                ${isUnread ? '<div class="unread-indicator" style="top: 15px;"></div>' : ''}
             </div>
         `;
     }).join("");
 }
-
 
 window.openNotificationHistoryModal = function() {
     closeProfileModal();
@@ -1550,7 +1585,7 @@ function renderNotificationHistoryArchive() {
         list.innerHTML = `
             <div style="text-align:center; padding: 30px 16px; color:var(--text-muted);">
                 <i class="fas fa-bell-slash" style="font-size: 2rem; opacity: 0.4;"></i>
-                <p style="margin:-top: 15px; font-weight: 700;">No notifications found</p>
+                <p style="margin-top: 15px; font-weight: 700;">No notifications found</p>
                 <p style="margin: 0; font-size: 0.9rem;">Try changing filters or search.</p>
             </div>
         `;
@@ -2285,8 +2320,10 @@ window.submitFeedback = function() {
 window.openAnimatedModal = function(modalId) {
     const m = document.getElementById(modalId);
     if (!m) return;
+    try { __haptic('modalOpen'); } catch(_) {}
     m.classList.remove('closing');
     m.style.display = 'flex';
+    document.body.classList.add('modal-open');
     void m.offsetWidth; // Force a browser reflow
     m.classList.add('active');
 };
@@ -2294,11 +2331,14 @@ window.openAnimatedModal = function(modalId) {
 window.closeAnimatedModal = function(modalId, onCompleteCallback) {
     const m = document.getElementById(modalId);
     if (!m) return;
+    try { __haptic('modalClose'); } catch(_) {}
     m.classList.remove('active');
     m.classList.add('closing');
     setTimeout(() => {
         m.style.display = 'none';
         m.classList.remove('closing');
+        const hasOpenModal = !!document.querySelector('.modal-overlay.active, .drawer-overlay.active');
+        if (!hasOpenModal) document.body.classList.remove('modal-open');
         if (typeof onCompleteCallback === 'function') onCompleteCallback();
     }, 300);
 };
@@ -2428,6 +2468,7 @@ window.openAdminContactModal = function(actionType) {
     currentContactAction = actionType;
     const fabMenu = document.getElementById('fabMenu');
     if (fabMenu) fabMenu.classList.remove('active');
+    document.body.classList.remove('fab-open');
 
     const titleEl = document.getElementById('adminContactTitle');
     if(titleEl) {
@@ -2534,7 +2575,9 @@ function toggleFabMenu(forceOpen) {
         ? forceOpen
         : !fabMenu.classList.contains('active');
 
+    try { __haptic(shouldOpen ? 'tap' : 'soft'); } catch(_) {}
     fabMenu.classList.toggle('active', shouldOpen);
+    document.body.classList.toggle('fab-open', shouldOpen);
 
     const fabBtn = document.getElementById('fabButton') || document.querySelector('.fab-main');
     if (fabBtn) fabBtn.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
@@ -2553,6 +2596,7 @@ function toggleFabMenu(forceOpen) {
         const clickedInside = fabMenu.contains(e.target) || fabBtn.contains(e.target);
         if (!clickedInside) {
             fabMenu.classList.remove('active');
+            document.body.classList.remove('fab-open');
             fabBtn.setAttribute('aria-expanded', 'false');
         }
     });
@@ -2564,6 +2608,7 @@ function toggleFabMenu(forceOpen) {
         if (!fabMenu || !fabBtn) return;
         if (fabMenu.classList.contains('active')) {
             fabMenu.classList.remove('active');
+            document.body.classList.remove('fab-open');
             fabBtn.setAttribute('aria-expanded', 'false');
         }
     });
@@ -2571,6 +2616,7 @@ function toggleFabMenu(forceOpen) {
 
 // 12. Custom Alert
 window.showCustomAlert = function(message, isSuccess = false) {
+    try { __haptic(isSuccess ? 'success' : 'alert'); } catch(_) {}
     const iconEl = document.getElementById('customAlertIcon');
     const msgEl = document.getElementById('customAlertMessage');
     const titleEl = document.getElementById('customAlertTitle');
@@ -2589,6 +2635,7 @@ window.closeCustomAlert = function() { closeAnimatedModal('customAlertModal'); }
 
 // 13. Custom Confirm
 window.showCustomConfirm = function(message, callback) {
+    try { __haptic('warning'); } catch(_) {}
     document.getElementById('customConfirmMessage').textContent = message;
     __confirmCallback = callback;
     openAnimatedModal('customConfirmModal');
@@ -2647,7 +2694,6 @@ function setSmartStallzAdvice() {
         "Stallz will never ask for your password via phone or WhatsApp. Keep your account secure.",
         "Repaying your loan on time increases your internal trust score for future, larger requests.",
         "Ensure your collateral details are accurate to speed up your approval process to under 30 minutes.",
-        "Quick. Easy. Reliable. That’s our promise to you. Need help? Use the chat icon below.",
         "Borrow only what you need. Keeping your loan amounts manageable ensures stress-free repayments.",
         "Did you know? You can make partial payments anytime before your due date to reduce your final burden.",
         "Always verify you are communicating with an official Stallz Admin before making mobile money transfers.",
@@ -2834,3 +2880,4 @@ async function initPushNotifications(forcePrompt = false) {
         return false;
     }
 }
+

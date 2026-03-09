@@ -7,7 +7,7 @@
   // ---------------------------
   // 1) Versioning
   // ---------------------------
-  cfg.version = cfg.version || "2.5.0";
+  cfg.version = cfg.version || "2.5.2";
   g.STALLZ_APP_VERSION = cfg.version;
 
   // ---------------------------
