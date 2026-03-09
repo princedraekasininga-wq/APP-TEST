@@ -44,6 +44,10 @@
             if (savedTheme === 'day' || (!savedTheme && currentHour >= 6 && currentHour < 18)) {
                 document.body.classList.add('day-mode');
             }
+            // INSTANT BOOT: If we have saved local data, inject CSS to permanently kill the splash screen
+            if (localStorage.getItem('stallz_client_profile')) {
+                document.write('<style>#appLoader { display: none !important; opacity: 0 !important; visibility: hidden !important; }</style>');
+            }
         })();
     </script>
 

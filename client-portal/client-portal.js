@@ -354,10 +354,10 @@ function animateValue(obj, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-function bootstrapSharedSession() {
+function bootstrapSharedSession(hasCache = false) {
     (async () => {
         try {
-            console.log("⏳ Starting Portal...");
+            console.log("⏳ Starting Portal Session...");
             const user = await window.StallzAuth?.onceAuthState?.();
 
             if (!user) {
@@ -368,23 +368,27 @@ function bootstrapSharedSession() {
             currentUserUid = user.uid;
 
             // --- PUSH NOTIFICATION AUTO-START ---
-            // If the user already granted permission, start listening for foreground messages
             if ('Notification' in window && Notification.permission === 'granted') {
-                // Prefer shared push glue (shared/push.js)
                 if (window.StallzPush?.initPushNotifications) {
                     window.StallzPush.initPushNotifications({ forcePrompt: false });
                 } else if (typeof initPushNotifications === 'function') {
                     initPushNotifications(false);
                 }
             }
-            // ------------------------------------
 
-            __stallzFirstDataLoaded = false;
-            __setSkeletonLoading(true);
-            // Fade out the full-screen loader early, skeletons will carry the wait.
-            setTimeout(hideAppLoader, 450);
+            // If we have no cache, show skeletons. Otherwise, skip them!
+            if (!hasCache) {
+                __stallzFirstDataLoaded = false;
+                __setSkeletonLoading(true);
+                setTimeout(hideAppLoader, 450);
+            } else {
+                __stallzFirstDataLoaded = true;
+                __setSkeletonLoading(false);
+            }
+
             __updateRingGradientFromTheme();
 
+            // Firebase Silent Background Sync
             if (typeof firebase !== "undefined") {
                 const userRef = firebase.database().ref(`clients/${currentUserUid}`);
 
@@ -393,9 +397,12 @@ function bootstrapSharedSession() {
 
                     updateHeaderGreeting(val);
                     currentUserPhone = val.phone || "";
+
+                    // SAVE FRESH DATA TO CACHE
                     localStorage.setItem("stallz_client_profile", JSON.stringify(val));
                     __lastClientProfileCache = val;
 
+                    // Silently Re-render with Fresh DB Data
                     if (val.loans) {
                         const myLoans = Object.values(val.loans).filter(l => l && typeof l === "object");
                         const byId = new Map();
@@ -410,26 +417,22 @@ function bootstrapSharedSession() {
 
                         const deduped = Array.from(byId.values()).map(x => x.loan);
                         renderLoansTable(deduped);
-                        try { renderLoanRequestProgressPanel(); } catch(e) {}
+                        try { renderLoanRequestProgressPanel(true); } catch(e) {}
                     } else {
                         renderLoansTable([]);
-                        try { renderLoanRequestProgressPanel(); } catch(e) {}
+                        try { renderLoanRequestProgressPanel(true); } catch(e) {}
                     }
 
-                    // ==========================================================
-                    // 🧠 SMART CLOUD-BASED SYNC DETECTOR
-                    // ==========================================================
                     const hasLoans = val.loans && Object.keys(val.loans).length > 0;
                     const hasDismissed = val.syncPromptDismissed === true;
 
-                    // Only popup if they have NO loans AND have NOT explicitly clicked "I am a new client"
                     if (!hasLoans && !hasDismissed) {
                         setTimeout(() => {
                             const syncModal = document.getElementById('firstTimeSyncModal');
                             if(syncModal) syncModal.style.display = 'flex';
                         }, 1000);
                     }
-                    // ==========================================================
+
                     __updateRingGradientFromTheme();
                     if (!__stallzFirstDataLoaded) {
                         __stallzFirstDataLoaded = true;
@@ -439,16 +442,10 @@ function bootstrapSharedSession() {
                     }
                     hideAppLoader();
                 }, (error) => {
-                    // Catch Permission Denied and network errors
                     console.error("Firebase read error:", error);
                     __setSkeletonLoading(false);
                     hideAppLoader();
-
-                    if (typeof showCustomAlert === "function") {
-                        showCustomAlert("Access denied. Please check your connection or contact support.");
-                    } else {
-                        alert("Access denied. Please check your connection or contact support.");
-                    }
+                    if (!hasCache) showCustomAlert("Access denied. Please check your connection or contact support.");
                 });
             }
 
@@ -480,77 +477,73 @@ function initClientPortal() {
         updateCalculator();
     }
 
-    // --- Hook up the Live Request Calculator ---
     const reqAmountInput = document.getElementById('reqAmount');
-    if(reqAmountInput) {
-        // This triggers the calculator every time a character is typed
-        reqAmountInput.addEventListener('input', window.updateRequestCalculator);
-    }
-    // -----------------------------------------------
+    if(reqAmountInput) { reqAmountInput.addEventListener('input', window.updateRequestCalculator); }
 
     const savedTheme = localStorage.getItem('stallz-theme');
     const currentHour = new Date().getHours();
 
-    if (savedTheme === 'day') {
-        document.body.classList.add('day-mode');
-    } else if (savedTheme === 'night') {
-        document.body.classList.remove('day-mode');
-    } else if (currentHour >= 6 && currentHour < 18) {
-        document.body.classList.add('day-mode');
-    }
+    if (savedTheme === 'day') { document.body.classList.add('day-mode'); }
+    else if (savedTheme === 'night') { document.body.classList.remove('day-mode'); }
+    else if (currentHour >= 6 && currentHour < 18) { document.body.classList.add('day-mode'); }
 
     __wireHaptics();
     __bindContextBubble();
 
     // ====== INSTANT CACHE HYDRATION ======
-    // Instantly load the name from local memory before the internet connects
+    let hasCache = false;
     try {
         const cachedProfile = localStorage.getItem("stallz_client_profile");
         if (cachedProfile) {
             const parsedProfile = JSON.parse(cachedProfile);
             __lastClientProfileCache = parsedProfile;
-            if (typeof updateHeaderGreeting === 'function') {
-                updateHeaderGreeting(parsedProfile);
+            if (typeof updateHeaderGreeting === 'function') updateHeaderGreeting(parsedProfile);
+
+            // Instantly render UI from Memory
+            if (parsedProfile.loans) {
+                const myLoans = Object.values(parsedProfile.loans).filter(l => l && typeof l === "object");
+                const byId = new Map();
+                myLoans.forEach((ln) => {
+                  const key = (ln && ln.id !== undefined && ln.id !== null) ? String(ln.id) : "";
+                  if (!key) return;
+                  const t = Date.parse(ln.updatedAt || ln.createdAt || "");
+                  const ts = isNaN(t) ? 0 : t;
+                  const prev = byId.get(key);
+                  if (!prev || ts >= prev.ts) byId.set(key, { loan: ln, ts });
+                });
+                const deduped = Array.from(byId.values()).map(x => x.loan);
+                renderLoansTable(deduped);
+            } else {
+                renderLoansTable([]);
             }
+
+            hasCache = true;
+            hideAppLoader(); // Kill loader immediately
         }
     } catch(e) { console.warn("Cache hydration skipped", e); }
     // =====================================
 
-    bootstrapSharedSession();
+    // Pass the cache status to Firebase so it knows to be silent
+    bootstrapSharedSession(hasCache);
 
-    // CRITICAL FIX: Map overlay clicks to specific close functions so form states don't leak
     window.onclick = function(event) {
         if (event.target.classList.contains('modal-overlay') || event.target.classList.contains('drawer-overlay')) {
             const id = event.target.id;
-
-            // Map ID to explicit function if it exists to ensure proper cleanup
-            if (id === 'requestModal' && typeof window.closeRequestModal === 'function') {
-                window.closeRequestModal();
-            } else if (id === 'profileModal' && typeof window.closeProfileModal === 'function') {
-                window.closeProfileModal();
-            } else if (id === 'firstTimeSyncModal' && typeof window.closeFirstTimeSync === 'function') {
-                window.closeFirstTimeSync();
-            } else if (id === 'payModal' && typeof window.closePayModal === 'function') {
-                window.closePayModal();
-            } else if (id === 'statementsModal' && typeof window.closeStatementsModal === 'function') {
-                window.closeStatementsModal();
-            } else if (id === 'historyModal' && typeof window.closeHistoryModal === 'function') {
-                window.closeHistoryModal();
-            } else if (id === 'uploadModal' && typeof window.closeUploadModal === 'function') {
-                window.closeUploadModal();
-            } else if (id === 'adminContactModal' && typeof window.closeAdminContactModal === 'function') {
-                window.closeAdminContactModal();
-            } else if (id === 'clientDetailsModal' && typeof window.closeClientDetailsModal === 'function') {
-                window.closeClientDetailsModal();
-            } else if (typeof closeAnimatedModal === 'function') {
-                closeAnimatedModal(id);
-            } else {
-                event.target.style.display = 'none';
-            }
+            if (id === 'requestModal' && typeof window.closeRequestModal === 'function') { window.closeRequestModal(); }
+            else if (id === 'profileModal' && typeof window.closeProfileModal === 'function') { window.closeProfileModal(); }
+            else if (id === 'firstTimeSyncModal' && typeof window.closeFirstTimeSync === 'function') { window.closeFirstTimeSync(); }
+            else if (id === 'payModal' && typeof window.closePayModal === 'function') { window.closePayModal(); }
+            else if (id === 'statementsModal' && typeof window.closeStatementsModal === 'function') { window.closeStatementsModal(); }
+            else if (id === 'historyModal' && typeof window.closeHistoryModal === 'function') { window.closeHistoryModal(); }
+            else if (id === 'uploadModal' && typeof window.closeUploadModal === 'function') { window.closeUploadModal(); }
+            else if (id === 'adminContactModal' && typeof window.closeAdminContactModal === 'function') { window.closeAdminContactModal(); }
+            else if (id === 'clientDetailsModal' && typeof window.closeClientDetailsModal === 'function') { window.closeClientDetailsModal(); }
+            else if (typeof closeAnimatedModal === 'function') { closeAnimatedModal(id); }
+            else { event.target.style.display = 'none'; }
         }
-        // Note: Notification dropdown outside-click is handled safely inside toggleNotifications() now.
     };
 }
+
 function hideAppLoader() {
     const loader = document.getElementById("appLoader");
     if (loader) {
@@ -950,19 +943,31 @@ body.day-mode .lr-msg-body{ color: #475569; }
     const uid = window.__stallz_current_uid || (window.currentUser && window.currentUser.uid) || (window.firebase && window.firebase.auth && window.firebase.auth().currentUser && window.firebase.auth().currentUser.uid) || null;
     let reqs = [];
 
+    // 1. Instantly load requests from Cache Memory
     try {
+        const cachedReqs = localStorage.getItem("stallz_client_reqs");
+        if (cachedReqs) reqs = JSON.parse(cachedReqs);
+    } catch(e) {}
+
+    // 2. Fetch fresh from Network
+    try {
+      let freshReqs = [];
       if (window.StallzShared && typeof window.StallzShared.listLoanRequestsForClient === "function" && uid) {
-        reqs = await window.StallzShared.listLoanRequestsForClient(uid);
+        freshReqs = await window.StallzShared.listLoanRequestsForClient(uid);
+      }
+
+      if ((!freshReqs || !freshReqs.length) && uid && window.firebase && window.firebase.database) {
+          const snap = await window.firebase.database().ref(`clients/${uid}/requests`).once("value");
+          const val = snap.val() || {};
+          freshReqs = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+      }
+
+      // If we found fresh requests, override cache
+      if (freshReqs && freshReqs.length > 0) {
+          reqs = freshReqs;
+          localStorage.setItem("stallz_client_reqs", JSON.stringify(reqs));
       }
     } catch (_) {}
-
-    if ((!reqs || !reqs.length) && uid && window.firebase && window.firebase.database) {
-      try {
-        const snap = await window.firebase.database().ref(`clients/${uid}/requests`).once("value");
-        const val = snap.val() || {};
-        reqs = Object.keys(val).map(k => ({ id: k, ...val[k] }));
-      } catch (_) {}
-    }
 
     reqs.sort((a, b) => {
       const getMs = (val) => {
