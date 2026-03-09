@@ -13,16 +13,53 @@
     <link rel="apple-touch-icon" href="../apple-touch.png">
 
     <link rel="icon" type="image/png" href="../assets/logo_images/myfavicon.png">
-    
+
     <style>
-        /* UPDATED: Deepest navy/black to match the dark theme */
+        /* Base Theme - Prevent flash */
         html, body { margin:0; background:#030712; color:#e5e7eb; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+        body.day-mode { background: #f1f5f9; color: #0f172a; }
+
+        /* CRITICAL CSS - Prevent Big Logo Flashes */
+        .app-loader-overlay { position: fixed; inset: 0; background: #030712; z-index: 99999; display: flex; align-items: center; justify-content: center; }
+        body.day-mode .app-loader-overlay { background: #f1f5f9; }
+
+        .logo-pulse-wrapper { width: 80px !important; height: 80px !important; }
+        .loader-logo { width: 100% !important; height: 100% !important; max-width: 80px; max-height: 80px; object-fit: contain; }
+
+        /* Protect the header logo too just in case */
+        .logo-box { width: 38px !important; height: 38px !important; overflow: hidden; }
+        .portal-logo { width: 100% !important; height: 100% !important; max-width: 38px; max-height: 38px; object-fit: cover; }
     </style>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700;800;900&display=swap" rel="stylesheet">
     <link id="clientStylesheet" rel="stylesheet" href="client-portal.css">
 </head>
 <body>
+
+    <script>
+        (function() {
+            var savedTheme = localStorage.getItem('stallz-theme');
+            var currentHour = new Date().getHours();
+            if (savedTheme === 'day' || (!savedTheme && currentHour >= 6 && currentHour < 18)) {
+                document.body.classList.add('day-mode');
+            }
+        })();
+    </script>
+
+    <div id="appLoader" class="app-loader-overlay">
+        <div class="aurora-bg-loader">
+            <div class="blob-loader b1"></div>
+            <div class="blob-loader b2"></div>
+        </div>
+        <div class="loader-content">
+            <div class="logo-pulse-wrapper">
+                <img src="../assets/logo_images/my-logo.png" alt="Stallz Logo" class="loader-logo">
+            </div>
+            <div class="loader-text">Loading Portal</div>
+            <div class="loader-bar"><div class="loader-progress"></div></div>
+        </div>
+    </div>
 
     <div class="portal-shell">
 
@@ -59,23 +96,15 @@
         </div>
 
         <script>
-            // Set a dynamic time-based greeting
             function updateTimeGreeting() {
                 const banner = document.getElementById('dynamicWelcomeBanner');
                 if (!banner) return;
-
                 const hour = new Date().getHours();
                 let greeting = "GOOD EVENING";
-
-                if (hour >= 5 && hour < 12) {
-                    greeting = "GOOD MORNING";
-                } else if (hour >= 12 && hour < 18) {
-                    greeting = "GOOD AFTERNOON";
-                }
-
+                if (hour >= 5 && hour < 12) greeting = "GOOD MORNING";
+                else if (hour >= 12 && hour < 18) greeting = "GOOD AFTERNOON";
                 banner.textContent = greeting;
             }
-
             document.addEventListener('DOMContentLoaded', updateTimeGreeting);
         </script>
 
@@ -98,7 +127,6 @@
                                 <span id="amortPreviewText">--</span>
                             </div>
                         </div>
-
                     </div>
 
                     <div class="hero-right-visual">
@@ -111,10 +139,7 @@
                                     </linearGradient>
                                     <filter id="glow-shadow" x="-50%" y="-50%" width="200%" height="200%">
                                         <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-                                        <feMerge>
-                                            <feMergeNode in="coloredBlur"/>
-                                            <feMergeNode in="SourceGraphic"/>
-                                        </feMerge>
+                                        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
                                     </filter>
                                 </defs>
                                 <circle class="ring-track" cx="80" cy="80" r="70" fill="none" stroke-width="10" stroke-linecap="round" />
@@ -194,8 +219,7 @@
 
         <div style="margin-bottom: 20px;">
             <h3 class="section-title-small">My Loans</h3>
-            <div id="portalLoansList" class="mobile-loans-list fade-in delay-2">
-                </div>
+            <div id="portalLoansList" class="mobile-loans-list fade-in delay-2"></div>
         </div>
 
         <div class="quick-actions-scroll fade-in delay-2" style="margin-bottom: 100px;">
