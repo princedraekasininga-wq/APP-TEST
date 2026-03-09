@@ -482,10 +482,10 @@ function initClientPortal() {
 
     // --- Hook up the Live Request Calculator ---
     const reqAmountInput = document.getElementById('reqAmount');
-if(reqAmountInput) {
-    // This triggers the calculator every time a character is typed
-    reqAmountInput.addEventListener('input', window.updateRequestCalculator);
-}
+    if(reqAmountInput) {
+        // This triggers the calculator every time a character is typed
+        reqAmountInput.addEventListener('input', window.updateRequestCalculator);
+    }
     // -----------------------------------------------
 
     const savedTheme = localStorage.getItem('stallz-theme');
@@ -518,33 +518,39 @@ if(reqAmountInput) {
 
     bootstrapSharedSession();
 
+    // CRITICAL FIX: Map overlay clicks to specific close functions so form states don't leak
     window.onclick = function(event) {
-        // If they click the dark background behind ANY modal or drawer, close via the universal closer
         if (event.target.classList.contains('modal-overlay') || event.target.classList.contains('drawer-overlay')) {
-            if (typeof closeAnimatedModal === 'function') {
-                closeAnimatedModal(event.target.id);
+            const id = event.target.id;
+
+            // Map ID to explicit function if it exists to ensure proper cleanup
+            if (id === 'requestModal' && typeof window.closeRequestModal === 'function') {
+                window.closeRequestModal();
+            } else if (id === 'profileModal' && typeof window.closeProfileModal === 'function') {
+                window.closeProfileModal();
+            } else if (id === 'firstTimeSyncModal' && typeof window.closeFirstTimeSync === 'function') {
+                window.closeFirstTimeSync();
+            } else if (id === 'payModal' && typeof window.closePayModal === 'function') {
+                window.closePayModal();
+            } else if (id === 'statementsModal' && typeof window.closeStatementsModal === 'function') {
+                window.closeStatementsModal();
+            } else if (id === 'historyModal' && typeof window.closeHistoryModal === 'function') {
+                window.closeHistoryModal();
+            } else if (id === 'uploadModal' && typeof window.closeUploadModal === 'function') {
+                window.closeUploadModal();
+            } else if (id === 'adminContactModal' && typeof window.closeAdminContactModal === 'function') {
+                window.closeAdminContactModal();
+            } else if (id === 'clientDetailsModal' && typeof window.closeClientDetailsModal === 'function') {
+                window.closeClientDetailsModal();
+            } else if (typeof closeAnimatedModal === 'function') {
+                closeAnimatedModal(id);
             } else {
                 event.target.style.display = 'none';
             }
         }
-
-        // Close notification dropdown when clicking outside, but ensure active class is removed
-        if (!event.target.closest('.notification-wrapper')) {
-            const dropdown = document.getElementById('notificationDropdown');
-            if (dropdown) {
-                if (dropdown.classList.contains('active')) {
-                    dropdown.classList.remove('active');
-                    setTimeout(() => {
-                        if (!dropdown.classList.contains('active')) dropdown.style.display = 'none';
-                    }, 300);
-                } else {
-                    dropdown.style.display = 'none';
-                }
-            }
-        }
+        // Note: Notification dropdown outside-click is handled safely inside toggleNotifications() now.
     };
-} // <--- THIS BRACKET WAS MISSING!
-
+}
 function hideAppLoader() {
     const loader = document.getElementById("appLoader");
     if (loader) {
@@ -616,8 +622,8 @@ function renderLoansTable(loansData) {
             .p-loan-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, var(--primary, #4ade80), #22c55e); box-shadow: 0 2px 10px rgba(74,222,128,0.5); }
             .p-loan-card.is-overdue::before { background: linear-gradient(90deg, #f87171, #ef4444); box-shadow: 0 2px 10px rgba(239,68,68,0.5); }
             .p-loan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-            .p-loan-id { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-            .p-loan-badge { padding: 6px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 900; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+            .p-loan-id { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 800; letter-spacing: 0.5px; text-shadow: none; box-shadow: none; }
+            .p-loan-badge { padding: 6px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 900; letter-spacing: 0.5px; box-shadow: none; text-shadow: none; }
             .p-loan-badge.active { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.4); }
             .p-loan-badge.overdue { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); }
             .p-loan-balance-label { font-size: 0.85rem; color: rgba(255,255,255,0.8); margin-bottom: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -917,8 +923,8 @@ body.day-mode .lr-circle{ border: 6px solid #ffffff; box-shadow: 0 10px 30px rgb
 body.day-mode .lr-label{ color: #475569; }
 body.day-mode .lr-message{ background: #ffffff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
 body.day-mode .lr-msg-body{ color: #475569; }
-.rp-empty { text-align: center; padding: 20px 10px; }
-.rp-empty-icon { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.8; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+.rp-empty { text-align: center; padding: 16px 10px; color: var(--text-muted); }
+.rp-empty-icon { font-size: 1.8rem; opacity: 0.9; margin-bottom: 8px; color: var(--primary); filter: none; text-shadow: none; box-shadow: none; }
 .rp-empty-title { font-weight: 800; font-size: 1.1rem; color: var(--text-main); margin-bottom: 5px; }
 .rp-empty-sub { font-size: 0.85rem; color: var(--text-muted); }
 @media (max-width: 380px){
@@ -1261,11 +1267,19 @@ function renderSharedNotifications() {
 
     let notifs = [];
     let pendingReqs = [];
+
+    // CRITICAL FIX 1: Ensure strict array fallback to prevent .filter / .sort crashes
     try {
-        const allReqs = window.StallzShared?.listLoanRequestsForClient?.(uid) || [];
-        pendingReqs = allReqs.filter(r => String(r.status || "").toUpperCase() === "PENDING");
-        notifs = window.StallzShared?.getUserNotifications?.(uid) || [];
-    } catch (e) { console.error("Notif Error", e); }
+        const allReqs = window.StallzShared?.listLoanRequestsForClient?.(uid);
+        pendingReqs = Array.isArray(allReqs) ? allReqs.filter(r => String(r.status || "").toUpperCase() === "PENDING") : [];
+
+        const fetchedNotifs = window.StallzShared?.getUserNotifications?.(uid);
+        notifs = Array.isArray(fetchedNotifs) ? fetchedNotifs : [];
+    } catch (e) {
+        console.error("Notif Error", e);
+        notifs = [];
+        pendingReqs = [];
+    }
 
     const unreadCount = pendingReqs.length + notifs.filter(n => !n.read).length;
     if (badge) {
@@ -1282,11 +1296,12 @@ function renderSharedNotifications() {
     const dropdownHeader = document.querySelector(".dropdown-header");
 
     if (dropdownHeader && !dropdownHeader.querySelector('.notif-filters')) {
+        // CRITICAL FIX 2: Removed inline text-shadow for a clean, premium look
         dropdownHeader.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:12px;">
                 <span style="font-weight:900; font-size:1.15rem; letter-spacing:0.5px;">Activity</span>
                 <div style="display:flex; gap:12px; align-items:center;">
-                    <button id="markAllBtn" onclick="markAllNotificationsRead(event)" style="background:none; border:none; color:var(--primary); font-size:0.75rem; font-weight:800; cursor:pointer; padding:0; display: ${unreadCount > 0 ? 'block' : 'none'}; text-shadow: 0 0 10px rgba(74,222,128,0.4);">Mark all read</button>
+                    <button id="markAllBtn" onclick="markAllNotificationsRead(event)" style="background:none; border:none; color:var(--primary); font-size:0.75rem; font-weight:800; cursor:pointer; padding:0; display: ${unreadCount > 0 ? 'block' : 'none'};">Mark all read</button>
                     <button id="viewAllNotifBtn" onclick="openNotificationHistoryModal()" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 8px; color:#fff; font-size:0.7rem; font-weight:800; cursor:pointer;">All History</button>
                 </div>
             </div>
@@ -1344,9 +1359,10 @@ function renderSharedNotifications() {
     displayList.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     if (displayList.length === 0) {
+        // CRITICAL FIX 2: Removed filter:drop-shadow from empty state icon
         list.innerHTML = `
             <div class="notify-empty">
-                <div style="font-size: 3rem; margin-bottom: 15px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); opacity: 0.8;">
+                <div style="font-size: 3rem; margin-bottom: 15px; opacity: 0.8;">
                     ${__notifFilter === 'ALERTS' ? '🛡️' : '🧘‍♂️'}
                 </div>
                 <div class="empty-text-title" style="color: var(--text-main); font-weight: 800; font-size: 1.05rem; margin-bottom: 5px;">
@@ -1376,8 +1392,9 @@ function renderSharedNotifications() {
             quickAction = `<button class="quick-action-btn info-btn" onclick="event.stopPropagation(); markNotificationRead('${n.id}'); openAdminContactModal('whatsapp');">Reply via WhatsApp</button>`;
         }
 
-        let cleanTitle = escapeHTML(n.title || '').replace(/[✅❌📝💬⏳🔔🎉]/g, '').trim();
-        let cleanBody = escapeHTML(n.body || '').replace(/[✅❌📝💬⏳🔔🎉]/g, '').trim();
+        // CRITICAL FIX 3: Removed aggressive Regex replace to keep Emojis intact
+        let cleanTitle = escapeHTML(n.title || '').trim();
+        let cleanBody = escapeHTML(n.body || '').trim();
 
         const isUnread = !n.read && n.type !== 'PENDING_UI';
         const delay = index * 0.05;
@@ -1400,7 +1417,6 @@ function renderSharedNotifications() {
         `;
     }).join("");
 }
-
 
 window.openNotificationHistoryModal = function() {
     closeProfileModal();
@@ -1514,9 +1530,15 @@ function renderNotificationHistoryArchive() {
     }
 
     let notifs = [];
+
+    // CRITICAL FIX: Ensure strict array fallback to prevent .sort() / .filter() crashes
     try {
-        notifs = window.StallzShared?.getUserNotifications?.(uid) || [];
-    } catch (e) { console.error("Archive Error", e); }
+        const fetched = window.StallzShared?.getUserNotifications?.(uid);
+        notifs = Array.isArray(fetched) ? fetched : [];
+    } catch (e) {
+        console.error("Archive Error", e);
+        notifs = [];
+    }
 
     notifs.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -1547,11 +1569,12 @@ function renderNotificationHistoryArchive() {
     });
 
     if (notifs.length === 0) {
+        // Cleaned up the empty state to match the premium flat look
         list.innerHTML = `
-            <div style="text-align:center; padding: 30px 16px; color:var(--text-muted);">
-                <i class="fas fa-bell-slash" style="font-size: 2rem; opacity: 0.4;"></i>
-                <p style="margin:-top: 15px; font-weight: 700;">No notifications found</p>
-                <p style="margin: 0; font-size: 0.9rem;">Try changing filters or search.</p>
+            <div style="text-align:center; padding: 40px 16px; color:var(--text-muted);">
+                <i class="fas fa-bell-slash" style="font-size: 2.5rem; opacity: 0.3; margin-bottom: 15px; display: block;"></i>
+                <p style="margin: 0 0 5px 0; font-weight: 800; font-size: 1.05rem; color: var(--text-main);">No notifications found</p>
+                <p style="margin: 0; font-size: 0.85rem;">Try changing your filters or search.</p>
             </div>
         `;
         return;
@@ -1571,30 +1594,43 @@ function renderNotificationHistoryArchive() {
 
     let html = '';
     let lastGroup = '';
+
     notifs.forEach((n, idx) => {
         const grp = dayLabel(n.createdAt || Date.now());
         if (grp !== lastGroup) {
             lastGroup = grp;
-            html += `<div style="padding:10px 6px 6px; font-weight:900; font-size:0.82rem; opacity:0.85;">${escapeHTML(grp)}</div>`;
+            html += `<div style="padding:15px 6px 6px; font-weight:800; font-size:0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">${escapeHTML(grp)}</div>`;
         }
 
         const isUnread = !n.read;
-        const title = escapeHTML(n.title || "Notification");
-        const body = escapeHTML(n.body || "");
+        const cleanTitle = escapeHTML(n.title || "Notification").trim();
+        const cleanBody = escapeHTML(n.body || "").trim();
+
+        // Bring over the specific icon classes so history matches the main dropdown
+        let iconClass = 'icon-default';
+        let icon = n.icon || '<i class="fas fa-bell"></i>';
+
+        if (n.type === 'PENDING_UI') { iconClass = 'icon-pending'; }
+        else if (n.type === 'REQUEST_APPROVED') { iconClass = 'icon-success'; icon = '<i class="fas fa-check"></i>'; }
+        else if (n.type === 'REQUEST_REJECTED') { iconClass = 'icon-danger'; icon = '<i class="fas fa-times"></i>'; }
+        else if (n.type === 'DUE_SOON') { iconClass = 'icon-warning'; icon = '<i class="fas fa-exclamation-triangle"></i>'; }
+        else if (n.type === 'MESSAGE' || n.type === 'ADMIN_MESSAGE') { iconClass = 'icon-info'; icon = '<i class="fas fa-comment-dots"></i>'; }
+
+        // Formatting timestamp to show only time, since the date is in the group header
+        const timeString = new Date(n.createdAt || Date.now()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
         html += `
-          <div class="notify-item ${isUnread ? 'unread' : ''}" style="border-radius:14px; margin:6px 0; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); padding: 12px 12px;"
+          <div class="notify-item ${isUnread ? 'unread' : ''}" style="margin: 6px 0; padding: 14px;"
                onclick="markNotificationRead('${n.id}', event)">
-            <div class="notif-icon-circle" style="width: 36px; height: 36px; font-size: 1rem;">
-              <i class="fas fa-bell"></i>
+            <div class="notif-icon-circle ${iconClass}">
+              ${icon}
             </div>
             <div class="notif-content">
-              <div class="notif-title" style="${isUnread ? 'color:#fff;' : 'color:#cbd5e1;'} font-size: 0.9rem;">${title}</div>
-              <div class="notif-body" style="font-size:0.82rem; opacity:0.9;">${body}</div>
-              <div class="notif-time" style="margin-top:6px; font-size:0.72rem; opacity:0.65;">
-                ${new Date(n.createdAt || Date.now()).toLocaleString()}
-              </div>
+              <div class="notif-title">${cleanTitle}</div>
+              <div class="notif-body">${cleanBody}</div>
+              <div class="notif-time">${timeString}</div>
             </div>
+            ${isUnread ? '<div class="unread-indicator"></div>' : ''}
           </div>
         `;
     });
@@ -2091,71 +2127,42 @@ async function renderLoanHistoryModal() {
     try {
         const snap = await firebase.database().ref(`clients/${currentUserUid}/loans`).once('value');
         const loansObj = snap.val() || {};
-        const loans = Object.values(loansObj).filter(Boolean)
-            .sort((a, b) => new Date(b.startDate || b.createdAt) - new Date(a.startDate || a.createdAt));
+        const loans = Object.values(loansObj).filter(Boolean).sort((a, b) => new Date(b.startDate || b.createdAt) - new Date(a.startDate || a.createdAt));
 
-        if (loans.length === 0) {
-            body.innerHTML = `<div style="padding:40px 20px; text-align:center; color:var(--text-muted); font-size:0.85rem;">No previous records found.</div>`;
-            return;
-        }
+        if (loans.length === 0) { body.innerHTML = `<div style="padding:40px 20px; text-align:center; color:var(--text-muted); font-size:0.85rem;">No previous records found.</div>`; return; }
 
         body.innerHTML = loans.map((l, index) => {
             const status = String(l.status || "PENDING").toUpperCase();
             const amt = Number(l.amount || 0);
             const dt = __safeDate(l.startDate || l.createdAt);
 
-            let icon = "fa-clock";
-            let iconClass = "icon-loan";
-            let statusLabel = "Processing";
-            let statusColor = "var(--text-muted)";
+            let icon = "fa-clock"; let iconClass = "icon-loan"; let statusLabel = "Processing"; let statusColor = "var(--text-muted)";
 
-            if (status === "PAID" || status === "CLOSED") {
-                icon = "fa-check-circle";
-                iconClass = "icon-pay";
-                statusLabel = "Fully Settled";
-                statusColor = "#4ade80";
-            } else if (status === "OVERDUE") {
-                icon = "fa-exclamation-triangle";
-                iconClass = "icon-red";
-                statusLabel = "Overdue Payment";
-                statusColor = "#f87171";
-            } else if (status === "ACTIVE") {
-                icon = "fa-sync-alt";
-                iconClass = "icon-loan";
-                statusLabel = "Active Loan";
-                statusColor = "#60a5fa";
-            }
+            if (status === "PAID" || status === "CLOSED") { icon = "fa-check-circle"; iconClass = "icon-pay"; statusLabel = "Fully Settled"; statusColor = "#4ade80"; }
+            else if (status === "OVERDUE") { icon = "fa-exclamation-triangle"; iconClass = "icon-red"; statusLabel = "Overdue Payment"; statusColor = "#f87171"; }
+            else if (status === "ACTIVE") { icon = "fa-sync-alt"; iconClass = "icon-loan"; statusLabel = "Active Loan"; statusColor = "#60a5fa"; }
 
             const delay = index * 0.05;
 
             return `
                 <div class="stmt-entry h-entry" style="animation-delay: ${delay}s;">
                     <div class="stmt-left">
-                        <div class="stmt-icon ${iconClass}">
-                            <i class="fas ${icon}"></i>
-                        </div>
+                        <div class="stmt-icon ${iconClass}"><i class="fas ${icon}"></i></div>
                         <div class="stmt-info">
                             <div class="stmt-title">Loan Record #${l.id}</div>
                             <div class="stmt-date">${dt ? dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</div>
-                            <div class="stmt-detail-row" style="color: ${statusColor}; font-weight: 800; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;">
-                                ${statusLabel}
-                            </div>
+                            <div class="stmt-detail-row" style="color: ${statusColor}; font-weight: 800; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;">${statusLabel}</div>
                         </div>
                     </div>
                     <div class="stmt-right">
-                        <div class="stmt-amt" style="color: #fff; font-weight: 900; font-size: 1rem;">${__fmtMoney(amt)}</div>
-                        <div class="stmt-sub-label" style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 3px;">
-                            ${escapeHTML(l.collateralItem || 'Personal')}
-                        </div>
+                        <div class="stmt-amt" style="font-weight: 900; font-size: 1rem; color: var(--text-main);">${__fmtMoney(amt)}</div>
+                        <div class="stmt-sub-label" style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 3px;">${escapeHTML(l.collateralItem || 'Personal')}</div>
                     </div>
                 </div>
             `;
         }).join("");
 
-    } catch (e) {
-        console.error("History modal error:", e);
-        body.innerHTML = `<div style="padding:20px; text-align:center; color:#f87171;">Error loading history.</div>`;
-    }
+    } catch (e) { console.error("History modal error:", e); body.innerHTML = `<div style="padding:20px; text-align:center; color:#f87171;">Error loading history.</div>`; }
 }
 
 async function fetchAndRenderPaymentMethods() {
