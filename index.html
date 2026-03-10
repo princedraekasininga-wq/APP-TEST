@@ -393,6 +393,10 @@
               </div>
           </div>
 
+          <button id="gatekeeperInstallBtn" style="display: none; width: 100%; padding: 14px; background: #4ade80; color: #000000; border: none; border-radius: 14px; font-size: 1rem; font-weight: 800; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);">
+              <i class="fas fa-download" style="margin-right: 8px;"></i> Install App Now
+          </button>
+
           <p style="font-size:0.75rem; color:#94a3b8; margin-top:15px; font-weight:600;">Open the app from your home screen after installing.</p>
       </div>
   </div>
@@ -1267,6 +1271,43 @@
     }
     function openDocModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeDocModal(id) { document.getElementById(id).style.display = 'none'; }
-</script>
+// =========================================================
+    // ONE-CLICK INSTALL BUTTON LOGIC (Android / Chrome)
+    // =========================================================
+    let deferredInstallPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the browser's default mini-infobar from appearing
+        e.preventDefault();
+        // Save the event so it can be triggered later by our button
+        deferredInstallPrompt = e;
+
+        // Make our custom install button visible
+        const installBtn = document.getElementById('gatekeeperInstallBtn');
+        if (installBtn) {
+            installBtn.style.display = 'block'; // Un-hide the button!
+
+            // What happens when they click it
+            installBtn.onclick = async () => {
+                if (!deferredInstallPrompt) return;
+
+                // Show the native OS install prompt
+                deferredInstallPrompt.prompt();
+
+                // Wait for the user to hit "Install" or "Cancel"
+                const { outcome } = await deferredInstallPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                    installBtn.style.display = 'none'; // Hide button once installing
+                    installBtn.innerHTML = "Installing...";
+                }
+
+                // The prompt can only be used once, so clear it
+                deferredInstallPrompt = null;
+            };
+        }
+    });
+
+  </script>
 </body>
 </html>

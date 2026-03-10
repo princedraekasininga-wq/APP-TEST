@@ -642,6 +642,12 @@ function renderLoansTable(loansData) {
         const style = document.createElement("style");
         style.id = "stallzPremiumLoanCardStyle";
         style.innerHTML = `
+        .p-loan-receipt-btn { background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.05)); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; padding: 10px 16px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-transform: uppercase; letter-spacing: 0.5px; }
+            .p-loan-receipt-btn i { font-size: 1.05rem; }
+            .p-loan-receipt-btn:hover { background: rgba(59, 130, 246, 0.25); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.5); }
+            .p-loan-receipt-btn:active { transform: scale(0.95); }
+            body.day-mode .p-loan-receipt-btn { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1px solid #bfdbfe; color: #2563eb; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.05); }
+            body.day-mode .p-loan-receipt-btn:hover { background: #dbeafe; box-shadow: 0 6px 14px rgba(37, 99, 235, 0.15); border-color: #93c5fd; }
             .p-loan-card { background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98)); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 24px; padding: 24px; margin-bottom: 20px; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
             .p-loan-card:hover { transform: translateY(-3px); box-shadow: 0 25px 55px rgba(0, 0, 0, 0.75); }
             .p-loan-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, var(--primary, #4ade80), #22c55e); box-shadow: 0 2px 10px rgba(74,222,128,0.5); }
@@ -789,11 +795,10 @@ function renderLoansTable(loansData) {
                         <div class="p-loan-progress-fill ${statusClass}" style="width: ${percent}%;"></div>
                     </div>
                 </div>
-                <div class="p-loan-footer">
-                    <div class="p-loan-meta">
-                        <span class="p-loan-meta-label">Collateral</span>
-                        <span class="p-loan-meta-val">${escapeHTML(loan.collateralItem || 'Personal Loan')}</span>
-                    </div>
+                <div class="p-loan-footer" style="align-items: flex-end;">
+                    <button class="p-loan-receipt-btn" onclick="generateAndOpenReceipt('${loan.id}')">
+                        <i class="fas fa-file-invoice"></i> view Receipt
+                    </button>
                     <div class="p-loan-meta" style="text-align: right;">
                         <span class="p-loan-meta-label">Issued On</span>
                         <span class="p-loan-meta-val">${new Date(loan.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
@@ -3178,3 +3183,127 @@ async function initPushNotifications(forcePrompt = false) {
         return false;
     }
 }
+
+// ==========================================================================
+// CLIENT RECEIPT GENERATOR & DOWNLOADER (Admin Exact Match)
+// ==========================================================================
+window.generateAndOpenReceipt = function(loanId) {
+    // Find loan in the local portal cache
+    const loan = (__lastLoansCache || []).find(l => String(l.id) === String(loanId));
+    if (!loan) return showCustomAlert("Loan details not found. Please refresh.");
+
+    let statusColor = "#333";
+    let statusText = loan.status;
+    if (loan.balance <= 0.01) { statusColor = "#16a34a"; statusText = "PAID IN FULL"; }
+    else if (loan.status === "OVERDUE") { statusColor = "#dc2626"; }
+
+    const interestPercent = ((loan.rate || 0) * 100).toFixed(0);
+
+    const receiptHTML = `
+        <div style="font-family: 'Segoe UI', sans-serif; color: #1e293b; padding: 20px; font-size: 10px; background: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="../assets/logo_images/my-logo.png" style="height: 32px; width: auto; display:block;" onerror="this.style.display='none'">
+                <div>
+                  <h1 style="margin: 0; font-size: 14px; color: #1e293b; text-transform: uppercase; font-weight:800; letter-spacing: 0.5px;">Stallz Loans</h1>
+                  <p style="margin: 1px 0 0; font-size: 8px; color: #64748b; font-weight:600;">Quick, Easy, Reliable</p>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="color: #64748b;">Receipt #: <strong style="color: #0f172a;">${loan.id}</strong></div>
+                <div style="color: #64748b;">Date: <strong style="color: #0f172a;">${new Date().toLocaleDateString('en-GB')}</strong></div>
+                <div style="margin-top:2px; font-size: 8px; font-weight:700; color:${statusColor}; border:1px solid ${statusColor}; padding:1px 4px; border-radius:3px; display:inline-block;">${statusText}</div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #f1f5f9;">
+              <div>
+                <div style="font-size: 8px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 2px;">Client</div>
+                <div style="font-size: 11px; font-weight: 700; color: #334155;">${escapeHTML(loan.clientName)}</div>
+                <div style="font-size: 9px; color: #64748b;">${loan.clientPhone || ''}</div>
+              </div>
+              <div style="text-align: right;">
+                 <div style="font-size: 8px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 2px;">Due Date</div>
+                 <div style="font-size: 11px; font-weight: 700; color: ${statusColor};">${new Date(loan.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                 <div style="font-size: 8px; color: #94a3b8; margin-top:2px;">Item: ${escapeHTML(loan.collateralItem || 'Personal')}</div>
+              </div>
+            </div>
+
+            <div style="width: 100%; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                    <span>Principal</span>
+                    <span style="font-weight:600;">${__fmtMoney(loan.amount)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                    <span>Interest/Fees (${interestPercent}%)</span>
+                    <span style="font-weight:600;">${__fmtMoney(loan.totalDue - loan.amount)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9;">
+                    <span style="font-weight: 700; color: #0f172a;">Total Due</span>
+                    <span style="font-weight: 700; color: #0f172a;">${__fmtMoney(loan.totalDue)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9; color: #16a34a;">
+                    <span>Less: Paid</span>
+                    <span>- ${__fmtMoney(loan.paid)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid #0f172a; margin-top: 2px;">
+                    <span style="font-weight: 800; font-size:12px;">BALANCE</span>
+                    <span style="font-weight: 800; font-size:14px; color: ${statusColor};">${__fmtMoney(loan.balance)}</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 5px; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+                <div style="font-size: 7px; color: #94a3b8; text-align: justify; line-height: 1.35;">
+                <strong>Terms & Conditions:</strong> By accepting this loan, you agree that failure to repay by the due date may result in the forfeiture and sale of the collateral item listed above to recover the loan amount.
+                </div>
+                <div style="text-align: center; margin-top: 10px; font-size: 9px; font-weight: 600; color: #1e293b;">Thank you for your business!</div>
+                <div style="margin-top: 2px; text-align: center; font-size: 6px; color: #cbd5e1;">Generated by Stallz System</div>
+            </div>
+        </div>
+    `;
+
+    const contentBox = document.getElementById("clientReceiptContent");
+    if (contentBox) contentBox.innerHTML = receiptHTML;
+
+    openClientReceiptModal();
+
+    const dlBtn = document.getElementById("downloadClientReceiptBtn");
+    if (dlBtn) {
+        dlBtn.onclick = function() {
+          const originalText = dlBtn.innerHTML;
+          dlBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Saving...';
+          dlBtn.disabled = true;
+
+          if (typeof html2canvas === 'undefined') {
+              showCustomAlert("Receipt engine is still loading, please try again in a moment.");
+              dlBtn.innerHTML = originalText;
+              dlBtn.disabled = false;
+              return;
+          }
+
+          // Use html2canvas to convert the HTML div into a downloadable PNG
+          html2canvas(contentBox, {
+            scale: 3, // High resolution
+            backgroundColor: "#ffffff",
+            useCORS: true
+          }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Stallz_Receipt_${loan.id}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+
+            dlBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+            setTimeout(() => {
+                dlBtn.innerHTML = originalText;
+                dlBtn.disabled = false;
+            }, 2500);
+
+          }).catch(err => {
+            console.error("Receipt generation failed:", err);
+            showCustomAlert("Error generating image.");
+            dlBtn.innerHTML = originalText;
+            dlBtn.disabled = false;
+          });
+        };
+    }
+};
