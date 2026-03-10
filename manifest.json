@@ -1,6 +1,6 @@
 {
   "name": "Stallz Loans",
-  "short_name": "Stallz Test App",
+  "short_name": "Stallz Loans",
   "description": "Secure loan management and tracking for admins.",
   "id": "./",
   "start_url": "./index.html",
