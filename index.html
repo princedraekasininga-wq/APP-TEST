@@ -365,6 +365,38 @@
 </head>
 <body>
 
+<div id="pwaInstallGate" style="display:none; position:fixed; inset:0; z-index:999999; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); align-items:center; justify-content:center; flex-direction:column; padding:20px; text-align:center;">
+      <div style="background: rgba(255,255,255,0.05); padding:30px; border-radius:24px; border: 1px solid rgba(255,255,255,0.1); max-width:400px; width:100%; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+
+          <img src="assets/logo_images/icon-192.png" alt="Stallz" style="width:85px; height:85px; border-radius:20px; margin-bottom:20px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 20px rgba(0,0,0,0.3);">
+
+          <h2 style="margin-bottom:12px; font-weight:900; font-size:1.4rem; color:#ffffff;">App Install Required</h2>
+          <p style="color:#94a3b8; font-size:0.9rem; line-height:1.5; margin-bottom:24px; font-weight:500;">
+              For security and to receive real-time push notifications, Stallz Loans must be installed on your phone.
+          </p>
+
+          <div style="background:rgba(22, 163, 74, 0.1); border:1px dashed rgba(22, 163, 74, 0.4); padding:18px; border-radius:16px; margin-bottom:10px; text-align:left;">
+              <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                  <i class="fab fa-apple" style="font-size:1.5rem; color:#ffffff;"></i>
+                  <div>
+                      <div style="font-size:0.75rem; color:#94a3b8; font-weight:800; text-transform:uppercase;">iPhone / Safari</div>
+                      <div style="font-size:0.85rem; color:#4ade80; font-weight:700;">Tap <i class="fas fa-external-link-square-alt"></i> Share > Add to Home Screen</div>
+                  </div>
+              </div>
+              <div style="height:1px; background:rgba(255,255,255,0.1); margin-bottom:15px;"></div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                  <i class="fab fa-android" style="font-size:1.5rem; color:#3ddc84;"></i>
+                  <div>
+                      <div style="font-size:0.75rem; color:#94a3b8; font-weight:800; text-transform:uppercase;">Android / Chrome</div>
+                      <div style="font-size:0.85rem; color:#4ade80; font-weight:700;">Tap <i class="fas fa-ellipsis-v"></i> Menu > Install App</div>
+                  </div>
+              </div>
+          </div>
+
+          <p style="font-size:0.75rem; color:#94a3b8; margin-top:15px; font-weight:600;">Open the app from your home screen after installing.</p>
+      </div>
+  </div>
+
   <div id="globalToast"></div>
 
   <div class="login-wrapper">
@@ -719,11 +751,39 @@
         });
     }
 
+    // =========================================================
+    // PHONE GATEKEEPER LOGIC
+    // =========================================================
+    function enforcePhoneAppInstall() {
+        const gate = document.getElementById('pwaInstallGate');
+        const loginUI = document.querySelector('.login-wrapper');
+        const noticeTxt = document.querySelector('.notice-text');
+        if (!gate || !loginUI) return false;
+
+        // 1. Target specifically mobile phones (excludes iPads/tablets by checking width < 768px)
+        const isMobilePhone = /iPhone|Android.*Mobile/i.test(navigator.userAgent) && window.innerWidth <= 768;
+
+        // 2. Check if they are running the installed PWA
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+        // 3. Block if on a phone but in a browser tab
+        if (isMobilePhone && !isStandalone) {
+            gate.style.display = 'flex';
+            loginUI.style.display = 'none'; // Completely hide the login form
+            if (noticeTxt) noticeTxt.style.display = 'none';
+            return true; // Return true meaning "Blocked"
+        }
+
+        return false; // Not blocked (Desktop, Tablet, or Installed Phone App)
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
+        // Run Gatekeeper FIRST. If blocked, stop everything else.
+        const isBlocked = enforcePhoneAppInstall();
+        if (isBlocked) return;
 
         // =========================================================
-        // 1. INSTANT AUTO-LOGIN CHECK
-        // Checks if the 30-minute rolling session is still alive
+        // 1. INSTANT AUTO-LOGIN CHECK (Only runs if not blocked)
         // =========================================================
         const loginBtn = document.getElementById('loginBtn');
         if (loginBtn) {
@@ -732,18 +792,15 @@
         }
 
         try {
-            // Wait for Firebase to check the secure token & custom 30-min timer
             if (window.StallzAuth && typeof window.StallzAuth.onceAuthState === 'function') {
                 const user = await window.StallzAuth.onceAuthState();
                 if (user) {
-                    // Session is still valid! Bypass login screen instantly.
                     smoothNav('gatekeeper.html');
-                    return; // Stop running the rest of the login page script
+                    return;
                 }
             }
         } catch (e) { console.warn("Auto-login bypassed:", e); }
 
-        // If no valid session, reset the button so they can log in normally
         if (loginBtn) {
             loginBtn.innerHTML = "Sign In";
             loginBtn.disabled = false;
@@ -753,6 +810,7 @@
         const isIos = () => /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         const isPhone = /iPhone|Android.*Mobile/i.test(navigator.userAgent);
         const isInStandaloneMode = () => (window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches || (document.referrer.includes('android-app://'));
+
 
         let isAlreadyInstalled = false;
         if ('getInstalledRelatedApps' in navigator) {

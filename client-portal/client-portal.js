@@ -552,18 +552,50 @@ function hideAppLoader() {
     }
 }
 
+function registerServiceWorkerWithPolling() {
+    if ('serviceWorker' in navigator) {
+        const regPath = (location.pathname.includes('/client-portal/') || location.pathname.includes('/admin/')) ? '../sw.js' : 'sw.js';
+
+        navigator.serviceWorker.register(regPath).then((registration) => {
+            console.log("Service Worker registered. Setting up auto-updates.");
+
+            // 1. ACTIVE POLLING: Check for updates every 1 hour automatically
+            setInterval(() => {
+                console.log("Polling for app updates...");
+                registration.update();
+            }, 1000 * 60 * 60);
+
+            // 2. AUTO-REFRESH: Detect when GitHub has a new version
+            registration.onupdatefound = () => {
+                const newWorker = registration.installing;
+                newWorker.onstatechange = () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        console.log("New version installed! Applying seamlessly...");
+
+                        // Don't refresh if they are currently filling out the loan request form
+                        const reqModal = document.getElementById('requestModal');
+                        if (reqModal && !reqModal.classList.contains('active')) {
+                            // Silently reload the page to apply the newest UI
+                            window.location.reload();
+                        }
+                    }
+                };
+            };
+        }).catch(err => console.warn("SW Registration failed:", err));
+    }
+}
+
 function runAllInit() {
     if (typeof initClientPortal === 'function') initClientPortal();
+    registerServiceWorkerWithPolling(); // Start the background polling engine
 }
 
 if (document.readyState === 'loading') {
     try { window.StallzAuth?.enforceSessionTTL?.(); } catch(e) {}
-
-document.addEventListener('DOMContentLoaded', runAllInit);
+    document.addEventListener('DOMContentLoaded', runAllInit);
 } else {
     runAllInit();
 }
-
 function toggleTheme() {
     const isDay = document.body.classList.toggle('day-mode');
     localStorage.setItem('stallz-theme', isDay ? 'day' : 'night');

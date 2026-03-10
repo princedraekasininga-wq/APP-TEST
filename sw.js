@@ -133,7 +133,7 @@ self.addEventListener('message', (event) => {
 });
 
 // ----------------------------------------------------------------------------
-// Firebase background messages -> show system notification
+// Firebase background messages -> show system notification OR Silent Update
 // ----------------------------------------------------------------------------
 messaging.onBackgroundMessage((payload) => {
   try { console.log('[sw.js] background payload:', payload); } catch(e) {}
@@ -141,6 +141,17 @@ messaging.onBackgroundMessage((payload) => {
   const data = payload && payload.data ? payload.data : {};
   const notif = payload && payload.notification ? payload.notification : {};
 
+  // 🚨 SILENT UPDATE INTERCEPTOR
+  // If the server sends a data message with action 'SILENT_UPDATE', wake up and fetch new code.
+  if (data.action === 'SILENT_UPDATE' || data.type === 'SILENT_UPDATE') {
+      console.log('[sw.js] Received silent update ping from server. Checking for new SW version...');
+      if (self.registration && self.registration.update) {
+          self.registration.update(); // Forces the phone to download your latest GitHub push!
+      }
+      return; // Stop here. Do NOT show a notification bubble to the user.
+  }
+
+  // NORMAL NOTIFICATION HANDLER
   const title = String(notif.title || data.title || 'Stallz Loans');
   const body  = String(notif.body  || data.body  || 'You have a new update.');
 
