@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "answers-8cc49"
-  }
+    "default": "answers-8cc49",
+    "production": "stallz-loans"
+  },
+  "targets": {},
+  "etags": {}
 }
