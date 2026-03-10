@@ -815,3 +815,27 @@ body.day-mode .ledger-loading { color: #475569 !important; }
     from { opacity: 0; transform: translateX(-10px); }
     to { opacity: 1; transform: translateX(0); }
 }
+
+/* ==========================================================================
+   INTERACTIVE TRUST SCORE & MODAL
+   ========================================================================== */
+.trust-pill {
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, box-shadow 0.2s;
+}
+.trust-pill:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.trust-pill:active {
+    transform: scale(0.95);
+}
+.ts-track { stroke: rgba(255,255,255,0.05); }
+
+/* Day Mode Overrides */
+body.day-mode .trust-pill:hover { background: rgba(15, 23, 42, 0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+body.day-mode .ts-track { stroke: rgba(0,0,0,0.05); }
+body.day-mode .ts-improve-box { background: #f8fafc !important; border-color: #e2e8f0 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+body.day-mode .ts-improve-title { color: #64748b !important; }
+body.day-mode #tsModalValue { color: #0f172a !important; }

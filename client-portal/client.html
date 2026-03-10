@@ -162,10 +162,10 @@
                             <div class="ring-center-content">
                                 <span id="daysRemaining" class="days-left-number">--</span>
                                 <span class="days-left-label">Days Left</span>
-                            <div class="trust-pill" title="Internal Trust Score">
-                                <i class="fas fa-shield-alt"></i>
-                                <span id="trustScoreValue">--</span>
-                            </div>
+                            <div class="trust-pill" title="Internal Trust Score" role="button" tabindex="0" onclick="openTrustScoreModal()">
+    <i class="fas fa-shield-alt"></i>
+    <span id="trustScoreValue">--</span>
+</div>
                             </div>
                         </div>
                     </div>
@@ -229,9 +229,9 @@
         <div class="quick-actions-scroll fade-in delay-2" style="margin-bottom: 100px;">
             <h3 class="section-title-small">Quick Actions</h3>
             <div class="actions-row">
-                <button class="action-card" onclick="openPayModal()">
-                    <div class="action-icon icon-green"><i class="fas fa-mobile-alt"></i></div>
-                    <span>Pay Now</span>
+                <button class="action-card" onclick="openCalcModal()">
+                    <div class="action-icon icon-green"><i class="fas fa-calculator"></i></div>
+                    <span>Estimator</span>
                 </button>
                 <button class="action-card" onclick="openStatementsModal()">
                     <div class="action-icon icon-blue"><i class="fas fa-file-invoice"></i></div>
@@ -249,13 +249,13 @@
     <script src="../shared/push.js"></script>
 
     <nav class="mobile-bottom-nav">
-        <a href="#" class="nav-item" onclick="openRequestModal()">
-            <div class="nav-icon"><i class="fas fa-hand-holding-usd"></i></div>
-            <span class="nav-label">Request Loan</span>
+        <a href="#" class="nav-item" onclick="openPayModal()">
+            <div class="nav-icon"><i class="fas fa-mobile-alt"></i></div>
+            <span class="nav-label">Pay Now</span>
         </a>
-        <a href="#" class="nav-item center-item" onclick="openCalcModal()">
-            <div class="nav-icon big-nav-icon"><i class="fas fa-calculator"></i></div>
-            <span class="nav-label">Estimator</span>
+        <a href="#" class="nav-item center-item" onclick="openRequestModal()">
+            <div class="nav-icon big-nav-icon"><i class="fas fa-hand-holding-usd"></i></div>
+            <span class="nav-label">Request Loan</span>
         </a>
         <a href="#" class="nav-item" onclick="openUploadModal()">
             <div class="nav-icon"><i class="fas fa-camera"></i></div>
@@ -498,6 +498,42 @@
                 </div>
                 <button class="btn-full" onclick="closeCalcModal()">Done</button>
             </div>
+        </div>
+    </div>
+
+    <div id="trustScoreModal" class="modal-overlay" style="z-index: 99999; display: none;">
+        <div class="modal-glass" style="max-width: 340px; text-align: center; padding: 30px 20px;">
+            <div class="modal-header" style="border: none; padding-bottom: 0; justify-content: center; position: relative;">
+                <button onclick="closeTrustScoreModal()" class="close-btn" style="position: absolute; right: -5px; top: -15px;">&times;</button>
+            </div>
+
+            <div style="position: relative; display: inline-block; margin-bottom: 15px;">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="42" fill="none" class="ts-track" stroke-width="8"></circle>
+                    <circle id="tsModalRing" cx="50" cy="50" r="42" fill="none" stroke="var(--primary)" stroke-width="8" stroke-dasharray="264" stroke-dashoffset="264" stroke-linecap="round" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);"></circle>
+                </svg>
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 900; color: var(--text-main);">
+                    <i class="fas fa-shield-alt" style="position: absolute; opacity: 0.1; font-size: 4rem; color: var(--primary);"></i>
+                    <span id="tsModalValue">--</span>
+                </div>
+            </div>
+
+            <h3 id="tsModalStatus" style="font-size: 1.4rem; font-weight: 900; margin-bottom: 8px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Excellent</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; font-weight: 500;">
+                Your trust score reflects your reliability. A higher score guarantees faster approvals and lower collateral.
+            </p>
+
+            <div class="ts-improve-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; text-align: left;">
+                <div class="ts-improve-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; margin-bottom: 12px; letter-spacing: 0.5px;">How to improve</div>
+                <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 0.85rem; color: var(--text-main); font-weight: 600;">
+                    <i class="fas fa-arrow-up" style="color: #4ade80; margin-top: 3px;"></i> <span>Repay loans exactly on or before the due date.</span>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: var(--text-main); font-weight: 600;">
+                    <i class="fas fa-arrow-up" style="color: #4ade80; margin-top: 3px;"></i> <span>Maintain a consistent and active borrowing history.</span>
+                </div>
+            </div>
+
+            <button class="btn-full" style="margin-top: 20px;" onclick="closeTrustScoreModal()">Awesome</button>
         </div>
     </div>
 
@@ -900,28 +936,18 @@
   });
 })();
 </script> <script>
+<script>
 /* ==========================================================================
-   SMART STALLZ ADVICE & SECURE FIREBASE INIT
+   CONTEXT-AWARE SMART ADVICE & SECURE FIREBASE INIT
    ========================================================================== */
-(function(){
-    // 1. Dynamic Advice Swipe Carousel
-    const tips = [
-        "Small, frequent payments are easier to manage than one large lump sum at the end of the month.",
-        "Stallz will never ask for your password via phone or WhatsApp. Keep your account secure.",
-        "Repaying your loan on time increases your internal trust score for future, larger requests.",
-        "Ensure your collateral details are accurate to speed up your approval process to under 30 minutes.",
-        "Quick. Easy. Reliable. That’s our promise to you. Need help? Use the chat icon below.",
-        "Borrow only what you need. Keeping your loan amounts manageable ensures stress-free repayments.",
-        "Did you know? You can make partial payments anytime before your due date to reduce your final burden.",
-        "Always verify you are communicating with an official Stallz Admin before making mobile money transfers.",
-        "Keep your next of kin details updated so we can easily assist you in case of emergencies.",
-        "Use the Loan Estimator tool to calculate your expected repayment before you even request a loan.",
-        "Checking your statement regularly helps you track your payments and remaining balance.",
-        "A perfect repayment history means faster approvals and lower collateral requirements in the future.",
-        "Experiencing difficulties? Don't hide. Reach out to our support team early so we can help you find a solution."
-    ];
-
+window.StallzAdvice = (function(){
+    let tips = ["Loading contextual advice..."];
     let idx = 0;
+
+    // Memory strings to detect when the user's loan data changes
+    let lastProfileStr = "";
+    let lastReqsStr = "";
+
     const elAdvice = () => document.getElementById('stallzDynamicAdvice');
     const elDots = () => document.getElementById('adviceDots');
     const elCarousel = () => document.getElementById('adviceCarousel');
@@ -961,22 +987,96 @@
     function next(){ setTip(idx + 1, 'next'); }
     function prev(){ setTip(idx - 1, 'prev'); }
 
+    // ==============================================================
+    // THE SMART ENGINE: Analyzes client data to generate targeted advice
+    // ==============================================================
+    function analyzeClient() {
+        try {
+            const profileStr = localStorage.getItem("stallz_client_profile") || "{}";
+            const reqsStr = localStorage.getItem("stallz_client_reqs") || "[]";
+
+            // Only rebuild the advice if the database data actually changed
+            if (profileStr === lastProfileStr && reqsStr === lastReqsStr) return;
+            lastProfileStr = profileStr;
+            lastReqsStr = reqsStr;
+
+            const profile = JSON.parse(profileStr);
+            const reqs = JSON.parse(reqsStr);
+
+            let newTips = [];
+            let isOverdue = false;
+            let isActive = false;
+            let dueSoon = false;
+
+            if (profile && profile.loans) {
+                const loansList = Object.values(profile.loans);
+                loansList.forEach(l => {
+                    const st = String(l.status||'').toUpperCase();
+                    if (st === 'OVERDUE') isOverdue = true;
+                    if (st === 'ACTIVE') isActive = true;
+
+                    // Check if payment is due within the next 3 days
+                    if (st === 'ACTIVE' && l.dueDate) {
+                        const daysLeft = (new Date(l.dueDate).getTime() - Date.now()) / 86400000;
+                        if (daysLeft >= 0 && daysLeft <= 3) dueSoon = true;
+                    }
+                });
+            }
+
+            let isPending = false;
+            if (reqs && reqs.length > 0) {
+                const lastReq = reqs[reqs.length - 1];
+                const st = String(lastReq.status || lastReq.requestStatus || '').toUpperCase();
+                if (["PENDING", "REVIEWING", "UNDER_REVIEW", "SUBMITTED", "NEW"].includes(st)) {
+                    isPending = true;
+                }
+            }
+
+            // 1. DYNAMIC INJECTIONS BASED ON CLIENT CONTEXT
+            if (isOverdue) {
+                newTips.push("Action Required: Your account currently has an overdue balance. Prioritize clearing this to restore your internal trust score.");
+                newTips.push("Experiencing difficulties? Don't hide. Reach out to our support team early so we can help you find a manageable solution.");
+            } else if (dueSoon) {
+                newTips.push("Friendly Reminder: Your loan payment is due soon. Timely payments guarantee instant approvals for future requests.");
+                newTips.push("Did you know? You can make partial payments anytime before your due date to reduce your final financial burden.");
+            } else if (isActive) {
+                newTips.push("You're on track! Small, frequent payments are easier to manage than one large lump sum at the end of the month.");
+                newTips.push("Repaying your loan on time securely increases your internal trust score for future, larger requests.");
+            } else if (isPending) {
+                newTips.push("Your loan application is currently under review by our administration team. We appreciate your patience and will notify you shortly.");
+                newTips.push("Ensure your Next of Kin details are updated in your profile to prevent approval delays.");
+            } else {
+                newTips.push("Planning your next move? Use our Loan Estimator to calculate a comfortable repayment plan before you apply.");
+                newTips.push("A perfect repayment history unlocks faster processing times and lower collateral requirements.");
+                newTips.push("Borrow only what you need. Keeping your loan amounts manageable ensures stress-free repayments.");
+            }
+
+            // 2. STANDARD SECURITY TIPS (Always included)
+            newTips.push("Stallz will never ask for your password via phone or WhatsApp. Keep your account secure.");
+            newTips.push("Always verify you are communicating with an official Stallz Admin before making mobile money transfers.");
+
+            tips = newTips;
+
+            // Render the most critical contextual message immediately
+            idx = 0;
+            const t = elAdvice();
+            if (t) t.textContent = tips[idx];
+            renderDots();
+
+        } catch(e) {
+            console.warn("Smart Advice engine paused.", e);
+        }
+    }
+
     function initAdvice(){
         const t = elAdvice();
         if (!t) return;
         if (t.dataset.initialized === "true") return;
         t.dataset.initialized = "true";
 
-        let showIdx = 0;
-        const last = localStorage.getItem('stallz_last_tip_index');
-        if (last !== null) {
-            const parsed = parseInt(last, 10);
-            if (!isNaN(parsed)) showIdx = parsed + 1;
-        }
-        idx = clampIndex(showIdx);
-        t.textContent = tips[idx];
-        localStorage.setItem('stallz_last_tip_index', String(idx));
-        renderDots();
+        // Run smart engine immediately, then listen for data changes every 3 seconds
+        analyzeClient();
+        setInterval(analyzeClient, 3000);
 
         const dots = elDots();
         if (dots) {
@@ -1017,45 +1117,49 @@
         }
     }
 
-    if (document.readyState === "loading") { document.addEventListener('DOMContentLoaded', initAdvice); } else { initAdvice(); }
-
-    // 2. Safe Firebase Auth & Push Listener (Prevents Memory Leaks & Infinite Loops)
-    let attempts = 0;
-    const checkAuth = setInterval(() => {
-        attempts++;
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-            clearInterval(checkAuth);
-            firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    const uid = user.uid;
-                    const notifRef = firebase.database().ref(`clients/${uid}/notifications`);
-
-                    // CRITICAL FIX: Prevent duplicate listeners on token refresh
-                    notifRef.off('child_added');
-
-                    let initialLoad = true;
-                    notifRef.on('child_added', (snapshot) => {
-                        if (initialLoad) return;
-                        const notif = snapshot.val();
-                        if (notif && notif.read === false) {
-                            try { if (typeof renderSharedNotifications === 'function') renderSharedNotifications(); } catch(e) {}
-                        }
-                    });
-
-                    notifRef.once('value', () => {
-                        initialLoad = false;
-                        console.log("🟢 Local Real-time Push Listener Active!");
-                    });
-                }
-            });
-        } else if (attempts > 30) {
-            // Abort after 15 seconds to prevent endless CPU looping
-            clearInterval(checkAuth);
-            console.warn("Firebase failed to load. Adblocker or network issue?");
-        }
-    }, 500);
-
+    return { init: initAdvice };
 })();
+
+if (document.readyState === "loading") {
+    document.addEventListener('DOMContentLoaded', window.StallzAdvice.init);
+} else {
+    window.StallzAdvice.init();
+}
+
+// 2. Safe Firebase Auth & Push Listener (Prevents Memory Leaks & Infinite Loops)
+let attempts = 0;
+const checkAuth = setInterval(() => {
+    attempts++;
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        clearInterval(checkAuth);
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                const uid = user.uid;
+                const notifRef = firebase.database().ref(`clients/${uid}/notifications`);
+
+                notifRef.off('child_added');
+
+                let initialLoad = true;
+                notifRef.on('child_added', (snapshot) => {
+                    if (initialLoad) return;
+                    const notif = snapshot.val();
+                    if (notif && notif.read === false) {
+                        try { if (typeof renderSharedNotifications === 'function') renderSharedNotifications(); } catch(e) {}
+                    }
+                });
+
+                notifRef.once('value', () => {
+                    initialLoad = false;
+                    console.log("🟢 Local Real-time Push Listener Active!");
+                });
+            }
+        });
+    } else if (attempts > 30) {
+        clearInterval(checkAuth);
+        console.warn("Firebase failed to load. Adblocker or network issue?");
+    }
+}, 500);
+
 </script>
 
 </body>

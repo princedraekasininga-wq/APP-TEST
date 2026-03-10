@@ -883,55 +883,146 @@ async function renderLoanRequestProgressPanel(force = false) {
 
     if (!document.getElementById("stallzLoanReqStatusStyle")) {
       const css = `
-#loanRequestProgressPanel.request-progress-panel{ background: rgba(10, 15, 28, 0.90); border: 1px solid rgba(255,255,255,0.20); border-radius: 22px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
-#loanRequestProgressPanel .rp-header{ padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.15); }
+#loanRequestProgressPanel.request-progress-panel{ background: rgba(10, 15, 28, 0.90); border: 1px solid rgba(255,255,255,0.20); border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+#loanRequestProgressPanel .rp-header{ padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.15); }
 #loanRequestProgressPanel .rp-icon{ background: rgba(74, 222, 128, 0.2); border: 1px solid rgba(74, 222, 128, 0.4); box-shadow: 0 4px 10px rgba(74,222,128,0.3); }
-#loanRequestProgressPanel .rp-title{ font-size: 1.05rem; font-weight: 900; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-#loanRequestProgressPanel .rp-meta{ font-weight: 800; }
-.lr-wrap{ display:flex; flex-direction:column; gap: 18px; margin-top: 12px; }
-.lr-amount-card{ background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 18px 16px; text-align: center; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3), 0 12px 28px rgba(0,0,0,0.4); }
-.lr-amount{ font-size: 2.2rem; font-weight: 900; letter-spacing: -0.9px; color: var(--primary, #4ade80); text-shadow: 0 4px 15px rgba(74,222,128,0.3); }
-.lr-item-pill{ display:inline-block; margin-top: 10px; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); font-weight: 900; font-size: .78rem; letter-spacing: .3px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-.lr-timeline{ position: relative; padding-top: 6px; }
-.lr-bar{ position:absolute; left: 28px; right: 28px; top: 34px; height: 16px; border-radius: 999px; background: rgba(0,0,0,0.5); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
-.lr-bar-fill{ height: 100%; width: 0%; border-radius: 999px; transition: width .45s ease; }
-.lr-steps{ display:flex; justify-content: space-between; align-items:flex-start; gap: 10px; position: relative; z-index: 2; }
-.lr-step{ width: 33.333%; display:flex; flex-direction: column; align-items:center; gap: 10px; }
-.lr-circle{ width: 58px; height: 58px; border-radius: 999px; display:flex; align-items:center; justify-content:center; font-size: 1.35rem; color: #fff; background: rgba(148,163,184,0.22); border: 6px solid #030712; box-shadow: 0 16px 40px rgba(0,0,0,0.5); transition: transform .25s ease, box-shadow .25s ease, background .25s ease; }
-.lr-label{ font-size: .78rem; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: rgba(255,255,255,0.8); }
-.lr-step.done .lr-circle{ background: var(--primary, #4ade80); box-shadow: 0 0 0 8px rgba(74,222,128,0.15), 0 20px 55px rgba(74,222,128,0.5); }
-.lr-step.current .lr-circle{ background: rgba(34,197,94,0.95); box-shadow: 0 0 0 10px rgba(74,222,128,0.2), 0 22px 60px rgba(74,222,128,0.6); transform: translateY(-1px); }
-.lr-step.rejected .lr-circle{ background: rgba(239,68,68,0.95); box-shadow: 0 0 0 10px rgba(239,68,68,0.2), 0 22px 60px rgba(239,68,68,0.6); }
-.lr-message{ background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 18px 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-.lr-msg-title{ font-size: 1.35rem; font-weight: 800; margin-bottom: 6px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-.lr-msg-body{ color: rgba(255,255,255,0.8); font-weight: 500; line-height: 1.3; }
-body.day-mode #loanRequestProgressPanel.request-progress-panel{ background: #ffffff; border: 1px solid rgba(0,0,0,0.15); box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
-body.day-mode #loanRequestProgressPanel .rp-header{ border-bottom: 1px solid rgba(0,0,0,0.1); }
+#loanRequestProgressPanel .rp-title{ font-size: 0.95rem; font-weight: 900; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+#loanRequestProgressPanel .rp-meta{ font-weight: 800; font-size: 0.75rem; }
+
+/* ZOOMED OUT TRACKER STYLES WITH THICKER BAR */
+.lr-wrap{ display:flex; flex-direction:column; gap: 12px; margin-top: 8px; }
+.lr-amount-card{ background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 12px 14px; text-align: center; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.4); }
+.lr-amount{ font-size: 1.55rem; font-weight: 900; letter-spacing: -0.5px; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+.lr-item-pill{ display:inline-block; margin-top: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); font-weight: 900; font-size: .7rem; letter-spacing: .3px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+/* --- PERFECTLY CENTERED THICK TIMELINE --- */
+.lr-timeline{ position: relative; padding-top: 15px; padding-bottom: 5px; }
+.lr-bar{ position:absolute; left: 16.66%; right: 16.66%; top: 28px; height: 12px; border-radius: 999px; background: rgba(0,0,0,0.5); overflow: hidden; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); z-index: 1; }
+
+@keyframes flowBar { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.lr-bar-fill{ height: 100%; width: 0%; border-radius: 999px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); background-size: 200% 100% !important; animation: flowBar 2s linear infinite; }
+
+.lr-steps{ display:flex; justify-content: space-between; align-items:flex-start; position: relative; z-index: 2; }
+.lr-step{ width: 33.333%; display:flex; flex-direction: column; align-items:center; gap: 8px; }
+.lr-circle{ width: 38px; height: 38px; border-radius: 999px; display:flex; align-items:center; justify-content:center; font-size: 0.9rem; color: #fff; background: rgba(148,163,184,0.15); border: 4px solid #030712; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: transform .25s ease, box-shadow .25s ease, background .25s ease; }
+.lr-label{ font-size: .65rem; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+
+/* --- SEMANTIC COLOR CLASSES --- */
+.lr-step.done-blue .lr-circle{ background: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,0.15), 0 10px 20px rgba(59,130,246,0.4); }
+.lr-step.done-amber .lr-circle{ background: #f59e0b; box-shadow: 0 0 0 4px rgba(245,158,11,0.15), 0 10px 20px rgba(245,158,11,0.4); }
+.lr-step.done-green .lr-circle{ background: #10b981; box-shadow: 0 0 0 4px rgba(16,185,129,0.15), 0 10px 20px rgba(16,185,129,0.4); }
+
+.lr-step.done-blue .lr-label { color: #60a5fa; }
+.lr-step.done-amber .lr-label { color: #fbbf24; }
+.lr-step.done-green .lr-label { color: #34d399; }
+.lr-step.rejected .lr-label { color: #f87171; }
+
+/* --- SEMANTIC BREATHING PULSES --- */
+@keyframes pulseBlue {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px rgba(59,130,246,0.2), 0 10px 25px rgba(59,130,246,0.5); }
+    50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(59,130,246,0.1), 0 14px 35px rgba(59,130,246,0.7); }
+}
+@keyframes pulseAmber {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px rgba(245,158,11,0.2), 0 10px 25px rgba(245,158,11,0.5); }
+    50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(245,158,11,0.1), 0 14px 35px rgba(245,158,11,0.7); }
+}
+@keyframes pulseGreen {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px rgba(16,185,129,0.2), 0 10px 25px rgba(16,185,129,0.5); }
+    50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(16,185,129,0.1), 0 14px 35px rgba(16,185,129,0.7); }
+}
+@keyframes pulseRed {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px rgba(239,68,68,0.2), 0 10px 25px rgba(239,68,68,0.5); }
+    50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(239,68,68,0.1), 0 14px 35px rgba(239,68,68,0.7); }
+}
+
+/* --- DYNAMIC ICON ANIMATIONS --- */
+@keyframes hourglassFlip {
+    0% { transform: rotate(0deg); }
+    40% { transform: rotate(180deg); }
+    100% { transform: rotate(180deg); }
+}
+.fa-hourglass-half { animation: hourglassFlip 2.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; display: inline-block; }
+
+@keyframes searchPan {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    33% { transform: scale(1.2) rotate(-15deg); }
+    66% { transform: scale(1.2) rotate(15deg); }
+}
+.fa-search { animation: searchPan 2.5s ease-in-out infinite; display: inline-block; }
+
+.lr-step.current-blue .lr-circle{ background: #3b82f6; animation: pulseBlue 2s infinite ease-in-out; }
+.lr-step.current-amber .lr-circle{ background: #f59e0b; animation: pulseAmber 2s infinite ease-in-out; }
+.lr-step.current-green .lr-circle{ background: #10b981; animation: pulseGreen 2s infinite ease-in-out; }
+.lr-step.rejected .lr-circle{ background: #ef4444; animation: pulseRed 2s infinite ease-in-out; }
+
+.lr-message{ background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 12px 14px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+.lr-msg-title{ font-size: 1.05rem; font-weight: 800; margin-bottom: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.lr-msg-body{ color: rgba(255,255,255,0.8); font-weight: 500; font-size: 0.8rem; line-height: 1.3; }
+
+/* ==============================================================
+   POLISHED DAY MODE OVERRIDES
+   ============================================================== */
+body.day-mode #loanRequestProgressPanel.request-progress-panel{ background: #ffffff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 12px 35px rgba(0,0,0,0.06); }
+body.day-mode #loanRequestProgressPanel .rp-header{ border-bottom: 1px solid rgba(0,0,0,0.08); }
 body.day-mode #loanRequestProgressPanel .rp-title, body.day-mode #loanRequestProgressPanel .rp-meta{ color: #0f172a; text-shadow: none; }
-body.day-mode .lr-amount-card{ background: #ffffff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+
+/* Increased visibility for background cards in Day Mode */
+body.day-mode .lr-amount-card{ background: #f1f5f9; border: 1px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 body.day-mode .lr-amount{ color: #0f172a; text-shadow: none; }
-body.day-mode .lr-item-pill{ background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); color: #475569; box-shadow: none; }
-body.day-mode .lr-bar{ background: rgba(34,197,94,0.2); box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); border: none; }
-body.day-mode .lr-circle{ border: 6px solid #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-body.day-mode .lr-label{ color: #475569; }
-body.day-mode .lr-message{ background: #ffffff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+body.day-mode .lr-item-pill{ background: #ffffff; border: 1px solid #cbd5e1; color: #475569; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+
+body.day-mode .lr-bar{ background: #e2e8f0; border: 1px solid #cbd5e1; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+body.day-mode .lr-step .lr-circle{ border: 4px solid #ffffff; box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
+body.day-mode .lr-step:not([class*="done-"]):not([class*="current-"]):not(.rejected) .lr-circle { color: #475569; background: #f1f5f9; border-color: #ffffff; }
+
+body.day-mode .lr-label{ color: #64748b; }
+body.day-mode .lr-step.done-blue .lr-label { color: #2563eb; }
+body.day-mode .lr-step.done-amber .lr-label { color: #d97706; }
+body.day-mode .lr-step.done-green .lr-label { color: #059669; }
+body.day-mode .lr-step.rejected .lr-label { color: #dc2626; }
+
+/* Increased visibility for message card in Day Mode */
+body.day-mode .lr-message{ background: #f1f5f9; border: 1px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+body.day-mode .lr-msg-title{ color: #0f172a !important; text-shadow: none !important; }
 body.day-mode .lr-msg-body{ color: #475569; }
-.rp-empty { text-align: center; padding: 16px 10px; color: var(--text-muted); }
-.rp-empty-icon { font-size: 1.8rem; opacity: 0.9; margin-bottom: 8px; color: var(--primary); filter: none; text-shadow: none; box-shadow: none; }
-.rp-empty-title { font-weight: 800; font-size: 1.1rem; color: var(--text-main); margin-bottom: 5px; }
-.rp-empty-sub { font-size: 0.85rem; color: var(--text-muted); }
+
+.rp-empty-icon { font-size: 1.8rem; opacity: 0.8; margin-bottom: 10px; filter: none; text-shadow: none; box-shadow: none; }
+.rp-empty-title { font-weight: 700; font-size: .95rem; color: var(--text-main); margin-bottom: 4px; letter-spacing: 0.3px; }
+.rp-empty-sub { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+
+/* --- MODERN CAROUSEL & POINTER CLASSES --- */
+.rp-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px; padding-bottom: 5px; scrollbar-width: none; -ms-overflow-style: none; }
+.rp-carousel::-webkit-scrollbar { display: none; }
+.rp-carousel-item { scroll-snap-align: center; flex: 0 0 100%; min-width: 100%; box-sizing: border-box; }
+
+.rp-sensitizer-card, .rp-empty-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 160px; transition: transform 0.2s, background 0.2s; cursor: pointer; }
+.rp-sensitizer-card:active { transform: scale(0.98); }
+.rp-sensitizer-card:hover { background: rgba(255,255,255,0.04); }
+
+@keyframes bounceRightModern { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(6px); } }
+.swipe-icon-wrap { animation: bounceRightModern 1.5s cubic-bezier(0.25, 1, 0.5, 1) infinite; opacity: 0.9; font-size: 2.2rem; }
+
+/* Modern Pill Dots */
+.rp-carousel-dots { display: flex; justify-content: center; gap: 5px; margin-top: 10px; }
+.rp-dot { width: 12px; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.15); transition: all 0.3s ease; cursor: pointer; }
+.rp-dot.active { width: 24px; background: var(--primary, #4ade80); opacity: 1; }
+
+body.day-mode .rp-dot { background: rgba(0,0,0,0.1); }
+body.day-mode .rp-sensitizer-card, body.day-mode .rp-empty-card { background: #f8fafc; border: 1px dashed #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+body.day-mode .rp-sensitizer-card:hover { background: #f1f5f9; }
+
 @media (max-width: 380px){
-  .lr-card{ padding: 12px 12px; border-radius: 18px; }
-  .lr-wrap{ gap: 12px; }
-  .lr-amount-card{ padding: 12px; border-radius: 16px; }
-  .lr-amount{ font-size: 1.8rem; }
-  .lr-item-pill{ font-size: .82rem; padding: 6px 10px; }
-  .lr-circle{ width: 48px; height: 48px; border-width: 4px; font-size: 1.1rem; }
-  .lr-bar{ left: 22px; right: 22px; top: 29px; height: 12px; }
-  .lr-label{ font-size: .72rem; }
-  .lr-message{ padding: 12px; border-radius: 16px; }
-  .lr-msg-title{ font-size: 1.1rem; }
-  .lr-msg-body{ font-size: .85rem; }
+  .lr-amount-card{ padding: 10px; border-radius: 14px; }
+  .lr-amount{ font-size: 1.4rem; }
+  .lr-item-pill{ font-size: .65rem; padding: 4px 8px; }
+  .lr-circle{ width: 34px; height: 34px; border-width: 3px; font-size: 0.85rem; }
+  .lr-bar{ top: 27px; height: 10px; } /* Recalculated perfectly for mobile */
+  .lr-label{ font-size: .6rem; }
+  .lr-message{ padding: 10px; border-radius: 14px; }
+  .lr-msg-title{ font-size: .95rem; }
+  .lr-msg-body{ font-size: .75rem; }
+  .swipe-icon-wrap { font-size: 1.8rem; }
+  .rp-sensitizer-card { min-height: 140px; }
 }
       `;
       const styleEl = document.createElement("style");
@@ -996,112 +1087,164 @@ body.day-mode .lr-msg-body{ color: #475569; }
 
     const isExpired = (isApproved || isRejected) && reqTimeMs > 0 && (Date.now() - reqTimeMs) > 86400000;
 
-    if (!reqs.length || isExpired) {
-        panel.style.display = 'block';
-        if (meta) meta.textContent = "";
+    let hasActiveLoan = false;
+    let statusContent = '';
 
-        body.innerHTML = `
-            <div class="rp-empty">
+    // If no active loan, show the stylized Empty Card
+    if (!reqs.length || isExpired) {
+        hasActiveLoan = false;
+        statusContent = `
+            <div class="rp-empty-card">
                 <div class="rp-empty-icon">📝</div>
-                <div class="rp-empty-title">No loan request yet</div>
-                <div class="rp-empty-sub">Tap <strong>Request Loan</strong> below to submit your request.</div>
+                <div class="rp-empty-title">No active request</div>
+                <div class="rp-empty-sub">Tap <strong>Request Loan</strong> below to begin.</div>
             </div>
         `;
-        st.lastMs = Date.now();
-        return;
+        if (meta) meta.textContent = "";
+    } else {
+        // If there IS an active loan, show the Timeline Status Card
+        hasActiveLoan = true;
+        const ts = Number(req.createdAt || req.submittedAt || req.ts || 0);
+        if (meta) {
+          if (ts) {
+            const d = new Date(ts);
+            meta.textContent = d.toLocaleDateString("en-GB");
+          } else if (req.createdAt) {
+              const d = new Date(req.createdAt);
+              meta.textContent = isNaN(d) ? "" : d.toLocaleDateString("en-GB");
+          } else {
+            meta.textContent = "";
+          }
+        }
+
+        const amount = Number(req.amount ?? req.loanAmount ?? req.principal ?? req.requestedAmount ?? 0) || 0;
+        const item = (req.itemName || req.item || req.assetName || req.collateral || req.collateralItem || req.productName || req.purpose || req.title || "").toString().trim();
+
+        let stage = 1;
+        if (isApproved || isRejected) stage = 3;
+        else if (isReviewing) stage = 2;
+        else if (isSubmitted) stage = 1;
+
+        // Determine filling width
+        const fillWidth = stage === 1 ? "15%" : stage === 2 ? "50%" : "100%";
+
+        // Richer Semantic Colors Logic
+        let fillColor = ""; let fillGlow = "";
+        let titleColor = "";
+        let title = ""; let message = "";
+
+        if (stage === 1) { // Submitted
+            fillColor = "linear-gradient(90deg, rgba(37,99,235,0.6) 0%, rgba(96,165,250,0.95) 50%, rgba(37,99,235,0.6) 100%)";
+            fillGlow = "rgba(59,130,246,0.5)";
+            title = "Submitted!";
+            message = "Your request is in the queue and waiting to be seen.";
+            titleColor = "#60a5fa";
+        } else if (stage === 2) { // Reviewing
+            fillColor = "linear-gradient(90deg, rgba(217,119,6,0.6) 0%, rgba(251,191,36,0.95) 50%, rgba(217,119,6,0.6) 100%)";
+            fillGlow = "rgba(245,158,11,0.5)";
+            title = "Under Review";
+            message = "We are currently checking your details. Hang tight!";
+            titleColor = "#fbbf24";
+        } else if (isApproved) { // Approved
+            fillColor = "linear-gradient(90deg, rgba(16,185,129,0.6) 0%, rgba(52,211,153,0.95) 50%, rgba(16,185,129,0.6) 100%)";
+            fillGlow = "rgba(16,185,129,0.5)";
+            title = "Approved!";
+            message = "Congratulations! Your loan has been approved and is ready.";
+            titleColor = "#34d399";
+        } else if (isRejected) { // Rejected
+            fillColor = "linear-gradient(90deg, rgba(220,38,38,0.6) 0%, rgba(248,113,113,0.95) 50%, rgba(220,38,38,0.6) 100%)";
+            fillGlow = "rgba(239,68,68,0.5)";
+            const reason = (req.rejectionReason || req.reason || req.note || "").toString().trim();
+            title = "Declined";
+            message = reason ? `Reason: <b>${escapeHTML(reason)}</b>` : "Your request was declined. Please contact support for details.";
+            titleColor = "#f87171";
+        }
+
+        const step1Class = stage === 1 ? "current-blue" : "done-blue";
+        const step2Class = stage === 1 ? "" : stage === 2 ? "current-amber" : "done-amber";
+        const step3Class = stage < 3 ? "" : isApproved ? "done-green" : "rejected";
+
+        const step2Icon = stage >= 2 ? "search" : "hourglass-half";
+        const step3Icon = isApproved ? "check-double" : isRejected ? "times" : "hourglass-half";
+
+        statusContent = `
+          <div class="lr-wrap">
+            <div class="lr-amount-card">
+              <div class="lr-amount">${__fmtMoney(amount)}</div>
+              <div class="lr-item-pill">${escapeHTML(item || "Loan request")}</div>
+            </div>
+            <div class="lr-timeline">
+              <div class="lr-bar">
+                <div class="lr-bar-fill" style="width:${fillWidth}; background:${fillColor}; box-shadow: 0 0 15px ${fillGlow};"></div>
+              </div>
+              <div class="lr-steps">
+                <div class="lr-step ${step1Class}">
+                  <div class="lr-circle"><i class="fas fa-check"></i></div>
+                  <div class="lr-label">Submitted</div>
+                </div>
+                <div class="lr-step ${step2Class}">
+                  <div class="lr-circle"><i class="fas fa-${step2Icon}"></i></div>
+                  <div class="lr-label">Reviewing</div>
+                </div>
+                <div class="lr-step ${step3Class}">
+                  <div class="lr-circle"><i class="fas fa-${step3Icon}"></i></div>
+                  <div class="lr-label">${isRejected ? 'Declined' : 'Approved'}</div>
+                </div>
+              </div>
+            </div>
+            <div class="lr-message">
+              <div class="lr-msg-title" style="color:${titleColor}">${title}</div>
+              <div class="lr-msg-body">${message}</div>
+            </div>
+          </div>
+        `;
     }
+
+    // Modern Sensitizer Card with Sleek Arrow
+    const sensitizerContent = `
+        <div class="rp-sensitizer-card" onclick="document.getElementById('rpCarousel').scrollBy({left: 300, behavior: 'smooth'})">
+            <div class="swipe-icon-wrap" style="color: var(--primary); margin-bottom: 12px;">
+                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <path d="M12 5l7 7-7 7"></path>
+                </svg>
+            </div>
+            <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-main); margin-bottom: 4px; letter-spacing: 0.3px;">Track Application</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Swipe right to view status</div>
+        </div>
+    `;
 
     panel.style.display = 'block';
 
-    const ts = Number(req.createdAt || req.submittedAt || req.ts || 0);
-    if (meta) {
-      if (ts) {
-        const d = new Date(ts);
-        meta.textContent = d.toLocaleDateString("en-GB");
-      } else if (req.createdAt) {
-          const d = new Date(req.createdAt);
-          meta.textContent = isNaN(d) ? "" : d.toLocaleDateString("en-GB");
-      } else {
-        meta.textContent = "";
-      }
-    }
-
-    const amount = Number(req.amount ?? req.loanAmount ?? req.principal ?? req.requestedAmount ?? 0) || 0;
-    const item = (req.itemName || req.item || req.assetName || req.collateral || req.collateralItem || req.productName || req.purpose || req.title || "").toString().trim();
-
-    let stage = 1;
-    if (isApproved || isRejected) stage = 3;
-    else if (isReviewing) stage = 2;
-    else if (isSubmitted) stage = 1;
-
-    const fillWidth = stage === 1 ? "15%" : stage === 2 ? "55%" : "100%";
-
-    let fillColor = "linear-gradient(90deg, rgba(34,197,94,0.2), rgba(74,222,128,0.95))";
-    let fillGlow = "rgba(74,222,128,0.55)";
-    if (isRejected) {
-      fillColor = "linear-gradient(90deg, rgba(239,68,68,0.25), rgba(239,68,68,0.95))";
-      fillGlow = "rgba(239,68,68,0.55)";
-    }
-
-    let title = "Submitted!";
-    let message = "Your loan request has been received. We’ll start reviewing it shortly.";
-    let titleColor = "var(--primary, #4ade80)";
-
-    if (isReviewing) {
-      title = "Reviewing…";
-      message = "Your request is being reviewed. We’ll notify you as soon as a decision is made.";
-      titleColor = "#22c55e";
-    }
-    if (isApproved) {
-      title = "Application Approved!";
-      message = "Congratulations! Your loan has been approved and is now active.";
-      titleColor = "#22c55e";
-    }
-    if (isRejected) {
-      const reason = (req.rejectionReason || req.reason || req.note || "").toString().trim();
-      title = "Application Rejected";
-      message = reason ? `Reason: <b>${escapeHTML(reason)}</b>` : "Your request was declined. Please contact support for details.";
-      titleColor = "#ef4444";
-    }
-
-    const step1Class = "done";
-    const step2Class = stage >= 2 ? "done" : "current";
-    const step3Class = isApproved ? "done" : isRejected ? "rejected" : stage === 3 ? "current" : "current";
-
-    const step2Icon = stage >= 2 ? "check" : "hourglass-half";
-    const step3Icon = isApproved ? "handshake" : isRejected ? "times" : "hourglass-half";
-
+    // Renders ONLY 2 sections (Sensitizer + Status/Empty)
     body.innerHTML = `
-      <div class="lr-wrap">
-        <div class="lr-amount-card">
-          <div class="lr-amount">${__fmtMoney(amount)}</div>
-          <div class="lr-item-pill">${escapeHTML(item || "Loan request")}</div>
+        <div class="rp-carousel" id="rpCarousel">
+            <div class="rp-carousel-item">${sensitizerContent}</div>
+            <div class="rp-carousel-item">${statusContent}</div>
         </div>
-        <div class="lr-timeline">
-          <div class="lr-bar">
-            <div class="lr-bar-fill" style="width:${fillWidth}; background:${fillColor}; box-shadow: 0 0 35px ${fillGlow};"></div>
-          </div>
-          <div class="lr-steps">
-            <div class="lr-step ${step1Class}">
-              <div class="lr-circle"><i class="fas fa-check"></i></div>
-              <div class="lr-label">Submitted</div>
-            </div>
-            <div class="lr-step ${step2Class}">
-              <div class="lr-circle"><i class="fas fa-${step2Icon}"></i></div>
-              <div class="lr-label">Reviewing</div>
-            </div>
-            <div class="lr-step ${step3Class}">
-              <div class="lr-circle"><i class="fas fa-${step3Icon}"></i></div>
-              <div class="lr-label">Approved</div>
-            </div>
-          </div>
+        <div class="rp-carousel-dots" id="rpDots">
+            <div class="rp-dot ${!hasActiveLoan ? 'active' : ''}" onclick="document.getElementById('rpCarousel').scrollTo({left:0, behavior:'smooth'})"></div>
+            <div class="rp-dot ${hasActiveLoan ? 'active' : ''}" onclick="document.getElementById('rpCarousel').scrollTo({left:document.getElementById('rpCarousel').offsetWidth, behavior:'smooth'})"></div>
         </div>
-        <div class="lr-message">
-          <div class="lr-msg-title" style="color:${titleColor}">${title}</div>
-          <div class="lr-msg-body">${message}</div>
-        </div>
-      </div>
     `;
+
+    // Apply the auto-scroll logic
+    setTimeout(() => {
+        const carousel = document.getElementById('rpCarousel');
+        const dots = document.querySelectorAll('#rpDots .rp-dot');
+        if (carousel) {
+            // Instantly snap to the correct starting card
+            if (hasActiveLoan) {
+                carousel.scrollTo({ left: carousel.offsetWidth, behavior: 'instant' });
+            }
+
+            // Update dots when user swipes
+            carousel.addEventListener('scroll', () => {
+                const idx = Math.round(carousel.scrollLeft / carousel.offsetWidth);
+                dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+            });
+        }
+    }, 10);
 
     st.lastMs = Date.now();
   } catch (err) {
@@ -1110,7 +1253,6 @@ body.day-mode .lr-msg-body{ color: #475569; }
     st.busy = false;
   }
 }
-
 function timeAgo(ms) {
     const seconds = Math.floor((Date.now() - ms) / 1000);
     if (seconds < 60) return "Just now";
@@ -2412,6 +2554,164 @@ window.openRequestModal = function() {
     openAnimatedModal('requestModal');
 };
 
+/* ==========================================================================
+   SMART TRUST SCORE ENGINE
+   ========================================================================== */
+
+window.SmartTrustEngine = {
+    calculate() {
+        let score = 50; // Baseline for brand new users
+        let paidCount = 0;
+        let activeCount = 0;
+        let overdueCount = 0;
+
+        try {
+            const profileStr = localStorage.getItem("stallz_client_profile") || "{}";
+            const profile = JSON.parse(profileStr);
+
+            if (profile && profile.loans) {
+                const loansList = Object.values(profile.loans);
+                loansList.forEach(l => {
+                    const st = String(l.status || '').toUpperCase();
+                    if (st === 'PAID' || st === 'COMPLETED' || st === 'CLOSED') paidCount++;
+                    else if (st === 'OVERDUE') overdueCount++;
+                    else if (st === 'ACTIVE') activeCount++;
+                });
+            }
+
+            // The Algorithm
+            score += (paidCount * 15);
+            score -= (overdueCount * 30);
+            score += (activeCount * 5);
+
+            // Hard limits
+            if (score > 100) score = 100;
+            if (score < 10) score = 10; // Never goes to 0 (too discouraging)
+
+        } catch (e) { console.warn("Trust Engine Error", e); }
+
+        // Determine Status & Colors
+        let status = "Excellent";
+        let color = "#10b981"; // Green
+        let glow = "rgba(16, 185, 129, 0.3)";
+
+        if (score < 40) {
+            status = "Poor";
+            color = "#ef4444"; // Red
+            glow = "rgba(239, 68, 68, 0.3)";
+        } else if (score < 75) {
+            status = "Good";
+            color = "#f59e0b"; // Amber
+            glow = "rgba(245, 158, 11, 0.3)";
+        }
+
+        // Generate Smart Contextual Messaging
+        let message = "";
+        let tipsHtml = "";
+
+        if (overdueCount > 0) {
+            message = "Your score has dropped significantly due to an overdue balance. This currently limits your ability to request new loans.";
+            tipsHtml = `
+                <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 0.85rem; color: var(--text-main); font-weight: 600;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-top: 3px;"></i> <span>Clear your overdue balance immediately to stop score decay.</span>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: var(--text-main); font-weight: 600;">
+                    <i class="fas fa-headset" style="color: #3b82f6; margin-top: 3px;"></i> <span>Contact support if you need a restructured payment plan.</span>
+                </div>
+            `;
+        } else if (paidCount > 0) {
+            message = "Great job! Your consistent repayment history has built a highly trusted profile with our system.";
+            tipsHtml = `
+                <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 0.85rem; color: var(--text-main); font-weight: 600;">
+                    <i class="fas fa-arrow-up" style="color: #10b981; margin-top: 3px;"></i> <span>Continue paying on time to unlock higher borrowing limits.</span>
+                </div>
+                <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: var(--text-main); font-weight: 600;">
+                    <i class="fas fa-star" style="color: #f59e0b; margin-top: 3px;"></i> <span>You currently enjoy priority processing on new requests.</span>
+                </div>
+            `;
+        } else if (activeCount > 0) {
+            message = "You're on your way! Repay your current active loan exactly on time to significantly boost your Trust Score.";
+            tipsHtml = `
+                <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 0.85rem; color: var(--text-main); font-weight: 600;">
+                    <i class="fas fa-calendar-check" style="color: #10b981; margin-top: 3px;"></i> <span>Never miss a due date. Even partial payments help.</span>
+                </div>
+            `;
+        } else {
+            message = "You are a new borrower! Your score starts at an average baseline. Take out your first loan to build trust.";
+            tipsHtml = `
+                <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 0.85rem; color: var(--text-main); font-weight: 600;">
+                    <i class="fas fa-info-circle" style="color: #3b82f6; margin-top: 3px;"></i> <span>Your first fully paid loan adds massive points to your score.</span>
+                </div>
+            `;
+        }
+
+        return { score, status, color, glow, message, tipsHtml };
+    },
+
+    updateBadgeUI() {
+        const data = this.calculate();
+        const badgeVal = document.getElementById('trustScoreValue');
+        const badgeIcon = document.querySelector('.trust-pill i');
+
+        if (badgeVal) badgeVal.textContent = data.score;
+        if (badgeIcon) badgeIcon.style.color = data.color; // Makes the shield icon red/amber/green on the dashboard!
+    }
+};
+
+function openTrustScoreModal() {
+    const modal = document.getElementById('trustScoreModal');
+    if (!modal) return;
+
+    // Generate fresh smart data
+    const data = window.SmartTrustEngine.calculate();
+
+    // Inject into Modal
+    document.getElementById('tsModalValue').textContent = data.score;
+    document.getElementById('tsModalStatus').textContent = data.status;
+    document.getElementById('tsModalStatus').style.color = data.color;
+
+    const ringEl = document.getElementById('tsModalRing');
+    ringEl.style.stroke = data.color;
+    ringEl.style.filter = `drop-shadow(0 0 8px ${data.glow})`;
+
+    // Inject Smart Text
+    const msgEl = document.querySelector('#trustScoreModal p');
+    if(msgEl) msgEl.textContent = data.message;
+
+    const tipsBox = document.querySelector('#trustScoreModal .ts-improve-box');
+    if(tipsBox) {
+        tipsBox.innerHTML = `
+            <div class="ts-improve-title" style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; margin-bottom: 12px; letter-spacing: 0.5px;">Personalized Advice</div>
+            ${data.tipsHtml}
+        `;
+    }
+
+    // Animate Ring
+    const c = 264;
+    const offset = c - (data.score / 100) * c;
+    ringEl.style.strokeDashoffset = c; // Start empty
+
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        modal.classList.add('active');
+        ringEl.style.strokeDashoffset = offset; // Fill to actual score
+    }, 10);
+}
+
+function closeTrustScoreModal() {
+    const modal = document.getElementById('trustScoreModal');
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.classList.add('closing');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        modal.classList.remove('closing');
+    }, 200);
+}
+
+// Auto-update the badge dynamically when data changes
+setInterval(() => window.SmartTrustEngine.updateBadgeUI(), 2500);
+setTimeout(() => window.SmartTrustEngine.updateBadgeUI(), 500);
 window.closeRequestModal = function() {
     closeAnimatedModal('requestModal', () => {
         ['reqError1', 'reqError2', 'reqCalcResult'].forEach(id => {

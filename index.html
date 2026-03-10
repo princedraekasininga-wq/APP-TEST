@@ -720,6 +720,36 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
+
+        // =========================================================
+        // 1. INSTANT AUTO-LOGIN CHECK
+        // Checks if the 30-minute rolling session is still alive
+        // =========================================================
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) {
+            loginBtn.innerHTML = `<span class="spinner" style="border-top-color:var(--primary); border-right-color:transparent; border-bottom-color:transparent; border-left-color:transparent;"></span> Resuming...`;
+            loginBtn.disabled = true;
+        }
+
+        try {
+            // Wait for Firebase to check the secure token & custom 30-min timer
+            if (window.StallzAuth && typeof window.StallzAuth.onceAuthState === 'function') {
+                const user = await window.StallzAuth.onceAuthState();
+                if (user) {
+                    // Session is still valid! Bypass login screen instantly.
+                    smoothNav('gatekeeper.html');
+                    return; // Stop running the rest of the login page script
+                }
+            }
+        } catch (e) { console.warn("Auto-login bypassed:", e); }
+
+        // If no valid session, reset the button so they can log in normally
+        if (loginBtn) {
+            loginBtn.innerHTML = "Sign In";
+            loginBtn.disabled = false;
+        }
+        // =========================================================
+
         const isIos = () => /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         const isPhone = /iPhone|Android.*Mobile/i.test(navigator.userAgent);
         const isInStandaloneMode = () => (window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches || (document.referrer.includes('android-app://'));
