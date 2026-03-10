@@ -780,12 +780,17 @@ function renderLoansTable(loansData) {
                     <div class="p-loan-id"><i class="fas fa-file-invoice-dollar" style="margin-right:6px; opacity:0.8;"></i>Loan #${loan.id}</div>
                     <div class="p-loan-badge ${statusClass}">${statusLabel}</div>
                 </div>
-                <div class="p-loan-balance-label">Remaining Balance</div>
-                <div class="p-loan-balance-val"><small>K</small>${balance.toLocaleString()}</div>
-                <div class="p-loan-total">
+
+                <div style="margin-bottom: 12px;">
+                    <div class="p-loan-balance-label" style="margin-bottom: 2px;">Remaining Balance</div>
+                    <div class="p-loan-balance-val" style="margin-bottom: 0;"><small>K</small>${balance.toLocaleString()}</div>
+                </div>
+
+                <div class="p-loan-total" style="margin-bottom: 24px;">
                     Principal: K${Number(loan.amount).toLocaleString()} &nbsp;•&nbsp; Total Due: K${total.toLocaleString()}<br>
                     <span class="p-loan-total-sub"><i class="fas fa-percentage" style="font-size:0.65rem; margin-right:2px;"></i> Interest: ${interestDisplay} &nbsp;•&nbsp; <i class="fas fa-calendar-alt" style="font-size:0.65rem; margin-right:2px; margin-left:4px;"></i> Duration: ${escapeHTML(planDisplay)}</span>
                 </div>
+
                 <div class="p-loan-progress-wrap">
                     <div class="p-loan-progress-labels">
                         <span>Paid: K${paid.toLocaleString()}</span>
@@ -795,13 +800,20 @@ function renderLoansTable(loansData) {
                         <div class="p-loan-progress-fill ${statusClass}" style="width: ${percent}%;"></div>
                     </div>
                 </div>
-                <div class="p-loan-footer" style="align-items: flex-end;">
+
+                <div class="p-loan-footer" style="align-items: center;">
+                    <div class="p-loan-meta">
+                        <span class="p-loan-meta-label">Collateral</span>
+                        <span class="p-loan-meta-val" style="font-size: 0.95rem; color: var(--primary);">${escapeHTML(loan.collateralItem || 'Personal')}</span>
+                    </div>
+
                     <button class="p-loan-receipt-btn" onclick="generateAndOpenReceipt('${loan.id}')">
-                        <i class="fas fa-file-invoice"></i> view Receipt
+                        <i class="fas fa-download"></i> Receipt
                     </button>
+
                     <div class="p-loan-meta" style="text-align: right;">
                         <span class="p-loan-meta-label">Issued On</span>
-                        <span class="p-loan-meta-val">${new Date(loan.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        <span class="p-loan-meta-val" style="font-size: 0.95rem;">${new Date(loan.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     </div>
                 </div>
             </div>
