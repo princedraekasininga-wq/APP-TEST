@@ -759,7 +759,8 @@ function renderLoansTable(loansData) {
         const balance = Number(loan.balance || 0);
         const percent = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
 
-        let interestRate = loan.customInterest !== undefined ? loan.customInterest : (loan.rate ? (loan.rate * 100) : 0);
+        // FIXED: Now safely ignores 'null' values passed from the Admin Portal
+        let interestRate = (loan.customInterest !== undefined && loan.customInterest !== null) ? loan.customInterest : (loan.rate ? (loan.rate * 100) : 0);
         let interestDisplay = interestRate > 0 ? `${interestRate}%` : "N/A";
         let planDisplay = loan.plan || "Standard";
 

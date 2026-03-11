@@ -3476,6 +3476,12 @@ window.openLoanRequestModal = function(requestId) {
             <div><strong>Collateral Value:</strong> ${formatMoney(req.collateralValue || 0)}</div>
         </div>
 
+        <div style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-weight:800; color: var(--primary); margin-bottom: 6px;">NEGOTIATED RATE (OPTIONAL)</div>
+            <input type="number" id="approveCustomInterest" placeholder="Enter % (e.g. 15)" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.3); color: #fff; font-size: 0.9rem;" autocomplete="off" min="0" step="1">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;">Leave blank to use the standard ${escapeHTML(req.plan || "-")} rate.</div>
+        </div>
+
         ${(req.nrcFrontUrl || req.nrcBackUrl) ? `
           <div style="display:grid; gap:8px; padding-top:6px;">
             <div style="font-weight:800;">NRC DOCUMENTATION</div>
@@ -3546,6 +3552,9 @@ window.approveLoanRequest = async function(){
 
     const profile = window.StallzShared?.getUser?.(exactUid) || {};
 
+    const customRateInput = document.getElementById("approveCustomInterest");
+    const customInterestVal = (customRateInput && customRateInput.value.trim() !== "") ? Number(customRateInput.value) : null;
+
     let creatorName = "Admin";
     let creatorEmail = "system@stallz";
     if (state.currentUserProfile) {
@@ -3563,7 +3572,7 @@ window.approveLoanRequest = async function(){
       clientPhone: String(req.clientPhone || profile.phone || "").trim(),
       amount: Number(req.amount || 0),
       plan: String(req.plan || "Weekly"),
-      customInterest: null,
+      customInterest: customInterestVal,
       collateralItem: String(req.collateralItem || "").trim(),
       collateralValue: Number(req.collateralValue || 0),
       startDate: toDateOnly(new Date()),
