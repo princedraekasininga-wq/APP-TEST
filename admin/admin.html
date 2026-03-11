@@ -695,71 +695,42 @@
   </div>
 </div>
 
-  <div id="adminProfileModal" class="modal-overlay modal-hidden" style="display: none; z-index: 50000;">
-  <div class="modal" style="max-width: 600px; height: 85vh; display:flex; flex-direction:column;">
+  <div id="adminProfileModal" class="modal-overlay modal-hidden" style="display: none; z-index: 50000; align-items:center; justify-content:center; padding: 15px;">
+  <div class="modal" style="max-width: 500px; width:100%; max-height: 85vh; display:flex; flex-direction:column; padding:0; border-radius:20px; overflow:hidden;">
 
-    <div class="modal-header" style="flex-shrink:0;">
+    <div class="modal-header" style="flex-shrink:0; background: var(--card-bg); border-bottom: 1px solid var(--divider); padding: 18px 24px;">
       <div class="modal-title">Team Member Profile</div>
       <button type="button" class="modal-close" onclick="closePopup('adminProfileModal')">✕</button>
     </div>
 
-    <div class="modal-body" style="padding:0; overflow-y:auto; flex:1;">
+    <div class="modal-body" style="padding:0; overflow-y:auto; flex:1; background: var(--bg-color);">
 
-        <div style="padding: 24px; background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent); text-align:center;">
-            <div class="avatar avatar-3" id="apAvatar" style="width:80px; height:80px; font-size:2rem; margin:0 auto 12px auto; box-shadow:0 8px 20px rgba(0,0,0,0.3);">AD</div>
-            <h2 id="apName" style="margin:0; font-size:1.4rem; color:var(--text-main);">Admin Name</h2>
-            <div id="apRole" style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">Role</div>
-            <div id="apContact" style="font-family:'Courier New', monospace; font-size:0.85rem; color:var(--primary); margin-top:6px; opacity:0.8;">-</div>
+        <div style="padding: 30px 24px; background: var(--card-bg); text-align:center; border-bottom: 1px solid var(--divider);">
+            <div class="avatar avatar-3" id="apAvatar" style="width:86px; height:86px; font-size:2.2rem; margin:0 auto 16px auto; box-shadow:0 8px 24px rgba(0,0,0,0.15); border: 3px solid var(--divider);">AD</div>
+            <h2 id="apName" style="margin:0; font-size:1.5rem; color:var(--text-main); font-weight:800; letter-spacing:-0.5px;">Admin Name</h2>
+            <div id="apRole" style="display:inline-block; background:rgba(148, 163, 184, 0.1); color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:4px 10px; border-radius:12px; margin-top:8px;">Role</div>
+            <div id="apContact" style="font-family:'Courier New', monospace; font-size:0.9rem; color:var(--primary); font-weight:600; margin-top:12px;">-</div>
         </div>
 
-        <div class="sketch-tabs" style="margin-top:0; border-bottom:1px solid var(--divider);">
-            <button class="sketch-btn active" onclick="switchProfileTab('activity', this)">Activity</button>
-            <button class="sketch-btn" id="tabBtnCommissions" onclick="switchProfileTab('commissions', this)">Commissions</button>
+        <div style="width: 100%; display: flex; justify-content: center; padding: 15px 0; border-bottom: 1px solid var(--divider); background: var(--card-bg);">
+            <div class="sketch-tabs" style="margin: 0; background: rgba(0,0,0,0.1); border: 1px solid var(--divider); padding: 6px; display: flex; justify-content: center; gap: 10px; width: 100%; max-width: 320px; border-radius: 100px;">
+                <button class="sketch-btn active" onclick="switchProfileTab('activity', this)" style="padding:10px 0; border-radius: 100px;">Activity</button>
+                <button class="sketch-btn" id="tabBtnCommissions" onclick="switchProfileTab('commissions', this)" style="padding:10px 0; border-radius: 100px;">Commissions</button>
+            </div>
         </div>
 
-        <div id="ap-tab-activity" class="profile-tab-content active" style="padding:20px;">
-            <div class="stat-card">
-                <div class="stat-label">Loans Created</div>
+        <div id="ap-tab-activity" class="profile-tab-content active" style="padding:24px;">
+            <div class="stat-card" style="margin-bottom: 24px;">
+                <div class="stat-label">Loans Originated</div>
                 <div class="stat-value" id="apLoansCount">0</div>
             </div>
-            <div style="margin-top:20px;">
-                <h4 style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Recent Entries</h4>
-                <div id="apRecentList" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <div>
+                <h4 style="color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">Recent Entries</h4>
+                <div id="apRecentList" style="display:flex; flex-direction:column; gap:10px;"></div>
             </div>
         </div>
 
-        <div id="ap-tab-commissions" class="profile-tab-content" style="padding:20px; display:none;">
-
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px;">
-                <div class="stat-card" style="background:rgba(16, 185, 129, 0.1); border-color:rgba(16, 185, 129, 0.2);">
-                    <div class="stat-label">Total Commission</div>
-                    <div class="stat-value" id="apTotalComm" style="color:#34d399;">K0.00</div>
-                    <div class="stat-sub">Potential Earnings</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Avg. Rate</div>
-                    <div class="stat-value" id="apAvgComm">15%</div>
-                    <div class="stat-sub">Performance</div>
-                </div>
-            </div>
-
-            <div style="background:rgba(59, 130, 246, 0.1); border:1px solid rgba(59, 130, 246, 0.2); padding:12px; border-radius:12px; font-size:0.8rem; color:#93c5fd; margin-bottom:20px;">
-                <strong>ℹ️ Policy:</strong> Standard commission is 25% of profit. If the loan interest rate is discounted, the commission % is reduced by the same proportion.
-            </div>
-
-            <div class="table-wrapper">
-                <table style="font-size:0.85rem;">
-                    <thead>
-                        <tr>
-                            <th>Loan</th>
-                            <th style="text-align:right;">Profit</th>
-                            <th style="text-align:center;">Rate Impact</th>
-                            <th style="text-align:right;">Comm.</th>
-                        </tr>
-                    </thead>
-                    <tbody id="apCommBody"></tbody>
-                </table>
-            </div>
+        <div id="ap-tab-commissions" class="profile-tab-content" style="padding:24px; display:none;">
         </div>
 
     </div>
