@@ -332,10 +332,9 @@ function animateValue(obj, start, end, duration) {
 }
 
 window.toggleAdminTheme = function() {
-    // Premium mechanical switch vibration
+    // Standard Android haptic tap (Note: iOS completely blocks web vibrations)
     try {
-        if (typeof vibrate === "function") vibrate([15, 30, 20]);
-        else if (navigator.vibrate) navigator.vibrate([15, 30, 20]);
+        if (navigator.vibrate) navigator.vibrate(50);
     } catch(err) {}
 
     const isLight = document.documentElement.getAttribute('data-theme') === 'light';
@@ -350,7 +349,6 @@ window.toggleAdminTheme = function() {
     localStorage.setItem('stallz_theme_preference', newTheme);
     syncAdminThemeUI(newTheme === 'light');
 };
-
 function syncAdminThemeUI(isLight) {
     const themeToggle = document.getElementById('themeToggleState');
     const themeKnob = document.getElementById('themeToggleKnob');

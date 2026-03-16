@@ -597,17 +597,15 @@ if (document.readyState === 'loading') {
     runAllInit();
 }
 function toggleTheme() {
-    // 1. Add nice mechanical switch vibration (double click feel)
+    // Standard Android haptic tap (Note: iOS completely blocks web vibrations)
     try {
-        if (navigator.vibrate) navigator.vibrate([15, 30, 20]);
-        else if (typeof __haptic === 'function') __haptic('soft');
+        if (navigator.vibrate) navigator.vibrate(50);
     } catch(err) {}
 
     const isDay = document.body.classList.toggle('day-mode');
     localStorage.setItem('stallz-theme', isDay ? 'day' : 'night');
     syncThemeUI();
 }
-
 function syncThemeUI() {
     const isDay = document.body.classList.contains('day-mode');
     const themeIcon = document.getElementById('themeIcon');
