@@ -7,7 +7,7 @@
   // ---------------------------
   // 1) Versioning
   // ---------------------------
-  cfg.version = cfg.version || "2.5.5";
+  cfg.version = cfg.version || "2.5.0";
   g.STALLZ_APP_VERSION = cfg.version;
 
   // ---------------------------
@@ -37,7 +37,7 @@
     } catch(_) {}
 
     // Default (safe): TEST
-    return "main";
+    return "test";
   }
 
   cfg.firebase.mode = cfg.firebase.mode || resolveMode();
