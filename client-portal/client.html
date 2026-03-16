@@ -284,7 +284,9 @@
                             <i id="themeIcon" class="fas fa-moon"></i>
                         </div>
                         <span style="flex:1;">Switch Theme</span>
-                        <i id="themeToggleState" class="fas fa-toggle-on toggle-icon" style="font-size: 1.2rem; color: var(--primary); transition: color 0.3s;"></i>
+                        <div id="themeToggleState" style="width: 44px; height: 24px; background: var(--primary); border-radius: 20px; position: relative; transition: background 0.3s; display: flex; align-items: center; padding: 2px; box-sizing: border-box; flex-shrink: 0;">
+    <div id="themeToggleKnob" style="width: 20px; height: 20px; background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(20px);"></div>
+</div>
                     </button>
 
                     <div style="height: 1px; background: rgba(255,255,255,0.06); margin: 6px 15px; border-radius: 1px;"></div>

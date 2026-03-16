@@ -331,29 +331,59 @@ function animateValue(obj, start, end, duration) {
   window.requestAnimationFrame(step);
 }
 
+window.toggleAdminTheme = function() {
+    // Premium mechanical switch vibration
+    try {
+        if (typeof vibrate === "function") vibrate([15, 30, 20]);
+        else if (navigator.vibrate) navigator.vibrate([15, 30, 20]);
+    } catch(err) {}
+
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const newTheme = isLight ? 'dark' : 'light';
+
+    if (newTheme === 'light') {
+        document.documentElement.setAttribute("data-theme", "light");
+    } else {
+        document.documentElement.removeAttribute("data-theme");
+    }
+
+    localStorage.setItem('stallz_theme_preference', newTheme);
+    syncAdminThemeUI(newTheme === 'light');
+};
+
+function syncAdminThemeUI(isLight) {
+    const themeToggle = document.getElementById('themeToggleState');
+    const themeKnob = document.getElementById('themeToggleKnob');
+
+    if (themeToggle && themeKnob) {
+        if (isLight) {
+            themeToggle.style.background = 'rgba(148, 163, 184, 0.4)'; // Gray for light mode
+            themeKnob.style.transform = 'translateX(0px)';
+        } else {
+            themeToggle.style.background = 'var(--primary)'; // Colored for dark mode
+            themeKnob.style.transform = 'translateX(20px)';
+        }
+    }
+}
+
 function checkTimeBasedTheme() {
-  const toggle = document.getElementById("themeToggle");
   const stored = localStorage.getItem("stallz_theme_preference");
+  let isLight = false;
 
   if (stored) {
-    if (stored === "light") {
-      document.documentElement.setAttribute("data-theme", "light");
-      if (toggle) toggle.checked = false;
-    } else {
-      document.documentElement.removeAttribute("data-theme");
-      if (toggle) toggle.checked = true;
-    }
-    return;
+    isLight = (stored === "light");
+  } else {
+    const hour = new Date().getHours();
+    isLight = (hour >= 6 && hour < 18);
   }
-  const hour = new Date().getHours();
-  const isDayTime = hour >= 6 && hour < 18;
-  if (isDayTime) {
+
+  if (isLight) {
     document.documentElement.setAttribute("data-theme", "light");
-    if (toggle) toggle.checked = false;
   } else {
     document.documentElement.removeAttribute("data-theme");
-    if (toggle) toggle.checked = true;
   }
+
+  syncAdminThemeUI(isLight);
 }
 
 let __lastActivityWrite = 0;
@@ -3210,6 +3240,12 @@ function init() {
   document.getElementById("notifBtn")?.addEventListener("click", toggleNotifications);
 
   document.getElementById("themeToggle")?.addEventListener("change", (e) => {
+    // Add nice mechanical switch vibration (double click feel)
+    try {
+        if (typeof vibrate === "function") vibrate([15, 30, 20]);
+        else if (navigator.vibrate) navigator.vibrate([15, 30, 20]);
+    } catch(err) {}
+
     localStorage.setItem("stallz_theme_preference", e.target.checked ? "dark" : "light");
     checkTimeBasedTheme();
   });

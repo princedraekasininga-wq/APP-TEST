@@ -597,6 +597,12 @@ if (document.readyState === 'loading') {
     runAllInit();
 }
 function toggleTheme() {
+    // 1. Add nice mechanical switch vibration (double click feel)
+    try {
+        if (navigator.vibrate) navigator.vibrate([15, 30, 20]);
+        else if (typeof __haptic === 'function') __haptic('soft');
+    } catch(err) {}
+
     const isDay = document.body.classList.toggle('day-mode');
     localStorage.setItem('stallz-theme', isDay ? 'day' : 'night');
     syncThemeUI();
@@ -606,9 +612,22 @@ function syncThemeUI() {
     const isDay = document.body.classList.contains('day-mode');
     const themeIcon = document.getElementById('themeIcon');
     const themeToggle = document.getElementById('themeToggleState');
+    const themeKnob = document.getElementById('themeToggleKnob');
 
     if (themeIcon) themeIcon.className = isDay ? 'fas fa-sun' : 'fas fa-moon';
-    if (themeToggle) {
+
+    // Logic for the new sliding CSS switch
+    if (themeToggle && themeKnob) {
+        if (isDay) {
+            themeToggle.style.background = 'rgba(148, 163, 184, 0.4)'; // Gray for day mode
+            themeKnob.style.transform = 'translateX(0px)';
+        } else {
+            themeToggle.style.background = 'var(--primary)'; // Colored for night mode
+            themeKnob.style.transform = 'translateX(20px)';
+        }
+    }
+    // Fallback just in case you kept the old FontAwesome icon
+    else if (themeToggle) {
         themeToggle.className = isDay ? 'fas fa-toggle-off' : 'fas fa-toggle-on';
         themeToggle.style.color = isDay ? '#94a3b8' : 'var(--primary)';
     }
