@@ -33,7 +33,7 @@ body.day-mode {
    2. GLOBAL RESET & BASE STYLES
    ========================================================================== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding-bottom: 90px; line-height: 1.4; -webkit-font-smoothing: antialiased; overflow-x: hidden; transition: background-color 0.5s ebody { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding-bottom: 90px; line-height: 1.4; -webkit-font-smoothing: antialiased; overflow-x: hidden; transition: background-color 0.5s ease, color 0.5s ease; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding-bottom: 90px; line-height: 1.4; -webkit-font-smoothing: antialiased; overflow-x: hidden; transition: background-color 0.5s ebody { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; padding-bottom: 90px; line-height: 1.4; -webkit-font-smoothing: antialiased; overflow-x: hidden; transition: background-color 0.5s ease, color 0.5s ease; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
 
 input, textarea, select { -webkit-user-select: auto; -moz-user-select: auto; -ms-user-select: auto; user-select: auto; }ase, color 0.5s ease; }
 .portal-shell { max-width: 800px; margin: 0 auto; padding: 15px; }

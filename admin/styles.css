@@ -54,7 +54,25 @@ body {
   font-feature-settings: "tnum" on, "cv11" on;
   transition: background-color 0.5s ease, color 0.5s ease;
   -webkit-user-select: none;
+  -moz-user-select: none;body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding-bottom: 90px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  width: 100%;
+  font-feature-settings: "tnum" on, "cv11" on;
+  transition: background-color 0.5s ease, color 0.5s ease;
+  -webkit-user-select: none;
   -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
   -ms-user-select: none;
   user-select: none;
 }
