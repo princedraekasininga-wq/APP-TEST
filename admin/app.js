@@ -1151,11 +1151,14 @@ function refreshUI() {
             : n.type === "DUE_SOON" ? "⏳"
             : "🔔";
         const sub = n.body ? `<div style="opacity:0.7;">${escapeHTML(n.body)}</div>` : "";
-        const click = n.type === "LOAN_REQUEST" ? `window.openLoanRequestModal(${Number(n.meta?.requestId) || 0})`
+
+        // ADDED SINGLE QUOTES TO IDs TO PREVENT CRASHES
+        const click = n.type === "LOAN_REQUEST" ? `window.openLoanRequestModal('${n.meta?.requestId || ""}')`
             : n.type === "MESSAGE" ? `window.openAdminMessageModal('${String(n.meta?.clientUid || "")}')`
             : n.type === "NEW_CLIENT" ? `openPopup('clientsModal')`
-            : n.type === "DUE_SOON" ? (n.meta?.loanId ? `openActionModal('PAY', ${Number(n.meta.loanId)})` : `openPopup('clientsModal')`)
+            : n.type === "DUE_SOON" ? (n.meta?.loanId ? `openActionModal('PAY', '${n.meta.loanId}')` : `openPopup('clientsModal')`)
             : `void 0`;
+
         return `
             <div class="notif-item" onclick="${click}">
             <span style="margin-right:8px;">${icon}</span>
@@ -1167,7 +1170,7 @@ function refreshUI() {
         }).join("");
 
         const overdueHtml = overdueLoans.map(l => `
-            <div class="notif-item" onclick="openActionModal('PAY', ${l.id})">
+            <div class="notif-item" onclick="openActionModal('PAY', '${l.id}')">
                 <span style="color:#ef4444; margin-right:8px;">⚠️</span>
                 <div>
                     <div style="font-weight:600;">Overdue: ${escapeHTML(l.clientName)}</div>
@@ -1228,7 +1231,6 @@ function refreshUI() {
 
 // Global flag to prevent re-animating numbers every 15 seconds
 let __dashboardAnimRan = false;
-
 /* ==========================================================================
    LOANS HISTORY (Modal)
    ========================================================================== */
@@ -1396,10 +1398,10 @@ function renderLoanHistory() {
             </div>
 
             <div style="display:flex; gap:8px; border-top:1px dashed var(--divider); padding-top:10px;">
-              <button onclick="openActionModal('NOTE', ${l.id})" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid ${hasNotes ? 'rgba(59, 130, 246, 0.3)' : 'var(--divider)'}; background:${hasNotes ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.03)'}; color:${hasNotes ? '#3b82f6' : 'var(--text-muted)'};">
+              <button onclick="openActionModal('NOTE', '${l.id}')" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid ${hasNotes ? 'rgba(59, 130, 246, 0.3)' : 'var(--divider)'}; background:${hasNotes ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.03)'}; color:${hasNotes ? '#3b82f6' : 'var(--text-muted)'};">
                 📝 ${hasNotes ? 'Read Notes' : '+ Note'}
               </button>
-              <button onclick="openActionModal('PAY', ${l.id})" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer; background:var(--primary); color:#000; border:none; box-shadow: 0 4px 10px rgba(74, 222, 128, 0.15);">
+              <button onclick="openActionModal('PAY', '${l.id}')" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer; background:var(--primary); color:#000; border:none; box-shadow: 0 4px 10px rgba(74, 222, 128, 0.15);">
                 Record Payment
               </button>
             </div>
@@ -1488,12 +1490,12 @@ function renderLoansTable() {
       <td data-label="Balance" ${balanceStyle}>${formatMoney(l.balance)}</td>
       <td data-label="Status"><span class="status-pill status-${(l.status || 'active').toLowerCase()}">${l.status}</span></td>
       <td data-label="Actions" style="text-align:right; white-space:nowrap;">
-        <button class="btn-icon" onclick="openReceipt(${l.id})" title="Print Receipt">🖨️</button>
+        <button class="btn-icon" onclick="openReceipt('${l.id}')" title="Print Receipt">🖨️</button>
         <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn-icon" style="${waStyle}; text-decoration:none; display:inline-flex;" title="WhatsApp">💬</a>
-        <button class="btn-icon" onclick="openActionModal('PAY', ${l.id})" title="Pay" style="color:#38bdf8; ${disabledOpacity}" ${disabledAttr}>💳</button>
-        <button class="btn-icon" onclick="openActionModal('TOPUP', ${l.id})" title="Top-Up / Refinance" style="color:#a855f7; ${disabledOpacity}" ${disabledAttr}>⬆️</button>
-        <button class="btn-icon" onclick="openActionModal('WRITEOFF', ${l.id})" title="Bad Debt" style="color:#f87171; ${disabledOpacity}" ${disabledAttr}>🗑️</button>
-        <button class="btn-icon" onclick="openActionModal('NOTE', ${l.id})" title="Note">📝</button>
+        <button class="btn-icon" onclick="openActionModal('PAY', '${l.id}')" title="Pay" style="color:#38bdf8; ${disabledOpacity}" ${disabledAttr}>💳</button>
+        <button class="btn-icon" onclick="openActionModal('TOPUP', '${l.id}')" title="Top-Up / Refinance" style="color:#a855f7; ${disabledOpacity}" ${disabledAttr}>⬆️</button>
+        <button class="btn-icon" onclick="openActionModal('WRITEOFF', '${l.id}')" title="Bad Debt" style="color:#f87171; ${disabledOpacity}" ${disabledAttr}>🗑️</button>
+        <button class="btn-icon" onclick="openActionModal('NOTE', '${l.id}')" title="Note">📝</button>
       </td>
     </tr>
   `}).join("");
@@ -2282,7 +2284,7 @@ window.openAdminClientDetails = function(key){
                   <strong>Loan #${escapeHTML(l.id || l.loanId || '')}</strong> — <span class="status-pill status-${(l.status||'').toLowerCase()}" style="font-size:0.65rem; padding:2px 6px;">${escapeHTML(l.status||'')}</span>
                   <div style="margin-top:4px; font-size:0.85rem; color:var(--text-muted);">Balance: ${__fmtMoney(l.balance||l.totalDue||0)}</div>
               </div>
-              ${l.notes ? `<button onclick="openActionModal('NOTE', ${l.id})" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">📝 Read Notes</button>` : `<button onclick="openActionModal('NOTE', ${l.id})" style="background: transparent; color: var(--text-muted); border: 1px dashed var(--border); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; cursor: pointer;">📝 + Note</button>`}
+              ${l.notes ? `<button onclick="openActionModal('NOTE', '${l.id}')" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">📝 Read Notes</button>` : `<button onclick="openActionModal('NOTE', '${l.id}')" style="background: transparent; color: var(--text-muted); border: 1px dashed var(--border); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; cursor: pointer;">📝 + Note</button>`}
           </div>
       </div>
     `).join('') || '<div style="color:var(--text-muted); font-style:italic;">No loans.</div>';

@@ -37,7 +37,7 @@
     } catch(_) {}
 
     // Default (safe): TEST
-    return "test";
+    return "main";
   }
 
   cfg.firebase.mode = cfg.firebase.mode || resolveMode();
