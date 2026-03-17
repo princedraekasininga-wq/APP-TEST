@@ -1025,6 +1025,208 @@ function updateWelcomeUI() {
 
 let __linkOrphansState = { lastLoansCount: 0, lastUsersCount: 0, lastRunAt: 0 };
 
+function injectPremiumCardCSS() {
+  if (document.getElementById("stallzPremiumAdminLoanCardStyle")) return;
+  const style = document.createElement("style");
+  style.id = "stallzPremiumAdminLoanCardStyle";
+  style.innerHTML = `
+      /* Hide standard table headers since we are using card views now */
+      #loansTable thead, #loanHistoryTable thead { display: none !important; }
+
+      /* REMOVED: opacity: 0; and animation: fadeInCard; to stop the blinking on sync */
+      .p-loan-card { background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98)); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 24px; padding: 24px; margin-bottom: 20px; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6); position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; width: 100%; box-sizing: border-box; }
+      .p-loan-card:hover { transform: translateY(-3px); box-shadow: 0 25px 55px rgba(0, 0, 0, 0.75); }
+      .p-loan-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, var(--primary, #4ade80), #22c55e); box-shadow: 0 2px 10px rgba(74,222,128,0.5); }
+      .p-loan-card.is-overdue::before { background: linear-gradient(90deg, #f87171, #ef4444); box-shadow: 0 2px 10px rgba(239,68,68,0.5); }
+      .p-loan-card.is-paid::before { background: linear-gradient(90deg, #3b82f6, #2563eb); box-shadow: 0 2px 10px rgba(59,130,246,0.5); }
+      .p-loan-card.is-defaulted::before { background: linear-gradient(90deg, #64748b, #475569); filter: grayscale(100%); }
+      .p-loan-badge { padding: 6px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
+      .p-loan-badge.active { background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.4); }
+      .p-loan-badge.overdue { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); }
+      .p-loan-badge.paid { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+      .p-loan-badge.defaulted { background: rgba(100, 116, 139, 0.2); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.4); }
+      .p-loan-balance-label { font-size: 0.85rem; color: rgba(255,255,255,0.8); margin-bottom: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+      .p-loan-balance-val { font-size: 2.08rem; font-weight: 900; color: #ffffff; letter-spacing: -1px; display: flex; align-items: baseline; gap: 4px; line-height: 1.1; margin-bottom: 8px; text-shadow: 0 4px 15px rgba(0,0,0,0.6); }
+      .p-loan-balance-val small { font-size: 1.4rem; color: rgba(255,255,255,0.6); font-weight: 800; }
+      .p-loan-total { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 26px; font-weight: 600; line-height: 1.6; }
+      .p-loan-total-sub { font-size: 0.75rem; font-weight: 700; color: var(--primary, #4ade80); }
+      .p-loan-progress-wrap { margin-bottom: 24px; }
+      .p-loan-progress-labels { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 10px; font-weight: 800; color: rgba(255,255,255,0.9); }
+      .p-loan-progress-track { height: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; box-shadow: inset 0 4px 8px rgba(0,0,0,0.5); }
+      .p-loan-progress-fill { height: 100%; border-radius: 12px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+      .p-loan-progress-fill.active { background: linear-gradient(90deg, #4ade80, #22c55e); box-shadow: 0 0 15px rgba(74,222,128,0.6); }
+      .p-loan-progress-fill.overdue { background: linear-gradient(90deg, #f87171, #ef4444); box-shadow: 0 0 15px rgba(239,68,68,0.6); }
+      .p-loan-progress-fill.paid { background: linear-gradient(90deg, #3b82f6, #2563eb); box-shadow: 0 0 15px rgba(59,130,246,0.6); }
+      .p-loan-progress-fill.defaulted { background: linear-gradient(90deg, #64748b, #475569); }
+      .p-loan-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 18px; margin-bottom: 15px; }
+      .p-loan-meta { display: flex; flex-direction: column; gap: 5px; }
+      .p-loan-meta-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800; }
+      .p-loan-meta-val { font-size: 1.05rem; color: rgba(255,255,255,0.95); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 145px; text-shadow: 0 2px 5px rgba(0,0,0,0.4); }
+
+      /* Professional SVG Action Buttons CSS */
+      .p-action-btn { display:flex; align-items:center; justify-content:center; gap:6px; padding:12px; border-radius:12px; font-size:0.85rem; font-weight:800; cursor:pointer; transition: transform 0.1s, box-shadow 0.2s; border:none; outline:none; font-family: inherit; }
+      .p-action-btn:active { transform: scale(0.96); }
+      .p-action-btn svg { flex-shrink: 0; }
+
+      /* Auto-Adapt for Admin Light Mode */
+      [data-theme="light"] .p-loan-card { background: #ffffff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 16px 45px rgba(0,0,0,0.05); }
+      [data-theme="light"] .p-loan-balance-label { color: #64748b; }
+      [data-theme="light"] .p-loan-balance-val { color: #0f172a; text-shadow: none; }
+      [data-theme="light"] .p-loan-balance-val small { color: #94a3b8; }
+      [data-theme="light"] .p-loan-total { color: #64748b; }
+      [data-theme="light"] .p-loan-total-sub { color: #16a34a; }
+      [data-theme="light"] .p-loan-progress-labels { color: #334155; }
+      [data-theme="light"] .p-loan-progress-track { background: #f1f5f9; box-shadow: inset 0 1px 3px rgba(0,0,0,0.04); }
+      [data-theme="light"] .p-loan-footer { border-top: 1px solid rgba(0,0,0,0.06); }
+      [data-theme="light"] .p-loan-meta-label { color: #94a3b8; }
+      [data-theme="light"] .p-loan-meta-val { color: #1e293b; text-shadow: none; }
+  `;
+  document.head.appendChild(style);
+}
+
+function getPremiumLoanCardHTML(l, index = 0) {
+    const status = String(l.status || "ACTIVE").toUpperCase();
+    const statusClass = status === "PAID" ? "paid" : (status === "OVERDUE" ? "overdue" : (status === "DEFAULTED" ? "defaulted" : "active"));
+    const hasNotes = !!l.notes;
+
+    const total = Number(l.totalDue || 0);
+    const paid = Number(l.paid || 0);
+    const balance = Number(l.balance || 0);
+    const percent = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+
+    let interestRate = (l.customInterest !== undefined && l.customInterest !== null) ? l.customInterest : (l.rate ? (l.rate * 100) : 0);
+    let interestDisplay = interestRate > 0 ? `${interestRate}%` : "N/A";
+    let planDisplay = l.plan || "Standard";
+
+    const updated = _fmtDateShort(l.updatedAt || l.paidAt || l.startDate);
+    const clientNameDisplay = l.clientName || "Unknown Client";
+
+    const waNumber = formatWhatsApp(l.clientPhone);
+    const waMsg = encodeURIComponent(`Hi ${clientNameDisplay}, reminder: Balance of ${formatMoney(l.balance)} was due on ${formatDate(l.dueDate)}.`);
+    const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMsg}` : "#";
+
+    const isClosed = status === "PAID" || status === "DEFAULTED";
+
+    // Generate Initials
+    let init1 = "", init2 = "";
+    if (clientNameDisplay) {
+        const parts = clientNameDisplay.trim().split(" ");
+        init1 = parts[0] ? parts[0].charAt(0).toUpperCase() : "";
+        init2 = parts.length > 1 ? parts[parts.length - 1].charAt(0).toUpperCase() : "";
+    }
+    const initials = init1 + init2;
+
+    // Smart Footer Buttons (Hide irrelevant actions on paid loans)
+    let actionButtonsHtml = '';
+    if (isClosed) {
+        actionButtonsHtml = `
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 15px;">
+              <button onclick="openActionModal('NOTE', '${l.id}')" class="p-action-btn" style="border:1px solid ${hasNotes ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255,255,255,0.15)'}; background:${hasNotes ? 'rgba(59, 130, 246, 0.15)' : 'transparent'}; color:${hasNotes ? '#60a5fa' : 'var(--text-main)'};">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                ${hasNotes ? 'Notes Log' : '+ Add Note'}
+              </button>
+              <button onclick="openReceipt('${l.id}')" class="p-action-btn" style="border:1px solid rgba(255,255,255,0.15); background:transparent; color:var(--text-main);" title="Print Receipt">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Receipt
+              </button>
+          </div>
+        `;
+    } else {
+        actionButtonsHtml = `
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 15px;">
+              <button onclick="openActionModal('PAY', '${l.id}')" class="p-action-btn" style="grid-column: span 2; background:var(--primary); color:#000; box-shadow: 0 4px 10px rgba(74, 222, 128, 0.2);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                Record Payment
+              </button>
+              <button onclick="openActionModal('TOPUP', '${l.id}')" class="p-action-btn" style="background:rgba(168, 85, 247, 0.15); color:#c084fc; border:1px solid rgba(168, 85, 247, 0.4);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Top-Up
+              </button>
+              <button onclick="openActionModal('NOTE', '${l.id}')" class="p-action-btn" style="border:1px solid ${hasNotes ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255,255,255,0.15)'}; background:${hasNotes ? 'rgba(59, 130, 246, 0.15)' : 'transparent'}; color:${hasNotes ? '#60a5fa' : 'var(--text-main)'};">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                ${hasNotes ? 'Notes' : 'Note'}
+              </button>
+              <button onclick="openActionModal('WRITEOFF', '${l.id}')" class="p-action-btn" style="border:1px solid rgba(239, 68, 68, 0.3); background:rgba(239, 68, 68, 0.1); color:#ef4444;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                Bad Debt
+              </button>
+              <button onclick="openReceipt('${l.id}')" class="p-action-btn" style="border:1px solid rgba(255,255,255,0.15); background:transparent; color:var(--text-main);">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Receipt
+              </button>
+          </div>
+          <div style="margin-top: 10px;">
+              <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="p-action-btn" style="width: 100%; border:1px solid rgba(74, 222, 128, 0.3); background:rgba(74, 222, 128, 0.1); color:#4ade80; text-decoration:none;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                Send WhatsApp Reminder
+              </a>
+          </div>
+        `;
+    }
+
+    return `
+      <div class="p-loan-card ${statusClass === 'overdue' ? 'is-overdue' : (statusClass === 'paid' ? 'is-paid' : (statusClass === 'defaulted' ? 'is-defaulted' : ''))}" style="animation-delay: ${index * 0.05}s">
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+              <div style="display:flex; align-items:center; gap:6px; font-family:monospace; font-size:0.85rem; color:var(--text-muted); font-weight:700;">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg>
+                  ID: ${l.id}
+              </div>
+              <div class="p-loan-badge ${statusClass}">${status === 'DEFAULTED' ? 'CLOSED' : status}</div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+              <div style="font-size:1.3rem; font-weight: 900; color:var(--text-main); line-height:1.2; word-break: break-word; padding-right: 15px;">
+                  ${escapeHTML(clientNameDisplay)}
+              </div>
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); flex-shrink: 0; letter-spacing: 1px;">
+                  ${initials}
+              </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-muted); font-family:monospace; margin-bottom: 24px;">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              ${escapeHTML(l.clientPhone || 'No Phone Number')}
+          </div>
+
+          <div style="margin-bottom: 12px;">
+              <div class="p-loan-balance-label" style="margin-bottom: 2px;">Remaining Balance</div>
+              <div class="p-loan-balance-val" style="margin-bottom: 0;"><small>K</small>${balance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+          </div>
+
+          <div class="p-loan-total" style="margin-bottom: 24px;">
+              Principal: K${Number(l.amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} &nbsp;•&nbsp; Total Due: K${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br>
+              <span class="p-loan-total-sub"> Interest: ${interestDisplay} &nbsp;•&nbsp; Duration: ${escapeHTML(planDisplay)}</span>
+          </div>
+
+          <div class="p-loan-progress-wrap">
+              <div class="p-loan-progress-labels">
+                  <span>Paid: K${paid.toLocaleString()}</span>
+                  <span>${percent}%</span>
+              </div>
+              <div class="p-loan-progress-track">
+                  <div class="p-loan-progress-fill ${statusClass}" style="width: ${percent}%;"></div>
+              </div>
+          </div>
+
+          <div class="p-loan-footer">
+              <div class="p-loan-meta">
+                  <span class="p-loan-meta-label">Collateral</span>
+                  <span class="p-loan-meta-val" style="color: var(--primary);">${escapeHTML(l.collateralItem || 'Personal')}</span>
+              </div>
+
+              <div class="p-loan-meta" style="text-align: right;">
+                  <span class="p-loan-meta-label">Due Date</span>
+                  <span class="p-loan-meta-val" style="${status === 'OVERDUE' ? 'color:#ef4444;' : ''}">${formatDate(l.dueDate)}</span>
+              </div>
+          </div>
+
+          ${actionButtonsHtml}
+
+      </div>
+    `;
+}
+
 function linkOrphanedLoans(force = false) {
   if (!state.loans || !window.StallzShared) return;
 
@@ -1330,6 +1532,8 @@ function renderLoanHistory() {
   const tbody = document.getElementById("loanHistoryBody");
   if (!tbody) return;
 
+  injectPremiumCardCSS(); // Inject the card styles
+
   const listAll = dedupeLoansById(state.loans || []);
   const q = String(state.loanHistorySearch || "").trim().toLowerCase();
   const mode = String(state.loanHistoryFilter || "ALL").toUpperCase();
@@ -1359,64 +1563,21 @@ function renderLoanHistory() {
     return;
   }
 
-  tbody.innerHTML = list.map(l => {
-    const status = String(l.status || "ACTIVE").toUpperCase();
-    const badgeClass = status === "PAID" ? "paid" : (status === "OVERDUE" ? "overdue" : (status === "DEFAULTED" ? "defaulted" : "active"));
-    const hasNotes = !!l.notes;
-    const updated = _fmtDateShort(l.updatedAt || l.paidAt || l.startDate);
-
-    // COMPACT ROW: Padding reduced from 12px to 8px
-    const makeDataRow = (label, value, valueStyle = "") => `
-      <div style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-bottom: 1px solid var(--divider);">
-        <div class="lh-label">${label}</div>
-        <div class="lh-value" style="${valueStyle}">${value}</div>
-      </div>
-    `;
-
-    return `
-      <tr style="border-bottom:none;">
-        <td colspan="9" style="padding:8px 4px;">
-          <div class="lh-card" style="background:var(--card-bg); border:1px solid var(--divider); border-radius:14px; padding:12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom: 1px solid var(--divider); padding-bottom:8px;">
-              <div style="font-family:'Courier New', monospace; font-weight:800; font-size:0.85rem; color:var(--primary);">#${l.id}</div>
-              <span class="status-pill status-${badgeClass}" style="font-size:0.6rem; padding:3px 8px;">${status === 'DEFAULTED' ? 'CLOSED' : status}</span>
-            </div>
-
-            <div style="margin-bottom:10px;">
-              ${makeDataRow("Client Name", escapeHTML(l.clientName || "Unknown"), "font-weight:800; color:var(--text-main);")}
-              ${makeDataRow("Phone", l.clientPhone || "-", "font-family:monospace;")}
-              ${makeDataRow("Collateral", escapeHTML(l.collateralItem || "Loan"))}
-              ${makeDataRow("Principal", _fmtMoney(l.amount))}
-              ${makeDataRow("Total Due", _fmtMoney(l.totalDue), "color:var(--accent-blue);")}
-              ${makeDataRow("Outstanding", _fmtMoney(l.balance), `color:${l.balance > 0 ? 'var(--danger)' : 'var(--text-main)'}; font-weight:800;`)}
-
-              <div style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0;">
-                <div class="lh-label">Last Update</div>
-                <div class="lh-value">${updated}</div>
-              </div>
-            </div>
-
-            <div style="display:flex; gap:8px; border-top:1px dashed var(--divider); padding-top:10px;">
-              <button onclick="openActionModal('NOTE', '${l.id}')" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer; border:1px solid ${hasNotes ? 'rgba(59, 130, 246, 0.3)' : 'var(--divider)'}; background:${hasNotes ? 'rgba(59, 130, 246, 0.1)' : 'rgba(255,255,255,0.03)'}; color:${hasNotes ? '#3b82f6' : 'var(--text-muted)'};">
-                📝 ${hasNotes ? 'Read Notes' : '+ Note'}
-              </button>
-              <button onclick="openActionModal('PAY', '${l.id}')" style="flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:8px; border-radius:8px; font-size:0.75rem; font-weight:700; cursor:pointer; background:var(--primary); color:#000; border:none; box-shadow: 0 4px 10px rgba(74, 222, 128, 0.15);">
-                Record Payment
-              </button>
-            </div>
-
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join("");
+  tbody.innerHTML = list.map((l, index) => `
+    <tr style="border:none; background:transparent;">
+      <td colspan="9" style="padding:0; border:none; background:transparent;">
+        ${getPremiumLoanCardHTML(l, index)}
+      </td>
+    </tr>
+  `).join("");
 }
 
 function renderLoansTable() {
   recomputeAllLoans();
   const tbody = document.getElementById("loansTableBody");
   if (!tbody) return;
+
+  injectPremiumCardCSS(); // Inject the card styles
 
   try { wireClientSearchUI(); } catch(e) {}
 
@@ -1442,65 +1603,14 @@ function renderLoansTable() {
     document.getElementById("emptyState").style.display = shouldShow ? "block" : "none";
   }
 
-  tbody.innerHTML = visibleLoans.map((l, index) => {
-    const percent = Math.min(100, Math.round(((l.paid || 0) / (l.totalDue || 1)) * 100));
-    let progressColor = "var(--primary)";
-    if (percent >= 100) progressColor = "var(--success)";
-    else if (l.status === "OVERDUE") progressColor = "var(--danger)";
-    else if (l.status === "DEFAULTED") progressColor = "var(--neutral)";
-
-    const isOverdue = l.status === "OVERDUE";
-    const balanceStyle = isOverdue ? 'class="text-danger-glow" style="font-weight:bold;"' : 'style="font-weight:bold;"';
-    const avatarClass = `avatar-${l.id % 5}`;
-    const isClosed = l.status === "PAID" || l.status === "DEFAULTED";
-    const disabledAttr = isClosed ? 'disabled aria-disabled="true"' : '';
-    const disabledOpacity = isClosed ? 'opacity:0.3;' : '';
-
-    const waNumber = formatWhatsApp(l.clientPhone);
-    const waMsg = encodeURIComponent(`Hi ${l.clientName}, reminder: Balance of ${formatMoney(l.balance)} was due on ${formatDate(l.dueDate)}.`);
-    const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMsg}` : "#";
-    const waStyle = waNumber ? "color:#4ade80;" : "color:#64748b; cursor:not-allowed;";
-
-    return `
-    <tr class="row-${(l.status || 'active').toLowerCase()}" data-loan-id="${l.id}" style="animation-delay: ${index * 0.05}s">
-      <td data-label="ID"><span style="opacity:0.5; font-size:0.8rem;">#${l.id}</span></td>
-      <td data-label="Client">
-        <div class="client-flex">
-          <div class="avatar ${avatarClass}">${escapeHTML(getInitials(l.clientName))}</div>
-          <div>
-            <div style="font-weight:600; color:var(--text-main);">${escapeHTML(l.clientName)}</div>
-            <div class="subtle" style="font-size:0.75rem;">${escapeHTML(l.clientPhone || '')}</div>
-          </div>
-        </div>
-      </td>
-      <td data-label="Item"><span style="color:var(--text-muted);">${escapeHTML(l.collateralItem || '-')}</span></td>
-      <td data-label="Progress">
-        <div style="min-width: 100px;">
-          <div style="display:flex; justify-content:space-between; font-size:0.7rem; margin-bottom:4px;">
-            <span>${percent}%</span>
-            <span>${formatMoney(l.paid)} / ${formatMoney(l.totalDue)}</span>
-          </div>
-          <div style="background:rgba(255,255,255,0.1); height:6px; border-radius:4px; overflow:hidden;">
-            <div style="width:${percent}%; background:${progressColor}; height:100%; border-radius:4px; transition: width 1s ease;"></div>
-          </div>
-        </div>
-      </td>
-      <td data-label="Start">${formatDate(l.startDate)}</td>
-      <td data-label="Due">${formatDate(l.dueDate)}</td>
-      <td data-label="Balance" ${balanceStyle}>${formatMoney(l.balance)}</td>
-      <td data-label="Status"><span class="status-pill status-${(l.status || 'active').toLowerCase()}">${l.status}</span></td>
-      <td data-label="Actions" style="text-align:right; white-space:nowrap;">
-        <button class="btn-icon" onclick="openReceipt('${l.id}')" title="Print Receipt">🖨️</button>
-        <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn-icon" style="${waStyle}; text-decoration:none; display:inline-flex;" title="WhatsApp">💬</a>
-        <button class="btn-icon" onclick="openActionModal('PAY', '${l.id}')" title="Pay" style="color:#38bdf8; ${disabledOpacity}" ${disabledAttr}>💳</button>
-        <button class="btn-icon" onclick="openActionModal('TOPUP', '${l.id}')" title="Top-Up / Refinance" style="color:#a855f7; ${disabledOpacity}" ${disabledAttr}>⬆️</button>
-        <button class="btn-icon" onclick="openActionModal('WRITEOFF', '${l.id}')" title="Bad Debt" style="color:#f87171; ${disabledOpacity}" ${disabledAttr}>🗑️</button>
-        <button class="btn-icon" onclick="openActionModal('NOTE', '${l.id}')" title="Note">📝</button>
+  tbody.innerHTML = visibleLoans.map((l, index) => `
+    <tr style="border:none; background:transparent;">
+      <td colspan="9" style="padding:0; border:none; background:transparent;">
+        ${getPremiumLoanCardHTML(l, index)}
       </td>
     </tr>
-  `}).join("");
+  `).join("");
 }
-
 function renderRepaymentsTable() {
   const tbody = el("repaymentsTableBody");
   if (!tbody) return;
@@ -2271,23 +2381,16 @@ window.switchProfileTab = function(tabName, btn) {
 
 window.openAdminClientDetails = function(key){
   try{
+    injectPremiumCardCSS(); // Ensure CSS is present for the premium cards
+
     const data = (window.adminClientCache || {})[key];
     const modal = document.getElementById('adminClientDetailsModal');
     const target = document.getElementById('adminClientDetailsContent');
     if(!modal || !target) return;
     if(!data){ target.innerHTML = '<div style="color:var(--text-muted)">Client details not found.</div>'; modal.style.display='flex'; setTimeout(()=>modal.classList.remove('modal-hidden'),10); return; }
 
-    const loansHtml = (data.loans || []).map(l=>`
-      <div style="padding:10px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                  <strong>Loan #${escapeHTML(l.id || l.loanId || '')}</strong> — <span class="status-pill status-${(l.status||'').toLowerCase()}" style="font-size:0.65rem; padding:2px 6px;">${escapeHTML(l.status||'')}</span>
-                  <div style="margin-top:4px; font-size:0.85rem; color:var(--text-muted);">Balance: ${__fmtMoney(l.balance||l.totalDue||0)}</div>
-              </div>
-              ${l.notes ? `<button onclick="openActionModal('NOTE', '${l.id}')" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">📝 Read Notes</button>` : `<button onclick="openActionModal('NOTE', '${l.id}')" style="background: transparent; color: var(--text-muted); border: 1px dashed var(--border); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; cursor: pointer;">📝 + Note</button>`}
-          </div>
-      </div>
-    `).join('') || '<div style="color:var(--text-muted); font-style:italic;">No loans.</div>';
+    // Use the new Premium Card layout here instead of the basic divs
+    const loansHtml = (data.loans || []).map((l, idx) => getPremiumLoanCardHTML(l, idx)).join('') || '<div style="color:var(--text-muted); font-style:italic; padding: 20px; text-align: center;">No loans available.</div>';
 
     let notesHtml = "";
     (data.loans || []).forEach(l => {
@@ -2323,11 +2426,11 @@ window.openAdminClientDetails = function(key){
           <div id="tabBtnClientNotes" onclick="switchClientDetailsTab('notes')" style="padding-bottom: 8px; cursor: pointer; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; transition: all 0.2s;">Client Notes Log</div>
       </div>
 
-      <div id="clientDetailsLoansView" style="margin-top:15px; max-height:300px; overflow:auto; display: block;">
+      <div id="clientDetailsLoansView" style="margin-top:20px; max-height:400px; overflow:auto; display: block;">
           ${loansHtml}
       </div>
 
-      <div id="clientDetailsNotesView" style="margin-top:15px; max-height:300px; overflow:auto; display: none;">
+      <div id="clientDetailsNotesView" style="margin-top:20px; max-height:400px; overflow:auto; display: none;">
           ${notesHtml}
       </div>
 
