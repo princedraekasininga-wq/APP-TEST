@@ -16,6 +16,10 @@ let __reqPanelBusy = false;
 let currentContactAction = '';
 let __confirmCallback = null;
 let __notifFilter = 'ALL';
+let __currentAuthUser = null;
+let __clientWelcomeWizardStep = 0;
+let __hasShownClientWelcomeWizard = false;
+const CLIENT_WELCOME_WIZARD_VERSION = 1;
 
 function escapeHTML(input = "") {
     const s = String(input ?? "");
@@ -366,6 +370,7 @@ function bootstrapSharedSession(hasCache = false) {
             }
 
             currentUserUid = user.uid;
+            __currentAuthUser = user;
 
             // --- PUSH NOTIFICATION AUTO-START ---
             if ('Notification' in window && Notification.permission === 'granted') {
@@ -423,13 +428,14 @@ function bootstrapSharedSession(hasCache = false) {
                         try { renderLoanRequestProgressPanel(true); } catch(e) {}
                     }
 
-                    const hasLoans = val.loans && Object.keys(val.loans).length > 0;
+                    const hasLoans = !!(val.loans && Object.keys(val.loans).length > 0);
                     const hasDismissed = val.syncPromptDismissed === true;
+                    const shouldShowWelcomeWizard = handleClientWelcomeWizardState(val);
 
-                    if (!hasLoans && !hasDismissed) {
+                    if (!shouldShowWelcomeWizard && !hasLoans && !hasDismissed && !document.getElementById('firstTimeSyncModal')?.classList.contains('active')) {
                         setTimeout(() => {
                             const syncModal = document.getElementById('firstTimeSyncModal');
-                            if(syncModal) syncModal.style.display = 'flex';
+                            if (syncModal && syncModal.style.display !== 'flex') openAnimatedModal('firstTimeSyncModal');
                         }, 1000);
                     }
 
@@ -481,14 +487,16 @@ function initClientPortal() {
     if(reqAmountInput) { reqAmountInput.addEventListener('input', window.updateRequestCalculator); }
 
     const savedTheme = localStorage.getItem('stallz-theme');
+    const sharedTheme = localStorage.getItem('stallz_theme_preference');
     const currentHour = new Date().getHours();
 
-    if (savedTheme === 'day') { document.body.classList.add('day-mode'); }
-    else if (savedTheme === 'night') { document.body.classList.remove('day-mode'); }
+    if (savedTheme === 'day' || sharedTheme === 'light') { document.body.classList.add('day-mode'); }
+    else if (savedTheme === 'night' || sharedTheme === 'dark') { document.body.classList.remove('day-mode'); }
     else if (currentHour >= 6 && currentHour < 18) { document.body.classList.add('day-mode'); }
 
     __wireHaptics();
     __bindContextBubble();
+    try { syncThemeUI(); } catch(_) {}
 
     // ====== INSTANT CACHE HYDRATION ======
     let hasCache = false;
@@ -532,6 +540,7 @@ function initClientPortal() {
             if (id === 'requestModal' && typeof window.closeRequestModal === 'function') { window.closeRequestModal(); }
             else if (id === 'profileModal' && typeof window.closeProfileModal === 'function') { window.closeProfileModal(); }
             else if (id === 'firstTimeSyncModal' && typeof window.closeFirstTimeSync === 'function') { window.closeFirstTimeSync(); }
+            else if (id === 'clientWelcomeWizardModal' && typeof window.skipClientWelcomeWizard === 'function') { window.skipClientWelcomeWizard(); }
             else if (id === 'payModal' && typeof window.closePayModal === 'function') { window.closePayModal(); }
             else if (id === 'statementsModal' && typeof window.closeStatementsModal === 'function') { window.closeStatementsModal(); }
             else if (id === 'historyModal' && typeof window.closeHistoryModal === 'function') { window.closeHistoryModal(); }
@@ -604,6 +613,7 @@ function toggleTheme() {
 
     const isDay = document.body.classList.toggle('day-mode');
     localStorage.setItem('stallz-theme', isDay ? 'day' : 'night');
+    localStorage.setItem('stallz_theme_preference', isDay ? 'light' : 'dark');
     syncThemeUI();
 }
 function syncThemeUI() {
@@ -616,6 +626,7 @@ function syncThemeUI() {
 
     // Logic for the new sliding CSS switch
     if (themeToggle && themeKnob) {
+        themeToggle.setAttribute('aria-checked', String(!isDay));
         if (isDay) {
             themeToggle.style.background = 'rgba(148, 163, 184, 0.4)'; // Gray for day mode
             themeKnob.style.transform = 'translateX(0px)';
@@ -2525,8 +2536,13 @@ window.closeAnimatedModal = function(modalId, onCompleteCallback) {
 };
 
 // 1. Profile Drawer
-window.openProfileModal = function() { openAnimatedModal('profileModal'); try{ updatePushPermissionUI(); }catch(_){} };
-window.closeProfileModal = function() { closeAnimatedModal('profileModal');
+window.openProfileModal = function() {
+    openAnimatedModal('profileModal');
+    try { updatePushPermissionUI(); } catch(_) {}
+    try { syncThemeUI(); } catch(_) {}
+};
+window.closeProfileModal = function() { closeAnimatedModal('profileModal'); };
+
 // 1b. Push Permission UI (Profile Drawer)
 window.handleEnablePushClick = async function() {
     try { __haptic('tap'); } catch(_) {}
@@ -2556,7 +2572,6 @@ window.updatePushPermissionUI = function() {
         }
     } catch(_) {}
 };
- };
 
 // 2. Notification History
 window.openNotificationHistoryModal = function() {
@@ -3013,6 +3028,164 @@ window.closeFirstTimeSync = function(permanentlyDismiss = false) {
         }
     });
 };
+
+
+function __isLikelyFirstClientLogin() {
+    try {
+        const meta = __currentAuthUser?.metadata || {};
+        const created = Date.parse(meta.creationTime || '');
+        const last = Date.parse(meta.lastSignInTime || '');
+        if (isNaN(created) || isNaN(last)) return false;
+        return Math.abs(last - created) <= (1000 * 60 * 10);
+    } catch(_) {
+        return false;
+    }
+}
+
+function getClientWelcomeWizardSteps(profile = {}) {
+    const firstName = String(profile.name || profile.fullName || 'Client').trim().split(/\s+/)[0] || 'Client';
+    return [
+        {
+            icon: 'hand-sparkles',
+            title: `Welcome, ${escapeHTML(firstName)}`,
+            body: 'Your Stallz Loans portal is ready. This quick setup shows you where to check your balance, request help, and follow your loan progress.',
+            points: [
+                ['This is your personal portal', 'Only your loan activity, payments, statements and support actions show here.'],
+                ['The app will remember you', 'Once you finish this welcome flow, it will not open again on future logins or new devices.']
+            ]
+        },
+        {
+            icon: 'chart-line',
+            title: 'Track your loan clearly',
+            body: 'The home screen shows your repayment progress ring, next due date, remaining days and recent activity in one place.',
+            points: [
+                ['Progress at a glance', 'Use the main card to see how much you have paid and what remains.'],
+                ['Stay ahead', 'Notifications and statements help you keep up with updates from the Stallz team.']
+            ]
+        },
+        {
+            icon: 'wallet',
+            title: 'Repayments and support',
+            body: 'Use the payment section for instructions, upload receipts when needed, and reach support early if you need help.',
+            points: [
+                ['Upload proof safely', 'Receipts and payment confirmations help the admin verify your account faster.'],
+                ['Need assistance?', 'Open the support section in the sidebar whenever you need help or need to update details.']
+            ]
+        },
+        {
+            icon: 'shield-check',
+            title: 'You are all set',
+            body: 'You can now continue into the portal. Stallz will save this setup as completed in Firebase so it stays finished across devices.',
+            points: [
+                ['One-time setup', 'This welcome wizard only appears once after your first real login.'],
+                ['Ready to continue', 'Tap Finish to start using your dashboard normally.']
+            ]
+        }
+    ];
+}
+
+function renderClientWelcomeWizard(profile = {}) {
+    const steps = getClientWelcomeWizardSteps(profile);
+    const step = steps[__clientWelcomeWizardStep] || steps[0];
+    const body = document.getElementById('clientWelcomeWizardBody');
+    const title = document.getElementById('clientWelcomeWizardTitle');
+    const stepText = document.getElementById('clientWelcomeWizardStepText');
+    const progress = document.getElementById('clientWelcomeWizardProgress');
+    const backBtn = document.getElementById('clientWelcomeBackBtn');
+    const nextBtn = document.getElementById('clientWelcomeNextBtn');
+    if (!body || !title || !stepText || !progress || !backBtn || !nextBtn) return;
+
+    title.textContent = step.title;
+    stepText.textContent = `Step ${__clientWelcomeWizardStep + 1} of ${steps.length}`;
+    progress.innerHTML = steps.map((_, idx) => `<div class="progress-dot ${idx <= __clientWelcomeWizardStep ? 'active' : ''}"></div>`).join('');
+    body.innerHTML = `
+        <div class="client-onboarding-hero"><i class="fas fa-${step.icon}"></i></div>
+        <div class="client-onboarding-copy">
+            <h4>${step.title}</h4>
+            <p>${step.body}</p>
+        </div>
+        <div class="client-onboarding-points">
+            ${(step.points || []).map(([head, copy]) => `
+                <div class="client-onboarding-point">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <strong>${head}</strong>
+                        <span>${copy}</span>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    backBtn.disabled = __clientWelcomeWizardStep === 0;
+    backBtn.style.opacity = __clientWelcomeWizardStep === 0 ? '0.55' : '1';
+    nextBtn.textContent = __clientWelcomeWizardStep === steps.length - 1 ? 'Finish' : 'Next';
+}
+
+function handleClientWelcomeWizardState(profile = {}) {
+    const welcome = profile?.appOnboarding?.welcomeWizard || {};
+    const isComplete = !!welcome.completedAt && Number(welcome.version || 0) >= CLIENT_WELCOME_WIZARD_VERSION;
+    const isFirstLogin = __isLikelyFirstClientLogin();
+
+    if (currentUserUid && typeof firebase !== 'undefined') {
+        const updates = {};
+        if (!profile?.appOnboarding?.firstOpenedAt) updates['appOnboarding/firstOpenedAt'] = new Date().toISOString();
+        if (!welcome.version) updates['appOnboarding/welcomeWizard/version'] = CLIENT_WELCOME_WIZARD_VERSION;
+        if (isFirstLogin && !welcome.firstLoginDetectedAt) updates['appOnboarding/welcomeWizard/firstLoginDetectedAt'] = new Date().toISOString();
+        if (isFirstLogin && welcome.pending !== false && !isComplete) updates['appOnboarding/welcomeWizard/pending'] = true;
+        if (Object.keys(updates).length) {
+            firebase.database().ref(`clients/${currentUserUid}`).update(updates).catch(() => {});
+        }
+    }
+
+    const shouldShow = !isComplete && (welcome.pending === true || isFirstLogin);
+    if (shouldShow && !__hasShownClientWelcomeWizard) {
+        __hasShownClientWelcomeWizard = true;
+        setTimeout(() => {
+            if (document.getElementById('firstTimeSyncModal')?.classList.contains('active')) closeAnimatedModal('firstTimeSyncModal');
+            window.openClientWelcomeWizard(profile);
+        }, 700);
+    }
+    return shouldShow;
+}
+
+window.openClientWelcomeWizard = function(profile = __lastClientProfileCache || {}) {
+    __clientWelcomeWizardStep = 0;
+    renderClientWelcomeWizard(profile);
+    openAnimatedModal('clientWelcomeWizardModal');
+};
+
+window.goBackClientWelcomeWizard = function() {
+    if (__clientWelcomeWizardStep === 0) return;
+    __clientWelcomeWizardStep -= 1;
+    renderClientWelcomeWizard(__lastClientProfileCache || {});
+};
+
+window.goNextClientWelcomeWizard = function() {
+    const steps = getClientWelcomeWizardSteps(__lastClientProfileCache || {});
+    if (__clientWelcomeWizardStep >= steps.length - 1) {
+        return completeClientWelcomeWizard(true);
+    }
+    __clientWelcomeWizardStep += 1;
+    renderClientWelcomeWizard(__lastClientProfileCache || {});
+};
+
+window.skipClientWelcomeWizard = function() {
+    completeClientWelcomeWizard(false);
+};
+
+function completeClientWelcomeWizard(completed = true) {
+    closeAnimatedModal('clientWelcomeWizardModal', () => {
+        if (currentUserUid && typeof firebase !== 'undefined') {
+            firebase.database().ref(`clients/${currentUserUid}/appOnboarding/welcomeWizard`).update({
+                version: CLIENT_WELCOME_WIZARD_VERSION,
+                pending: false,
+                completedAt: new Date().toISOString(),
+                completed: !!completed
+            }).catch(() => {});
+        }
+    });
+}
 
 /* ==========================================================================
    SMART STALLZ ADVICE GENERATOR (SEQUENTIAL MEMORY)

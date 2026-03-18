@@ -1755,3 +1755,30 @@ html:not([data-theme="light"]) .sketch-btn:not(.active):hover {
 html:not([data-theme="light"]) .menu-pill.on{
   color: #86efac;
 }
+
+
+/* Shared theme switch */
+.theme-toggle-switch {
+  width: 44px;
+  height: 24px;
+  background: var(--primary);
+  border-radius: 20px;
+  position: relative;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-left: auto;
+}
+.theme-toggle-switch__knob {
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(20px);
+}

@@ -230,8 +230,8 @@
                         <span class="menu-title">Dark Mode</span>
                         <span class="menu-sub">Adjust appearance</span>
                     </div>
-                    <div id="themeToggleState" onclick="toggleAdminTheme()" style="width: 44px; height: 24px; background: var(--primary); border-radius: 20px; position: relative; transition: background 0.3s; display: flex; align-items: center; padding: 2px; box-sizing: border-box; flex-shrink: 0; cursor: pointer;">
-                        <div id="themeToggleKnob" style="width: 20px; height: 20px; background: white; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(20px);"></div>
+                    <div id="themeToggleState" class="theme-toggle-switch" onclick="toggleAdminTheme()" role="switch" aria-checked="true">
+                        <div id="themeToggleKnob" class="theme-toggle-switch__knob"></div>
                     </div>
                 </div>
             </div>

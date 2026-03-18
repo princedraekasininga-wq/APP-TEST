@@ -354,6 +354,7 @@ function syncAdminThemeUI(isLight) {
     const themeKnob = document.getElementById('themeToggleKnob');
 
     if (themeToggle && themeKnob) {
+        themeToggle.setAttribute('aria-checked', String(!isLight));
         if (isLight) {
             themeToggle.style.background = 'rgba(148, 163, 184, 0.4)'; // Gray for light mode
             themeKnob.style.transform = 'translateX(0px)';
